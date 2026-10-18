@@ -1,0 +1,12 @@
+tcad 0.1
+
+part sketch_splines "sketch splines" {
+  sketch s on plane.XY {
+    spline control points=[(0 mm, 0 mm), (10 mm, 10 mm), (20 mm, -10 mm), (30 mm, 0 mm)]
+    spline fit through=[(0 mm, 20 mm), (10 mm, 25 mm), (20 mm, 20 mm)]
+    spline loop through=[(0 mm, 40 mm), (10 mm, 45 mm), (5 mm, 52 mm)] closed
+    point tip at=control.p3
+    constrain fix(control.p0)
+    constrain fix(fit.p0)
+  }
+}

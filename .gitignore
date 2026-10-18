@@ -16,7 +16,6 @@ eggs/
 .eggs/
 lib/
 lib64/
-parts/
 sdist/
 var/
 wheels/
@@ -226,3 +225,5 @@ __marimo__/
 /fuzz/target/
 /fuzz/artifacts/
 /fuzz/Cargo.lock
+
+# A bundle keeps its sources in parts/ (spec/bundle.md); never ignore it.

@@ -1,0 +1,14 @@
+tcad 0.1
+
+part sketch_over_constrained "sketch over constrained" {
+  sketch s on plane.XY {
+    line a start=(0 mm, 0 mm) end=(10 mm, 0 mm)
+    line b start=(0 mm, 5 mm) end=(10 mm, 5 mm)
+    constrain fix(a.start)
+    constrain fix(a.end)
+    constrain fix(b.start)
+    constrain distance(a) = 10 mm
+    constrain distance(a) = 12 mm
+    constrain distance(b) = 10 mm
+  }
+}
