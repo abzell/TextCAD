@@ -104,6 +104,7 @@ fn every_measured_corpus_part_matches() {
         .collect();
     names.sort();
     let mut checked = 0;
+    let mut hashes: Vec<String> = Vec::new();
     for name in names {
         let dir = corpus_dir().join(&name);
         let want: Value =
@@ -182,6 +183,7 @@ fn every_measured_corpus_part_matches() {
         }
         // T1: building again gives the same canonical B-rep, byte for byte (three builds in all)
         let first = k.canonical_brep(shape).unwrap();
+        hashes.push(format!("{name} {}", tcad_cache::sha256_hex(&first)));
         for _ in 0..2 {
             let again = build(&k, &model, None).unwrap().shape.unwrap();
             assert_eq!(
@@ -193,4 +195,36 @@ fn every_measured_corpus_part_matches() {
         checked += 1;
     }
     assert!(checked >= 27, "only {checked} measured parts found");
+    check_cross_platform(&k.id(), &hashes);
+}
+
+/// T1 across platforms and targets (docs/adr/0014): every build with the same OpenCASCADE version
+/// (Windows, Linux, the browser module) must produce the canonical B-reps whose SHA-256 are listed in
+/// `corpus/brep-t1.txt`. Builds with another version skip the comparison. Regenerate with
+/// `UPDATE_BREP_T1=1` after an intended change.
+fn check_cross_platform(kernel: &str, hashes: &[String]) {
+    let path = corpus_dir().join("brep-t1.txt");
+    let text = format!("# {kernel}\n{}\n", hashes.join("\n"));
+    if std::env::var_os("UPDATE_BREP_T1").is_some() {
+        std::fs::write(&path, text).expect("write brep-t1.txt");
+        return;
+    }
+    let golden = std::fs::read_to_string(&path).expect("corpus/brep-t1.txt");
+    let version = golden.lines().next().unwrap_or("").trim_start_matches("# ");
+    if version != kernel {
+        eprintln!("brep-t1.txt is for {version}, this build is {kernel}: cross-platform check skipped");
+        return;
+    }
+    let want: Vec<&str> = golden.lines().skip(1).collect();
+    let differ: Vec<String> = hashes
+        .iter()
+        .zip(&want)
+        .filter(|(g, w)| g.as_str() != **w)
+        .map(|(g, w)| format!("  built {g}\n  file  {w}"))
+        .collect();
+    assert!(
+        differ.is_empty() && hashes.len() == want.len(),
+        "canonical B-reps differ from corpus/brep-t1.txt ({kernel}):\n{}",
+        differ.join("\n")
+    );
 }

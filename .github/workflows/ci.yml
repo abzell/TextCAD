@@ -118,8 +118,18 @@ jobs:
         with:
           toolchain: 1.97.0
       - uses: Swatinem/rust-cache@v2
-      - name: Install OpenCASCADE
-        run: sudo apt-get update && sudo apt-get install -y libocct-foundation-dev libocct-modeling-data-dev libocct-modeling-algorithms-dev libocct-data-exchange-dev libocct-ocaf-dev g++
+      # OpenCASCADE 8.0.1 from conda-forge: the version the Windows job uses, so both check the
+      # same canonical B-rep hashes (corpus/brep-t1.txt, docs/adr/0014).
+      - uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-name: occt
+          create-args: occt=8.0.1
+          cache-environment: true
+      - name: Point the build at OpenCASCADE 8.0.1
+        run: |
+          echo "OCCT_INCLUDE_DIR=$MAMBA_ROOT_PREFIX/envs/occt/include/opencascade" >> "$GITHUB_ENV"
+          echo "OCCT_LIB_DIR=$MAMBA_ROOT_PREFIX/envs/occt/lib" >> "$GITHUB_ENV"
+          echo "LD_LIBRARY_PATH=$MAMBA_ROOT_PREFIX/envs/occt/lib" >> "$GITHUB_ENV"
       - name: Test with OCCT
         run: cargo test --workspace --features tcad-cli/occt,tcad-build/occt,tcad-mcp/occt
       - uses: actions/setup-python@v5
