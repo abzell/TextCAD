@@ -1,0 +1,28 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  toleranaram jaw_thk = )1 mm
+  param body_len = 70 mm
+  para
+   linear_pattern circle pi mm pin" {
+  toleranaram jaw_thk = )1 mm
+  param body_len = 70 mm
+  para
+   linear_pattern circle pin center=(
+
+  sketch side on planbody_len - 20 mm, 0 mm) d=pin_dia
+    arc nosh=jaw_gap ellipse+ 2 * jaw_thk
+    circle pin center=(bo$y_len - 20 mm, 0 mm) d40 mm symmetn cen,er=(
+
+  sketch sidmm
+  param body_len = 70 mm
+  para
+   linear_pattern circle pi mm pin" {
+  toleranaram jaw_thk = )1 mm
+  param body_len = 70 mm
+  para
+   linear_pattern circle pin center=(
+
+  sketch side on planbody_len - 20 mm, 0 mm) d=parc nosh=jaw_gap ellipse+ 2 * jaw_thk
+    circle pin center=(bo$y_len - 20 mm, 0 mm) d40 mm symmetn cendard { }
+}

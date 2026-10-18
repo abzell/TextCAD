@@ -80,6 +80,14 @@ registry! {
     E2501 = "E2501", "unknown value for an enumerated argument";
     E2601 = "E2601", "suppress condition must be a boolean";
     E2701 = "E2701", "a file must contain exactly one part";
+    E4001 = "E4001", "invalid sketch entity argument";
+    E4002 = "E4002", "unknown sketch constraint";
+    E4003 = "E4003", "invalid constraint arguments";
+    E4101 = "E4101", "sketch constraints conflict";
+    W4102 = "W4102", "redundant sketch constraint";
+    I4201 = "I4201", "sketch has degrees of freedom";
+    E4301 = "E4301", "sketch cannot be solved near its starting geometry";
+    W4601 = "W4601", "projected geometry is not available before the kernel runs";
 }
 
 #[cfg(test)]
@@ -91,7 +99,7 @@ mod tests {
         let mut seen = std::collections::HashSet::new();
         for (code, title) in REGISTRY {
             let s = code.as_str();
-            assert!(s.starts_with('E') || s.starts_with('W'), "{s}");
+            assert!(matches!(s.as_bytes()[0], b'E' | b'W' | b'I'), "{s}");
             assert!(
                 s.len() == 5 && s[1..].bytes().all(|b| b.is_ascii_digit()),
                 "{s}"

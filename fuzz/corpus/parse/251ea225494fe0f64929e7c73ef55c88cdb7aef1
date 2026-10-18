@@ -1,0 +1,17 @@
+tcad 0.1
+
+part rod_clev param body_len = 70 mm
+  param thread = "M24x2"
+
+  sketch side on plane.XZ {
+    rect outline corner=(0 mm, -(jaw_gap / 2 + jaw_thk)in concentric(nose, pin)
+  }
+
+  extrude body from sidetcad 0.1
+
+part rod_clevis "Rdhread=threa.outline distance=40 mm symmetric
+  extrude slot from rect(on=body.cap_end, w=jaw_gap, i=40 mm=36 mm  fillet config d0 mm pin" {
+  tolerance 1e-6 mm
+  mateefault standard& { }rial "AISI 
+}
+10) de4

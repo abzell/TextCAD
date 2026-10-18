@@ -1,0 +1,11 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045"  = 26 mm
+  param jaw_thk = 16 mm
+  param weldment B 70 ml
+  pa
+  t045" apdens param thread = "M48x2ody_~n1e.top_right, outline.bottom_right taity=7.85 g/cm^3
+
+  par / 2 +am pin  

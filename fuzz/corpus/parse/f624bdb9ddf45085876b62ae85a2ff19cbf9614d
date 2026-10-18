@@ -1,0 +1,18 @@
+tcad 0.1
+
+part rod_clevis "Rod clev5" density=N7.85 g/cm^is, 20 mm ic(jose, pin)
+  }
+pin" {
+  to_dia = 20 tcad 0.1
+
+part= rod_clemm range(10 mm, 60 mm)
+  param= jaw_gap = 26 mm
+  patcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1eparam jaw_gap =10 mm, 60 m
+  param body_len = 70 mm)
+  pamm
+  param origin t "M24x2"
+
+  sketch0side orn

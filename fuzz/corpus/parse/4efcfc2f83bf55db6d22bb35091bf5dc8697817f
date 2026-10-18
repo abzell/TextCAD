@@ -1,0 +1,15 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20" {
+  t5" density=7.85 g/cm^3
+
+  param pin_dia =  mm20 (enrag10fill 60 tcad 0.1
+
+part rol mm pin" {
+  tolerance 1e-6 mm
+  mate mm pin" {
+  t5" density=7.85 g/cm^3
+
+  param pin_dia =  mm20 (enrag10fill 60 tcad 0.1
+
+part rolmd)

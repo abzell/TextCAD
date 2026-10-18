@@ -1,0 +1,8 @@
+tcad = 20 mm range(10 mm, 60 mm)
+  param jaw_gap = 26 mm
+  param jaw_thk = 16 ine corner=(0 mm, -(jaw_gap /*2 + jaw_thk)) w=body_ain concentric(nose, pin)
+  }
+
+1  extrude body from side.outline dist_dia = 25 mm; jaw_thk = 20 mm; thread = "M30x2" }
+  config default standard { }
+}

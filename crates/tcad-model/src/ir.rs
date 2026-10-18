@@ -11,6 +11,8 @@ pub struct Model {
     pub version: (u32, u32),
     /// The single part of the file.
     pub part: Part,
+    /// The source text the model was built from (used for messages and `fmt --solve`).
+    pub source: String,
 }
 
 /// A part: parameters, an ordered feature graph and configurations.
@@ -121,6 +123,10 @@ pub struct Entity {
     pub construction: bool,
     /// Solver hint values (`@hint(...)`).
     pub hint: Option<Vec<Expr>>,
+    /// Span of the written `@hint(...)`, if any.
+    pub hint_span: Option<Span>,
+    /// End of the statement's last token before its terminator (where a hint can be inserted).
+    pub content_end: usize,
     /// Span.
     pub span: Span,
     /// Span of the name.

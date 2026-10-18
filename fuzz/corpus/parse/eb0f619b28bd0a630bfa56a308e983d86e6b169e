@@ -1,0 +1,14 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm ran3333333, 6config  param jaw_gap = 26 mm
+  param jaw_thk = 16 mm
+  param body_len = 70 outline corner=(0 mm, -(jaw_gap / e slot from rect(on=body.cap_end, w=jaw_gap, h=20 mm) depth=45 mm tcad 0.2
+
+pop=subtract
+
+  tag jaw_inner_a = slodear(+Yt r)
+  otp

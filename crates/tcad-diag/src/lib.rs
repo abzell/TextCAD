@@ -53,6 +53,8 @@ pub enum Severity {
     Error,
     /// The input is accepted but suspicious or newer than supported.
     Warning,
+    /// Information that does not need action, such as a sketch's degrees of freedom.
+    Info,
 }
 
 /// One text replacement of a fix hint.
@@ -73,6 +75,15 @@ pub struct FixHint {
     pub edits: Vec<Edit>,
 }
 
+/// A secondary location that explains a diagnostic, e.g. the other half of a conflict.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct Related {
+    /// Where.
+    pub span: Span,
+    /// What is there.
+    pub message: String,
+}
+
 /// A single diagnostic.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct Diagnostic {
@@ -86,7 +97,10 @@ pub struct Diagnostic {
     pub span: Span,
     /// Optional mechanical fix.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub hint: Option<FixHint>,
+    pub hint: Option<Box<FixHint>>,
+    /// Other locations involved (named conflicting constraints, for example).
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub related: Vec<Related>,
 }
 
 impl Diagnostic {
@@ -98,6 +112,7 @@ impl Diagnostic {
             message: message.into(),
             span,
             hint: None,
+            related: Vec::new(),
         }
     }
 
@@ -109,9 +124,26 @@ impl Diagnostic {
         }
     }
 
+    /// An informational diagnostic.
+    pub fn info(code: Code, span: Span, message: impl Into<String>) -> Self {
+        Diagnostic {
+            severity: Severity::Info,
+            ..Diagnostic::error(code, span, message)
+        }
+    }
+
+    /// Adds a related location.
+    pub fn with_related(mut self, span: Span, message: impl Into<String>) -> Self {
+        self.related.push(Related {
+            span,
+            message: message.into(),
+        });
+        self
+    }
+
     /// Attaches a fix hint.
     pub fn with_hint(mut self, hint: FixHint) -> Self {
-        self.hint = Some(hint);
+        self.hint = Some(Box::new(hint));
         self
     }
 

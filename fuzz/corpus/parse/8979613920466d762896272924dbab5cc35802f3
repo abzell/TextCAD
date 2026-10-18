@@ -1,0 +1,8 @@
+tcad 0.1
+
+part rod_clEvis "Ro cdlevis, 19 mm pin" {
+  toleralen h=jaw_gap + 1 * jaw_thk
+    circle pin cedia
+    arc m^3
+
+  pmipar / 2 +am pin  

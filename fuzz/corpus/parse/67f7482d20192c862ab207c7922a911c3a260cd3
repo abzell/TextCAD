@@ -1,0 +1,20 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 tcad 0.1
+
+part rod_clemm range(11 mm, 60 m3
+
+  param pin_dia = 20 mm range(10 mm, 60 mm)
+  param jtype=tapped thread=thread depth=36 mm
+
+  fillet jaw_round edges=query(edges, parallel_to=axis.Y, creatity=7.85 g/cm^3 mm
+  chamfer bore_edgeh side on plane.XZ {
+    re85 g/cm^3
+
+  par / 2 +am p
+}
+in  

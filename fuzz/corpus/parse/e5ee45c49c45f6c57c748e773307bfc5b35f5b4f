@@ -1,0 +1,9 @@
+tcad 0.1
+
+part rod_clevis "Rod cl sketch side on plane.XZ {
+       rect outline corn/ 2 + jaw_thk)) w=body_len h=jaw_gap + 0 mm, -(jaw_gap /ner=(0 mm, -(jaw_gap / 2 + jaw_thk)) w=body_len h=jaw_gap + 2 * jawlsuppressmm
+  chamssmm
+  cha=(0 mm, -(jaw_gap / 2 + jaw_thk)) w=body_len 2 + jaw_thk)) w=body_lefer bore_edges e sketch side on plane.XZ {
+    rect outline corner=(0 mm, -(jaw_agp / 3 + jaw_thk)) w=body_len 2 + jaw_thk)) w=body_len h=jacorner=(0 mm, -(jaw_gap /ner=(0 mm, -(jaw_gap / 2 + jap_thk)) w=2" }
+  config default standard { }
+}

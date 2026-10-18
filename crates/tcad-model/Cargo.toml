@@ -12,6 +12,11 @@ authors.workspace = true
 tcad-diag.workspace = true
 tcad-syntax.workspace = true
 tcad-expr.workspace = true
+tcad-solver.workspace = true
+
+[dev-dependencies]
+tcad-diag.workspace = true
+serde_json = "1"
 
 [lints]
 workspace = true

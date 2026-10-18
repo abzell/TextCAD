@@ -8,5 +8,9 @@ license.workspace = true
 repository.workspace = true
 authors.workspace = true
 
+[dependencies]
+# Pure-Rust math so results are bit-identical on every target (determinism tier T1).
+libm = "0.2"
+
 [lints]
 workspace = true

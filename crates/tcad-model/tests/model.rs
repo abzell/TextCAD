@@ -5,8 +5,13 @@ use tcad_model::{Analysis, ItemKind, analyze};
 
 const CLEVIS: &str = include_str!("../../../spec/examples/rod_clevis.tcad");
 
+/// Codes of everything except informational notes.
 fn codes(a: &Analysis) -> Vec<&'static str> {
-    a.diagnostics.iter().map(|d| d.code.as_str()).collect()
+    a.diagnostics
+        .iter()
+        .filter(|d| d.severity != tcad_diag::Severity::Info)
+        .map(|d| d.code.as_str())
+        .collect()
 }
 
 /// Wraps statements in a part.
@@ -19,9 +24,16 @@ fn check(body: &str) -> Vec<&'static str> {
 }
 
 #[test]
-fn clevis_has_no_diagnostics() {
+fn clevis_has_no_problems() {
     let a = analyze(CLEVIS);
-    assert!(a.diagnostics.is_empty(), "{:#?}", a.diagnostics);
+    // the sketch is deliberately under-constrained: that is reported as information only
+    let problems: Vec<_> = a
+        .diagnostics
+        .iter()
+        .filter(|d| d.severity != tcad_diag::Severity::Info)
+        .collect();
+    assert!(problems.is_empty(), "{problems:#?}");
+    assert!(a.diagnostics.iter().all(|d| d.code.as_str() == "I4201"));
     let m = a.model.expect("model");
     assert_eq!(m.part.name, "rod_clevis");
     assert_eq!(
@@ -134,7 +146,7 @@ fn scoping() {
 
 #[test]
 fn sketch_scope() {
-    let ok = "sketch s on plane.XY {\n  circle c center=(0 mm, 0 mm) d=1 mm\n  circle e center=c.center d=1 mm\n  constrain concentric(c, e)\n}";
+    let ok = "sketch s on plane.XY {\n  circle c center=(0 mm, 0 mm) d=1 mm\n  circle e center=(1 mm, 1 mm) d=1 mm\n  constrain concentric(c, e)\n}";
     assert_eq!(check(ok), Vec::<&str>::new());
     let bad = "sketch s on plane.XY {\n  circle e center=c.center d=1 mm\n  circle c d=1 mm\n}";
     assert_eq!(check(bad), ["E2103"]);

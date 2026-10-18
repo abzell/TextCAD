@@ -50,3 +50,28 @@ Deferred:
 - Per-feature argument schemas (required arguments, expected dimensions, topology roles) arrive with
   the features in M5/M6; until then only names, units, ranges and the provisional enum words are checked.
 - The golden corpus starts in M5, when geometry exists to compare against `expected.json`.
+
+## M4: Sketch solver (2026-10-18)
+
+CI for M3 was green at `484e961` (8 jobs).
+
+Done:
+- `tcad-solver`: exact Jacobians by forward-mode autodiff; Newton with backtracking and LM damping;
+  min-weighted-norm steps through banded Cholesky (RCM ordering); clusters; pinned and weighted
+  variables; conflict isolation (minimal sets); redundancy and per-entity DOF by envelope rank.
+  A connected 200-entity sketch (1000 variables) solves in about 16 ms (release).
+- Sketch bridge in `tcad-model`: entities (point, line, circle, arc in three forms, ellipse, spline,
+  slot, rect, polygon, project placeholder), 20 constraint forms, hints, configurations; diagnostics
+  name conflicting constraints with related locations.
+- `tcad fmt --solve`; `info` severity; spec chapter `sketch.md`; ADR 0007.
+- Corpus: six sketch-stress parts and a harness that checks diagnostics, DOF, coordinates and the
+  200-entity timing.
+
+Findings worth remembering (details in ADR 0007): CGLS was too slow on chains; the primal normal
+equations drift along free directions, hence the dual form; tangency at a contact point is first-order
+degenerate in its general form; authored coordinates must be stiffer than guessed ones.
+
+Deferred:
+- Splines in tangency/on-curve constraints; `project` (needs the kernel).
+- The remaining ~34 corpus parts (primitives, features, naming robustness, hydraulics) arrive with
+  the kernel (M5-M7).

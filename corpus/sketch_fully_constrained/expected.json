@@ -1,0 +1,23 @@
+{
+  "codes": [],
+  "dof": 0,
+  "points": {
+    "plate.bottom_left": [
+      1,
+      1
+    ],
+    "plate.top_right": [
+      61,
+      31
+    ],
+    "hole.center": [
+      20,
+      15
+    ],
+    "diag.end": [
+      61,
+      31
+    ]
+  },
+  "note": "A rectangle pinned at its corner (`fix` holds a point where it is written) with both dimensions, a circle pinned at its center with a diameter, and a diagonal sharing the rectangle's corners. Nothing can move."
+}

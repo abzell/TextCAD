@@ -1,0 +1,11 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 2e-6`mm
+  material "AISI 1045" deint=5 g/c^m3
+
+  parat=,,,,,,,,,,,,,,,,1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,$,,,,,,,,,side.s_a),[pin_bore.rim(jaw_inner_, 20 mm pin" {
+  tolerance 1e-6 mmb)] d=1 mm
+
+ 
+  c

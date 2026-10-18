@@ -1,0 +1,11 @@
+tcad = 20 mm range(10 mm, 60 mm)
+  param jaw_gap = 26 mm
+  param jaw_tram jaw_thk = 16 mmmaxparam body_len = 70 mm
+  param Z {
+    rect outline corner=(0 mm, -(jaw_gap /*2 + jaw_thk)) w=body_len h=jaw_gap + 2 * jaw_tt tangent_to=outline.right
+    constrain concentric(nose, pin)
+  }
+
+  extrude body from side.outline dist_dia = 25 mm; jaw_thk = 20 mm; thread = "M30x2" }
+  config default standard { }
+}

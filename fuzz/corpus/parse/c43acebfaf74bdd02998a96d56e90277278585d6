@@ -1,0 +1,7 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, ;0 mm min" {
+  tolerance 1e-6 mm
+  mde slot from rect(on=body.cap_end, w=jawtpe=simple d=pin_dia end=through_all
+  holmm pin" {
+  tolee carn1e-6 mmeod, w= ry(ee-6 mdm

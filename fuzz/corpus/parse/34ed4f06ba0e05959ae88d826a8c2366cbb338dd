@@ -1,0 +1,11 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+ffffffffffffffffffffffffffffffffffffffffffffffff
+  param pin_dia =$20 mm range(10 mm, body_len = 70 mm
+  p)ram thread = "M24x2"
+
+  sket}}}}}}}}}}}}}}}}}}}}}}}}}}}
+}

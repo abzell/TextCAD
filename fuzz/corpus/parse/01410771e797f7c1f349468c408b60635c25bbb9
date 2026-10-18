@@ -1,0 +1,15 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 19 mm pin" {
+  toleracad 0.1
+c
+  extrude slot from rect
+part rod_clevis "Rod clevis, 20am thread = "M24x2"
+
+  sketch side on plane.XZ {
+    rect outline corner=(0 mm, -(jaw_gap / 2 +od clevis, 20 mtcad 0.1
+
+parw_thk
+   circle pin center=(body_len - 20 mm, 0 mm) d=pin_dia
+    arc nose through=outline.top_right, outline.bottom_right tangent_to=outline.right
+    constram ipinn 

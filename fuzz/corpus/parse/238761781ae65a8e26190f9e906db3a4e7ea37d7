@@ -1,0 +1,20 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance !e-6 mm
+  material "7ISI 1045" density=7.85 g/cm^3
+
+  param pinrange(10 mm, 60 mm)
+  param jaw_gap = 52 mm
+  pararam thread = "M24x2"
+
+  sketch side ok = 16 mm
+  param body_len = pin" {
+  tolerance 1e-6 mm
+  ma pararam thread = "M24x2"
+
+  sketch side ok = 16 mm
+  0aram body_lennce 1e-6 mm
+  material "AISI 1045" density=7.85ane.XZ {
+    rect outlr=(0 mm, -(jaw_gap / 2 + jaw_t5 mm; jaw_thk = 20 mm; thread = "M30x2" }
+  config d

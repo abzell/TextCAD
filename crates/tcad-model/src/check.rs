@@ -3,6 +3,7 @@
 
 use crate::ir::{Config, Item, ItemKind, Model, Param, Part, Resolved, Sketch};
 use crate::lower::lower_file;
+use crate::sketch::{Report, SolvedSketch, solve_sketch};
 use std::collections::{BTreeSet, HashMap, HashSet};
 use tcad_diag::{Diagnostic, Edit, FixHint, Span, codes};
 use tcad_expr::{Arg, Env, EvalError, Expr, ExprKind, Reference, Value, eval};
@@ -54,10 +55,11 @@ pub fn analyze(src: &str) -> Analysis {
             "a file holds exactly one part; move this one to its own file",
         ));
     }
-    check_part(&mut part, &mut diags);
+    check_part(&mut part, src, &mut diags);
     let model = Model {
         version: lowered.version,
         part,
+        source: src.to_string(),
     };
     Analysis {
         model: Some(model),
@@ -95,6 +97,35 @@ impl Model {
             Err(finish(diags))
         } else {
             Ok(resolved)
+        }
+    }
+
+    /// Solves every sketch under a configuration (`None` for the base part).
+    pub fn solve_sketches(
+        &self,
+        config: Option<&str>,
+    ) -> Result<Vec<SolvedSketch>, Vec<Diagnostic>> {
+        let resolved = self.resolve(config)?;
+        let env: HashMap<String, Value> = resolved.params.iter().cloned().collect();
+        let mut diags = Vec::new();
+        let mut out = Vec::new();
+        for item in &self.part.items {
+            if let ItemKind::Sketch(sk) = &item.kind {
+                out.push(solve_sketch(
+                    &item.name,
+                    item.name_span,
+                    sk,
+                    &env,
+                    &self.source,
+                    Report::Problems,
+                    &mut diags,
+                ));
+            }
+        }
+        if tcad_diag::has_errors(&diags) {
+            Err(finish(diags))
+        } else {
+            Ok(out)
         }
     }
 
@@ -164,7 +195,7 @@ struct Checker<'a> {
     flagged: HashSet<(usize, usize)>,
 }
 
-fn check_part(part: &mut Part, diags: &mut Vec<Diagnostic>) {
+fn check_part(part: &mut Part, src: &str, diags: &mut Vec<Diagnostic>) {
     // Names must be unique across parameters and items.
     let mut names: HashMap<String, (usize, Kind)> = HashMap::new();
     let mut declare =
@@ -225,9 +256,38 @@ fn check_part(part: &mut Part, diags: &mut Vec<Diagnostic>) {
     all.extend((0..part.configs.len()).map(Some));
     let mut base_values: Vec<(String, Value)> = Vec::new();
     let mut base_keys: HashSet<(tcad_diag::Code, Span)> = HashSet::new();
+    let solvable = flagged.is_empty() && !tcad_diag::has_errors(diags);
     for cfg in all {
         let mut ds = Vec::new();
         let resolved = resolve_part_with(part, cfg, &mut ds, &flagged);
+        if solvable && !tcad_diag::has_errors(&ds) {
+            let env: HashMap<String, Value> = resolved.params.iter().cloned().collect();
+            let report = if cfg.is_none() {
+                Report::WithDegreesOfFreedom
+            } else {
+                Report::Problems
+            };
+            let mut sketch_diags = Vec::new();
+            for item in &part.items {
+                if let ItemKind::Sketch(sk) = &item.kind {
+                    solve_sketch(
+                        &item.name,
+                        item.name_span,
+                        sk,
+                        &env,
+                        src,
+                        report,
+                        &mut sketch_diags,
+                    );
+                }
+            }
+            if let Some(c) = cfg.map(|i| &part.configs[i]) {
+                for d in &mut sketch_diags {
+                    d.message = format!("{} (in configuration `{}`)", d.message, c.name);
+                }
+            }
+            ds.append(&mut sketch_diags);
+        }
         if cfg.is_none() {
             base_keys = ds.iter().map(|d| (d.code, d.span)).collect();
             base_values = resolved.params;

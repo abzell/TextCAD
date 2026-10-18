@@ -8,10 +8,12 @@ Every diagnostic has:
 
 - a **stable code**: `E` (error) or `W` (warning) and four digits. A code is never renumbered or
   reused; retired codes stay in the registry.
-- a **severity**: `error` makes a command fail, `warning` does not.
+- a **severity**: `error` makes a command fail; `warning` and `info` do not. Codes start with `E`, `W` or `I` accordingly.
 - a **message** for humans.
 - a **span**: a byte range in the source, reported with 1-based line and column of both ends
   (columns count Unicode scalar values).
+- optional **related locations**: other spans that explain the diagnostic (the other halves of a
+  conflict), each with a message.
 - an optional **fix hint**: a message and a list of text edits (byte range plus replacement) that
   can be applied mechanically.
 
@@ -72,12 +74,20 @@ The registry lives in `crates/tcad-diag/src/codes.rs`; a test keeps it unique an
 | E2501 | unknown value for an enumerated argument |
 | E2601 | `suppress if` condition is not boolean |
 | E2701 | a file must contain exactly one part |
+| E4001 | invalid sketch entity argument |
+| E4002 | unknown sketch constraint |
+| E4003 | invalid constraint arguments |
+| E4101 | sketch constraints conflict (names a minimal conflicting set, with related locations) |
+| W4102 | redundant sketch constraint |
+| I4201 | sketch has degrees of freedom (information) |
+| E4301 | sketch cannot be solved near its starting geometry |
+| W4601 | projected geometry is not available before the kernel runs |
 
 ## Output
 
 - **Text**: `file:line:col: error[E1102]: message`, the source line, a caret line and `= help: ...`.
 - **JSON** (`--json`): `{"file": ..., "diagnostics": [{"code", "severity", "message", "span": {"start",
-  "end", "start_line", "start_col", "end_line", "end_col"}, "hint"?: {"message", "edits": [{"span",
+  "end", "start_line", "start_col", "end_line", "end_col"}, "related"?: [{"span", "message"}], "hint"?: {"message", "edits": [{"span",
   "replacement"}]}}]}`. CLI commands wrap the per-file objects in `{"command", "ok", "files": [...]}`
   with a `status` per file.
 

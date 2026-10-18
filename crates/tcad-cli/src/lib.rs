@@ -26,6 +26,7 @@ Commands:
 Options:
   --json     Machine-readable output
   --check    (fmt) do not write, exit 1 if any file would change
+  --solve    (fmt) also write solved sketch coordinates as @hint(...)
   --help     Show this help
   --version  Show the version
 
@@ -36,12 +37,14 @@ A path is a .tcad file or a directory searched recursively for .tcad files.
 pub fn run(args: &[String], out: &mut dyn Write, err: &mut dyn Write) -> i32 {
     let mut json = false;
     let mut check_only = false;
+    let mut solve = false;
     let mut command: Option<&str> = None;
     let mut paths: Vec<&str> = Vec::new();
     for a in args {
         match a.as_str() {
             "--json" => json = true,
             "--check" => check_only = true,
+            "--solve" => solve = true,
             "--help" | "-h" => {
                 let _ = write!(out, "{USAGE}");
                 return 0;
@@ -68,6 +71,10 @@ pub fn run(args: &[String], out: &mut dyn Write, err: &mut dyn Write) -> i32 {
     }
     if check_only && command != "fmt" {
         let _ = writeln!(err, "tcad: --check only applies to `fmt`");
+        return 2;
+    }
+    if solve && command != "fmt" {
+        let _ = writeln!(err, "tcad: --solve only applies to `fmt`");
         return 2;
     }
     if paths.is_empty() {
@@ -97,7 +104,7 @@ pub fn run(args: &[String], out: &mut dyn Write, err: &mut dyn Write) -> i32 {
         };
         let (status, diags) = match command {
             "check" => check_file(&src),
-            _ => match fmt_file(file, &src, check_only) {
+            _ => match fmt_file(file, &src, check_only, solve) {
                 Ok(r) => r,
                 Err(e) => {
                     let _ = writeln!(err, "tcad: cannot write {name}: {e}");
@@ -142,9 +149,15 @@ fn fmt_file(
     path: &Path,
     src: &str,
     check_only: bool,
+    solve: bool,
 ) -> Result<(&'static str, Vec<Diagnostic>), std::io::Error> {
-    match tcad_syntax::format_source(src) {
-        Err(e) => Ok(("error", e.diagnostics)),
+    let result = if solve {
+        tcad_model::solve_hints(src)
+    } else {
+        tcad_syntax::format_source(src).map_err(|e| e.diagnostics)
+    };
+    match result {
+        Err(diags) => Ok(("error", diags)),
         Ok(formatted) => {
             let warnings = tcad_syntax::parse(src).diagnostics;
             if formatted == src {
@@ -254,6 +267,20 @@ mod tests {
         let (_, out, _) = run_args(&["check", "--json", &f]);
         let v: Value = serde_json::from_str(&out).expect("json");
         assert_eq!(v["files"][0]["diagnostics"][0]["code"], "E2201");
+    }
+
+    #[test]
+    fn fmt_solve_writes_hints() {
+        let d = Dir::new("solve");
+        let src = "tcad 0.1\n\npart p {\n  sketch s on plane.XY {\n    circle c center=(1 mm, 2 mm) d=4 mm\n  }\n}\n";
+        let f = d.write("s.tcad", src);
+        let (code, _, _) = run_args(&["fmt", "--check", "--solve", &f]);
+        assert_eq!(code, 1, "hints are missing");
+        assert_eq!(run_args(&["fmt", "--solve", &f]).0, 0);
+        let text = std::fs::read_to_string(&f).expect("read");
+        assert!(text.contains("@hint(1 mm, 2 mm, 2 mm)"), "{text}");
+        assert_eq!(run_args(&["fmt", "--check", "--solve", &f]).0, 0);
+        assert_eq!(run_args(&["check", "--solve", &f]).0, 2);
     }
 
     #[test]

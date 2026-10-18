@@ -42,6 +42,7 @@ fn severity_name(s: Severity) -> &'static str {
     match s {
         Severity::Error => "error",
         Severity::Warning => "warning",
+        Severity::Info => "info",
     }
 }
 
@@ -69,6 +70,10 @@ pub fn render_text(file: &str, src: &str, diags: &[Diagnostic]) -> String {
             " ".repeat(col - 1),
             "^".repeat(width.max(1))
         ));
+        for rel in &d.related {
+            let (l, c) = index.line_col(rel.span.start);
+            out.push_str(&format!("  = note: {file}:{l}:{c}: {}\n", rel.message));
+        }
         if let Some(hint) = &d.hint {
             out.push_str(&format!("  = help: {}\n", hint.message));
         }
@@ -101,6 +106,14 @@ pub fn render_json(file: &str, src: &str, diags: &[Diagnostic]) -> Value {
                 "message": d.message,
                 "span": span_json(&index, d.span),
             });
+            if !d.related.is_empty() {
+                v["related"] = json!(
+                    d.related
+                        .iter()
+                        .map(|r| json!({"span": span_json(&index, r.span), "message": r.message}))
+                        .collect::<Vec<_>>()
+                );
+            }
             if let Some(h) = &d.hint {
                 v["hint"] = json!({
                     "message": h.message,

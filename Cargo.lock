@@ -142,8 +142,10 @@ version = "0.0.1"
 name = "tcad-model"
 version = "0.0.1"
 dependencies = [
+ "serde_json",
  "tcad-diag",
  "tcad-expr",
+ "tcad-solver",
  "tcad-syntax",
 ]
 
@@ -158,6 +160,9 @@ version = "0.0.1"
 [[package]]
 name = "tcad-solver"
 version = "0.0.1"
+dependencies = [
+ "libm",
+]
 
 [[package]]
 name = "tcad-syntax"

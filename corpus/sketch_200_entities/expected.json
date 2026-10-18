@@ -1,0 +1,16 @@
+{
+  "codes": [],
+  "dof": 0,
+  "entity_count": 200,
+  "points": {
+    "r49.bottom_left": [
+      1029.3,
+      0.2
+    ],
+    "c49.center": [
+      1038.3,
+      0.2
+    ]
+  },
+  "note": "50 rectangles chained edge to edge, each with a circle, an arc and a line attached: 200 entities in one connected cluster. The solver must handle it in under 50 ms in a release build (checked by the test suite)."
+}

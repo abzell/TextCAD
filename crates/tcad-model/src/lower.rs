@@ -322,12 +322,21 @@ impl Lowerer {
                     let hint = s
                         .node_of(N::Hint)
                         .map(|h| h.nodes().filter_map(|e| self.expr(e)).collect());
+                    let hint_span = s.node_of(N::Hint).map(span_of);
+                    let content_end = s
+                        .descendant_tokens()
+                        .iter()
+                        .rev()
+                        .find(|t| !matches!(t.kind, K::Newline | K::Semi))
+                        .map_or(0, |t| t.span.end);
                     entities.push(Entity {
                         kind,
                         name: ename.text.clone(),
                         args,
                         construction,
                         hint,
+                        hint_span,
+                        content_end,
                         span: span_of(s),
                         name_span: ename.span,
                     });

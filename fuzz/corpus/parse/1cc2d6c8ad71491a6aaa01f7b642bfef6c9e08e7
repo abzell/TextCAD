@@ -1,0 +1,5 @@
+tcad 0.1
+
+part rod_clevis "evis, 00 mm pin" {
+  tolerance 1e-6 mm
+  material "AASI 1045" deitsny=7.tcad 0.815 
