@@ -60,19 +60,30 @@ cache entry is valid only for the backend that wrote it.
 
 | Tier | Applies when | Requirement |
 | --- | --- | --- |
-| T1 Identical | same backend id and version, same platform build | the canonical serialization is bit-identical across runs |
+| T1 Identical | same backend id and version | the canonical serialization is bit-identical across runs, and across platforms and targets built from the same OpenCASCADE version (Windows, Linux, WebAssembly; `corpus/brep-t1.txt`) |
 | T2 Equivalent | different backend version or a different kernel | same topology counts per feature role; volume and area within 1e-6 relative; center of mass and bounding box within 10 times the modeling tolerance; Hausdorff distance below 10 times the modeling tolerance |
 | T3 Failed | neither holds | `tcad verify` fails with a per-feature report |
 
 No parallel reductions in geometry paths, fixed iteration orders, no hash-map iteration order in
 outputs. The OpenCASCADE backend runs its boolean operations single-threaded.
 
-How the tiers are tested: `crates/tcad-build/tests/corpus.rs` builds every corpus part twice and compares
-the canonical B-rep byte for byte (T1), and compares properties with the analytic `expected.json` (T2).
+How the tiers are tested: `crates/tcad-build/tests/corpus.rs` builds every corpus part three times and
+compares the canonical B-rep byte for byte (T1), checks the SHA-256 of each against
+`corpus/brep-t1.txt` when the backend version matches (T1 across Windows and Linux), and compares
+properties with the analytic `expected.json` (T2). `tools/wasm/gate.mjs` checks the same hashes for the
+WebAssembly build (docs/adr/0014).
 `corpus/tools/compare_reference.py` cross-checks the expected values with an independent build123d model.
 
 ## The mock backend
 
 `mock-0.1` handles only closed-form cases: extruding a profile that is one circle or a closed chain
 of straight lines (no holes, no draft). Everything else is an error. It exists for fast unit tests and
-for WASM builds before the in-browser kernel (Phase 1b).
+for builds without OpenCASCADE.
+
+## In the browser
+
+`crates/tcad-web` compiles the build for `wasm32-unknown-emscripten`. OpenCASCADE (the same version
+as the native builds) is a separate WebAssembly side module, `occt.wasm`, that the main module loads
+at start-up and that can be replaced by another build of the library (docs/adr/0014). The C interface
+(`tcad_build`, `tcad_free`, `tcad_glb_ptr`, `tcad_glb_len`) returns JSON with the manifest, the
+properties and the SHA-256 of the canonical B-rep, and the GLB.

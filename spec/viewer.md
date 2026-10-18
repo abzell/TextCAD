@@ -30,6 +30,16 @@ a `.tcad` file. Only `GET` is accepted. Responses are never cached.
   keeping the camera and the selection when the feature still exists.
 - A failing build leaves the previous model on screen and shows the error.
 
+## In-browser mode (Phase 1b)
+
+A page with `<body data-mode="browser">` (`viewer/web/index.html`, assembled with the WebAssembly
+module by `tools/wasm/site.sh`) needs no server: the source pane is an editor, and every edit
+(after 300 ms without typing) regenerates the part in a Web Worker running `crates/tcad-web`. The
+configuration list comes from the build; a source that does not build keeps the last model on screen
+and shows the errors with their codes and lines. The part shown first is `?part=URL`, by default the
+rod clevis. Text and geometry stay linked both ways: the statement under the caret selects its
+feature, and selecting a feature or picking a face selects its statement.
+
 ## Language server (`tcad-lsp`)
 
 JSON-RPC over standard input and output with `Content-Length` framing. Capabilities: full-text

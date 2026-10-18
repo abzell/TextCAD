@@ -252,6 +252,14 @@ jobs:
           ls -la target/wasm32-unknown-emscripten/release/ | grep -E 'tcad|occt'
       - name: Regenerate the corpus in WebAssembly (T1 against the native builds)
         run: node tools/wasm/gate.mjs target/wasm32-unknown-emscripten/release/tcad-web.js corpus
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: In-browser viewer (edit, regenerate, highlight) in Chromium
+        run: |
+          (cd viewer && npm ci && npm run build)
+          tools/wasm/site.sh target/wasm32-unknown-emscripten/release site
+          (cd viewer && npx playwright-core install --with-deps chromium && node tests/browser.test.mjs ../site)
 
   build123d-crosscheck:
     runs-on: ubuntu-latest

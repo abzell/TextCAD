@@ -23,7 +23,7 @@ pub const LINEAR_DEFLECTION_MM: f64 = 0.05;
 pub const ANGULAR_DEFLECTION_RAD: f64 = 10.0 * std::f64::consts::PI / 180.0;
 
 /// Builds `src` (configuration `config`, `None`: the default) and describes the result as JSON:
-/// `{ok, kernel, part, config, features, result, brep_sha256, topology}` or
+/// `{ok, kernel, part, config, configs, features, result, brep_sha256, topology}` or
 /// `{ok: false, diagnostics}`. The GLB of a successful build is returned separately.
 pub fn regenerate<K: Kernel>(k: &K, src: &str, config: Option<&str>) -> (Value, Option<Vec<u8>>) {
     let analysis = tcad_model::analyze(src);
@@ -71,9 +71,11 @@ pub fn regenerate<K: Kernel>(k: &K, src: &str, config: Option<&str>) -> (Value, 
                 .collect()
         })
         .unwrap_or_default();
+    let configs: Vec<&str> = model.part.configs.iter().map(|c| c.name.as_str()).collect();
     let Some(shape) = built.shape.as_ref() else {
         let v = json!({"ok": true, "kernel": k.id(), "part": model.part.name,
-            "config": built.config, "features": features, "result": Value::Null});
+            "config": built.config, "configs": configs, "features": features,
+            "result": Value::Null});
         return (v, None);
     };
     let result = match k.properties(shape) {
@@ -117,6 +119,7 @@ pub fn regenerate<K: Kernel>(k: &K, src: &str, config: Option<&str>) -> (Value, 
         "kernel": k.id(),
         "part": model.part.name,
         "config": built.config,
+        "configs": configs,
         "features": features,
         "result": result,
         "brep_sha256": brep.as_deref().map(tcad_cache::sha256_hex),
