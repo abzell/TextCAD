@@ -206,9 +206,9 @@ jobs:
         with:
           toolchain: 1.97.0
       - uses: Swatinem/rust-cache@v2
-      - name: Cache OpenCASCADE
+      - name: Restore OpenCASCADE
         id: occt-cache
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: vcpkg_installed
           key: occt-vcpkg-x64-windows-v1
@@ -216,6 +216,13 @@ jobs:
         if: steps.occt-cache.outputs.cache-hit != 'true'
         shell: pwsh
         run: vcpkg install "opencascade[core]:x64-windows" --x-install-root="$env:GITHUB_WORKSPACE\vcpkg_installed"
+      # Saved right after the (very long) build, so a failing test run does not throw it away.
+      - name: Save OpenCASCADE
+        if: steps.occt-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: vcpkg_installed
+          key: occt-vcpkg-x64-windows-v1
       - name: Test with OCCT
         shell: pwsh
         run: |
