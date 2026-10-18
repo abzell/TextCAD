@@ -130,6 +130,24 @@ pub fn source_hash(canonical: &str, config: Option<&str>, imports: &[(String, Ve
     h.finalize().iter().map(|b| format!("{b:02x}")).collect()
 }
 
+/// One named face or edge in the manifest.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct TopologyEntry {
+    /// `face` or `edge`.
+    pub kind: String,
+    /// Primary semantic ID.
+    pub id: String,
+    /// Other IDs of the same entity.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub aliases: Vec<String>,
+    /// Surface or curve type.
+    pub geometry: String,
+    /// Area (mm^2) of a face, length (mm) of an edge.
+    pub size: f64,
+    /// Centroid of a face, midpoint of an edge (mm).
+    pub at: [f64; 3],
+}
+
 /// What one feature contributed (topology and volume after it).
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct FeatureEntry {
@@ -147,6 +165,12 @@ pub struct FeatureEntry {
     pub vertices: usize,
     /// Volume after this feature (mm^3).
     pub volume_mm3: f64,
+    /// Thread designation of a tapped hole (cosmetic).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub thread: Option<String>,
+    /// Persistent names of the faces and edges after this feature (spec/naming.md).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub topology: Vec<TopologyEntry>,
 }
 
 /// Measurements of the result.

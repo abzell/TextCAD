@@ -30,6 +30,45 @@ fn line(a: P2, b: P2) -> Segment {
 
 /// The segments of an entity and whether they form a closed loop by themselves.
 fn entity_segments(e: &SolvedEntity) -> Option<(Vec<Segment>, bool)> {
+    entity_segments_named(e).map(|(s, _, c)| (s, c))
+}
+
+/// Role names of the segments of an entity, parallel to [`entity_segments`]: `bottom`, `right`,
+/// `top`, `left` for a rectangle, `e0`... for a polygon, `right`, `end_cap`, `left`, `start_cap`
+/// for a slot; empty when the entity is a single curve.
+fn segment_roles(e: &SolvedEntity, count: usize) -> Vec<String> {
+    match &e.geometry {
+        Geometry::Rect { .. } => ["bottom", "right", "top", "left"]
+            .iter()
+            .map(|s| s.to_string())
+            .collect(),
+        Geometry::Polygon { .. } => (0..count).map(|i| format!("e{i}")).collect(),
+        Geometry::Slot { .. } => ["right", "end_cap", "left", "start_cap"]
+            .iter()
+            .map(|s| s.to_string())
+            .collect(),
+        _ => vec![String::new(); count],
+    }
+}
+
+fn entity_segments_named(e: &SolvedEntity) -> Option<(Vec<Segment>, Vec<String>, bool)> {
+    let (segs, closed) = entity_segments_raw(e)?;
+    let roles = segment_roles(e, segs.len());
+    let base = &e.name;
+    let names = roles
+        .into_iter()
+        .map(|r| {
+            if r.is_empty() {
+                base.clone()
+            } else {
+                format!("{base}.{r}")
+            }
+        })
+        .collect();
+    Some((segs, names, closed))
+}
+
+fn entity_segments_raw(e: &SolvedEntity) -> Option<(Vec<Segment>, bool)> {
     Some(match &e.geometry {
         Geometry::Rect {
             bottom_left,
@@ -174,30 +213,60 @@ fn reverse(segs: &[Segment]) -> Vec<Segment> {
     segs.iter().rev().map(reverse_segment).collect()
 }
 
+/// A loop together with the name of every segment (`r1.top`, `c1`, ...), in loop order.
+#[derive(Clone, Debug)]
+pub struct NamedLoop {
+    /// The loop.
+    pub lp: Loop,
+    /// One name per segment.
+    pub names: Vec<String>,
+}
+
+/// A profile together with its segment names: `names[0]` for the outer loop, then one entry per
+/// hole.
+#[derive(Clone, Debug)]
+pub struct NamedProfile {
+    /// The profile.
+    pub profile: Profile,
+    /// Segment names per loop.
+    pub names: Vec<Vec<String>>,
+}
+
+type Piece = (Segment, String);
+type Chain = (Vec<Segment>, Vec<String>);
+
+fn reverse_named(segs: &[Segment], names: &[String]) -> (Vec<Segment>, Vec<String>) {
+    (reverse(segs), names.iter().rev().cloned().collect())
+}
+
 /// Chains open segments into loops. Returns the loops or a message naming a gap.
-fn chain(mut pool: Vec<Segment>, join: f64) -> Result<Vec<Vec<Segment>>, String> {
+fn chain(mut pool: Vec<Piece>, join: f64) -> Result<Vec<Chain>, String> {
     let mut loops = Vec::new();
     while let Some(first) = pool.pop() {
         let mut chain = vec![first];
-        let start = chain[0].start();
+        let start = chain[0].0.start();
         loop {
-            let end = chain.last().map(Segment::end).unwrap_or(start);
-            if (chain.len() > 1 || chain[0].is_closed()) && dist(end, start) <= join {
+            let end = chain.last().map(|c| c.0.end()).unwrap_or(start);
+            if (chain.len() > 1 || chain[0].0.is_closed()) && dist(end, start) <= join {
                 break;
             }
             let pick = pool
                 .iter()
-                .position(|s| dist(s.start(), end) <= join)
+                .position(|s| dist(s.0.start(), end) <= join)
                 .map(|i| (i, false))
                 .or_else(|| {
                     pool.iter()
-                        .position(|s| dist(s.end(), end) <= join)
+                        .position(|s| dist(s.0.end(), end) <= join)
                         .map(|i| (i, true))
                 });
             match pick {
                 Some((i, flip)) => {
-                    let s = pool.remove(i);
-                    chain.push(if flip { reverse_segment(&s) } else { s });
+                    let (seg, name) = pool.remove(i);
+                    chain.push(if flip {
+                        (reverse_segment(&seg), name)
+                    } else {
+                        (seg, name)
+                    });
                 }
                 None => {
                     return Err(format!(
@@ -207,7 +276,8 @@ fn chain(mut pool: Vec<Segment>, join: f64) -> Result<Vec<Vec<Segment>>, String>
                 }
             }
         }
-        loops.push(chain);
+        let (segs, names) = chain.into_iter().unzip();
+        loops.push((segs, names));
     }
     Ok(loops)
 }
@@ -231,19 +301,35 @@ fn point_in_polygon(p: P2, poly: &[P2]) -> bool {
 /// Loops from the entities of a sketch. With `only` set, just that entity (it must be closed or be
 /// part of a closed chain by itself); otherwise every non-construction entity.
 pub fn loops_of(sketch: &SolvedSketch, only: Option<&str>, join: f64) -> Result<Vec<Loop>, String> {
-    let mut closed: Vec<Vec<Segment>> = Vec::new();
-    let mut open: Vec<Segment> = Vec::new();
+    Ok(loops_named(sketch, only, join)?
+        .into_iter()
+        .map(|n| n.lp)
+        .collect())
+}
+
+/// Like [`loops_of`], keeping the segment names.
+pub fn loops_named(
+    sketch: &SolvedSketch,
+    only: Option<&str>,
+    join: f64,
+) -> Result<Vec<NamedLoop>, String> {
+    let mut closed: Vec<Chain> = Vec::new();
+    let mut open: Vec<Piece> = Vec::new();
     let mut found = false;
     for e in &sketch.entities {
         if only.is_some_and(|n| n != e.name) || (only.is_none() && e.construction) {
             continue;
         }
         found = true;
-        if let Some((segs, is_closed)) = entity_segments(e) {
+        if let Some((segs, names, is_closed)) = entity_segments_named(e) {
+            let qualified: Vec<String> = names
+                .into_iter()
+                .map(|n| format!("{}.{n}", sketch.name))
+                .collect();
             if is_closed {
-                closed.push(segs);
+                closed.push((segs, qualified));
             } else {
-                open.extend(segs);
+                open.extend(segs.into_iter().zip(qualified));
             }
         }
     }
@@ -259,21 +345,39 @@ pub fn loops_of(sketch: &SolvedSketch, only: Option<&str>, join: f64) -> Result<
     }
     Ok(closed
         .into_iter()
-        .map(|mut segs| {
+        .map(|(mut segs, mut names)| {
             let l = Loop {
                 segments: segs.clone(),
             };
             if l.signed_area() < 0.0 {
-                segs = reverse(&segs);
+                (segs, names) = reverse_named(&segs, &names);
             }
-            Loop { segments: segs }
+            NamedLoop {
+                lp: Loop { segments: segs },
+                names,
+            }
         })
         .collect())
 }
 
 /// Nests loops by containment into profiles in `frame`.
 pub fn nest(frame: Frame, loops: Vec<Loop>) -> Vec<Profile> {
-    let polys: Vec<Vec<P2>> = loops.iter().map(Loop::polygon).collect();
+    let named = loops
+        .into_iter()
+        .map(|lp| NamedLoop {
+            names: vec![String::new(); lp.segments.len()],
+            lp,
+        })
+        .collect();
+    nest_named(frame, named)
+        .into_iter()
+        .map(|p| p.profile)
+        .collect()
+}
+
+/// Nests named loops: even depth is an outer boundary, odd depth a hole of its container.
+pub fn nest_named(frame: Frame, loops: Vec<NamedLoop>) -> Vec<NamedProfile> {
+    let polys: Vec<Vec<P2>> = loops.iter().map(|l| l.lp.polygon()).collect();
     let n = loops.len();
     // containers[i]: loops that contain loop i
     let containers: Vec<Vec<usize>> = (0..n)
@@ -284,15 +388,18 @@ pub fn nest(frame: Frame, loops: Vec<Loop>) -> Vec<Profile> {
                 .collect()
         })
         .collect();
-    let mut profiles: Vec<(usize, Profile)> = Vec::new();
+    let mut profiles: Vec<(usize, NamedProfile)> = Vec::new();
     for i in 0..n {
         if containers[i].len().is_multiple_of(2) {
             profiles.push((
                 i,
-                Profile {
-                    frame,
-                    outer: loops[i].clone(),
-                    holes: Vec::new(),
+                NamedProfile {
+                    profile: Profile {
+                        frame,
+                        outer: loops[i].lp.clone(),
+                        holes: Vec::new(),
+                    },
+                    names: vec![loops[i].names.clone()],
                 },
             ));
         }
@@ -307,7 +414,8 @@ pub fn nest(frame: Frame, loops: Vec<Loop>) -> Vec<Profile> {
             if let Some(parent) = parent
                 && let Some((_, p)) = profiles.iter_mut().find(|(k, _)| *k == parent)
             {
-                p.holes.push(loops[i].clone());
+                p.profile.holes.push(loops[i].lp.clone());
+                p.names.push(loops[i].names.clone());
             }
         }
     }

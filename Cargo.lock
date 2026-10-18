@@ -358,6 +358,7 @@ dependencies = [
  "tcad-expr",
  "tcad-kernel",
  "tcad-model",
+ "tcad-naming",
  "tcad-occt",
 ]
 
@@ -434,6 +435,11 @@ dependencies = [
 [[package]]
 name = "tcad-naming"
 version = "0.0.1"
+dependencies = [
+ "tcad-diag",
+ "tcad-expr",
+ "tcad-kernel",
+]
 
 [[package]]
 name = "tcad-occt"

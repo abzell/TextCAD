@@ -4,14 +4,20 @@
 //! Regeneration stops at the first feature that fails, with a diagnostic naming it; it never
 //! silently skips or substitutes (requirements 6.4).
 
+mod detail;
+mod holes;
+mod patterns;
 pub mod profile;
+mod select;
 
+use profile::NamedProfile;
 use std::collections::HashMap;
 use tcad_diag::{Code, Diagnostic, Span, codes};
 use tcad_expr::{Arg, Dim, Env, EvalError, Expr, ExprKind, Reference, Value, eval};
 use tcad_kernel::geometry::{Frame, P2, Path, Profile, Segment, V3, cross, dot, norm, sub, unit};
-use tcad_kernel::{BoolOp, Kernel, KernelError, Topology};
+use tcad_kernel::{BoolOp, Kernel, KernelError, Role, TopoInfo, Topology};
 use tcad_model::{Item, ItemKind, Model, SolvedSketch};
+use tcad_naming::Names;
 
 /// Working name of the format. Defined once per crate so it can be renamed later
 /// (see `spec/name.md`).
@@ -34,6 +40,40 @@ pub struct FeatureRecord {
     pub topology: Topology,
     /// Volume of the result after this feature (mm^3).
     pub volume: f64,
+    /// Faces and edges of the result after this feature with their persistent names.
+    pub topology_map: Vec<TopoEntry>,
+    /// Thread designation recorded by a tapped hole (cosmetic only).
+    pub thread: Option<String>,
+}
+
+/// One face or edge of a result with its persistent name (spec/naming.md).
+#[derive(Clone, Debug, PartialEq)]
+pub struct TopoEntry {
+    /// `face` or `edge`.
+    pub kind: &'static str,
+    /// The primary semantic ID, ordinal included.
+    pub id: String,
+    /// The other IDs of the entity (merged features).
+    pub aliases: Vec<String>,
+    /// Surface or curve type word.
+    pub geometry: String,
+    /// Area (mm^2) or length (mm).
+    pub size: f64,
+    /// Centroid of a face, midpoint of an edge (mm).
+    pub at: V3,
+}
+
+/// A reference met while regenerating, and what it resolved to.
+#[derive(Clone, Debug, PartialEq)]
+pub struct RefRecord {
+    /// The feature that used the reference.
+    pub feature: String,
+    /// Location in the source.
+    pub span: Span,
+    /// The reference as written.
+    pub text: String,
+    /// The names it resolved to, or the failure.
+    pub resolved: Result<Vec<String>, String>,
 }
 
 /// The outcome of a regeneration.
@@ -48,14 +88,8 @@ pub struct Built<S> {
     pub material: Option<(String, Option<f64>)>,
     /// The configuration that was built (`None`: the base part).
     pub config: Option<String>,
-}
-
-struct Values<'a>(&'a HashMap<String, Value>);
-
-impl Env for Values<'_> {
-    fn get(&self, name: &str) -> Option<Value> {
-        self.0.get(name).cloned()
-    }
+    /// Every face/edge reference that was resolved, in order.
+    pub refs: Vec<RefRecord>,
 }
 
 /// Regenerates `model` under a configuration (`None`: the default configuration if the part has
@@ -65,15 +99,30 @@ pub fn build<K: Kernel>(
     model: &Model,
     config: Option<&str>,
 ) -> Result<Built<K::Shape>, Vec<Diagnostic>> {
+    build_traced(kernel, model, config).0
+}
+
+/// The outcome of a build and the references it resolved.
+pub type Traced<S> = (Result<Built<S>, Vec<Diagnostic>>, Vec<RefRecord>);
+
+/// Like [`build`], and also returns every face/edge reference that was resolved on the way, even
+/// when the build fails.
+pub fn build_traced<K: Kernel>(
+    kernel: &K,
+    model: &Model,
+    config: Option<&str>,
+) -> Traced<K::Shape> {
     let config = config
         .map(str::to_string)
         .or_else(|| model.default_config().map(|c| c.name.clone()));
-    let resolved = model.resolve(config.as_deref())?;
-    let sketches: HashMap<String, SolvedSketch> = model
-        .solve_sketches(config.as_deref())?
-        .into_iter()
-        .map(|s| (s.name.clone(), s))
-        .collect();
+    let resolved = match model.resolve(config.as_deref()) {
+        Ok(r) => r,
+        Err(d) => return (Err(d), Vec::new()),
+    };
+    let sketches: HashMap<String, SolvedSketch> = match model.solve_sketches(config.as_deref()) {
+        Ok(v) => v.into_iter().map(|s| (s.name.clone(), s)).collect(),
+        Err(d) => return (Err(d), Vec::new()),
+    };
     let env: HashMap<String, Value> = resolved.params.iter().cloned().collect();
     let mut cx = Cx {
         k: kernel,
@@ -84,6 +133,13 @@ pub fn build<K: Kernel>(
         points: HashMap::new(),
         sketch_frames: HashMap::new(),
         body: None,
+        body_topo: None,
+        names: Names::default(),
+        tags: HashMap::new(),
+        tools: HashMap::new(),
+        rank: 0,
+        current: String::new(),
+        refs: Vec::new(),
         diags: Vec::new(),
         features: Vec::new(),
         tol: model.part.tolerance,
@@ -97,24 +153,57 @@ pub fn build<K: Kernel>(
         }
     }
     if tcad_diag::has_errors(&cx.diags) {
-        return Err(cx.diags);
+        return (Err(cx.diags), cx.refs);
     }
-    Ok(Built {
-        shape: cx.body,
-        features: cx.features,
-        tolerance: model.part.tolerance,
-        material: model
-            .part
-            .material
-            .as_ref()
-            .map(|m| (m.name.clone(), m.density)),
-        config: resolved.config,
-    })
+    let refs = cx.refs.clone();
+    (
+        Ok(Built {
+            shape: cx.body,
+            features: cx.features,
+            tolerance: model.part.tolerance,
+            material: model
+                .part
+                .material
+                .as_ref()
+                .map(|m| (m.name.clone(), m.density)),
+            config: resolved.config,
+            refs: cx.refs,
+        }),
+        refs,
+    )
 }
 
-type Res<T = ()> = Result<T, ()>;
+struct Values<'a>(&'a HashMap<String, Value>);
 
-struct Cx<'a, K: Kernel> {
+impl Env for Values<'_> {
+    fn get(&self, name: &str) -> Option<Value> {
+        self.0.get(name).cloned()
+    }
+}
+
+pub(crate) type Res<T = ()> = Result<T, ()>;
+
+/// A solid made by one statement before it is combined with the body, with the names of its faces.
+pub(crate) struct Tool<S> {
+    shape: S,
+    /// `None` if the kernel cannot list topology (the mock): then nothing is named.
+    topo: Option<TopoInfo>,
+    names: Names,
+}
+
+/// What a pattern copies: the tool pieces of a feature, with the role text of every face.
+pub(crate) struct ToolRec<S> {
+    op: BoolOp,
+    pieces: Vec<ToolPiece<S>>,
+}
+
+pub(crate) struct ToolPiece<S> {
+    shape: S,
+    /// For each face index of `shape`, the role text after the feature name.
+    roles: Vec<String>,
+}
+
+pub(crate) struct Cx<'a, K: Kernel> {
     k: &'a K,
     env: HashMap<String, Value>,
     sketches: HashMap<String, SolvedSketch>,
@@ -123,6 +212,13 @@ struct Cx<'a, K: Kernel> {
     points: HashMap<String, V3>,
     sketch_frames: HashMap<String, Frame>,
     body: Option<K::Shape>,
+    body_topo: Option<TopoInfo>,
+    names: Names,
+    tags: HashMap<String, Reference>,
+    tools: HashMap<String, ToolRec<K::Shape>>,
+    rank: u32,
+    current: String,
+    refs: Vec<RefRecord>,
     diags: Vec<Diagnostic>,
     features: Vec<FeatureRecord>,
     tol: f64,
@@ -130,13 +226,31 @@ struct Cx<'a, K: Kernel> {
 
 const OPS: &[&str] = &["add", "subtract", "intersect"];
 
+/// Role text of a face made by sweeping a profile whose segments have `names`.
+pub(crate) fn sweep_role(names: &[Vec<String>]) -> impl Fn(Role) -> Option<String> + '_ {
+    move |r| match r {
+        Role::CapStart => Some("cap_start".to_string()),
+        Role::CapEnd => Some("cap_end".to_string()),
+        Role::Side { lp, seg } => {
+            let n = names
+                .get(lp as usize)
+                .and_then(|l| l.get(seg as usize))
+                .filter(|n| !n.is_empty())
+                .cloned()
+                .unwrap_or_else(|| format!("loop{lp}.{seg}"));
+            Some(format!("side({n})"))
+        }
+        _ => None,
+    }
+}
+
 impl<K: Kernel> Cx<'_, K> {
-    fn fail<T>(&mut self, code: Code, span: Span, msg: impl Into<String>) -> Res<T> {
+    pub(crate) fn fail<T>(&mut self, code: Code, span: Span, msg: impl Into<String>) -> Res<T> {
         self.diags.push(Diagnostic::error(code, span, msg));
         Err(())
     }
 
-    fn kernel_error<T>(&mut self, item: &Item, e: KernelError) -> Res<T> {
+    pub(crate) fn kernel_error<T>(&mut self, item: &Item, e: KernelError) -> Res<T> {
         self.fail(
             codes::E5004,
             item.span,
@@ -149,7 +263,7 @@ impl<K: Kernel> Cx<'_, K> {
 
     // ---- evaluating arguments ----
 
-    fn value(&mut self, e: &Expr) -> Res<Value> {
+    pub(crate) fn value(&mut self, e: &Expr) -> Res<Value> {
         match eval(e, &Values(&self.env)) {
             Ok(v) => Ok(v),
             Err(EvalError::Diag(d)) => {
@@ -162,7 +276,7 @@ impl<K: Kernel> Cx<'_, K> {
         }
     }
 
-    fn quantity(&mut self, a: &Arg, dim: Dim, what: &str) -> Res<f64> {
+    pub(crate) fn quantity(&mut self, a: &Arg, dim: Dim, what: &str) -> Res<f64> {
         let Some(e) = a.values.first() else {
             return self.fail(codes::E5001, a.span, format!("`{}` needs a value", a.name));
         };
@@ -176,7 +290,7 @@ impl<K: Kernel> Cx<'_, K> {
         }
     }
 
-    fn triple(&mut self, e: &Expr, allow_numbers: bool) -> Res<V3> {
+    pub(crate) fn triple(&mut self, e: &Expr, allow_numbers: bool) -> Res<V3> {
         if let ExprKind::Ref(r) = &e.kind
             && let Some(name) = r.simple_name()
             && let Some(p) = self.points.get(name)
@@ -212,7 +326,7 @@ impl<K: Kernel> Cx<'_, K> {
     }
 
     /// The arguments of `item` must come from `allowed`.
-    fn only(&mut self, item: &Item, allowed: &[&str]) -> Res {
+    pub(crate) fn only(&mut self, item: &Item, allowed: &[&str]) -> Res {
         for a in &item.args {
             if !allowed.contains(&a.name.as_str()) {
                 return self.fail(
@@ -232,7 +346,7 @@ impl<K: Kernel> Cx<'_, K> {
 
     /// The values of an argument with `[a, b, c]` lists flattened (`through=[a, b]` and
     /// `through=a, b` mean the same).
-    fn flat(a: &Arg) -> Vec<&Expr> {
+    pub(crate) fn flat(a: &Arg) -> Vec<&Expr> {
         a.values
             .iter()
             .flat_map(|v| match &v.kind {
@@ -242,11 +356,11 @@ impl<K: Kernel> Cx<'_, K> {
             .collect()
     }
 
-    fn arg<'i>(item: &'i Item, name: &str) -> Option<&'i Arg> {
+    pub(crate) fn arg<'i>(item: &'i Item, name: &str) -> Option<&'i Arg> {
         item.args.iter().find(|a| a.name == name)
     }
 
-    fn require<'i>(&mut self, item: &'i Item, name: &str) -> Res<&'i Arg> {
+    pub(crate) fn require<'i>(&mut self, item: &'i Item, name: &str) -> Res<&'i Arg> {
         match Self::arg(item, name) {
             Some(a) => Ok(a),
             None => self.fail(
@@ -259,7 +373,7 @@ impl<K: Kernel> Cx<'_, K> {
 
     // ---- references to geometry ----
 
-    fn plane_of(&mut self, r: &Reference) -> Res<Frame> {
+    pub(crate) fn plane_of(&mut self, r: &Reference) -> Res<Frame> {
         let names: Vec<&str> = r.segments.iter().map(|s| s.name.as_str()).collect();
         match names.as_slice() {
             ["plane", "XY"] => Ok(Frame::xy()),
@@ -270,25 +384,34 @@ impl<K: Kernel> Cx<'_, K> {
                 // a sketch's own plane
                 Ok(self.sketch_frames.get(*name).copied().unwrap_or_else(Frame::xy))
             }
+            _ if self.body.is_some() => {
+                // a planar face of the body, by name, tag or query
+                let e = Expr {
+                    kind: ExprKind::Ref(r.clone()),
+                    span: r.span,
+                };
+                self.face_plane_expr(&e, "a plane")
+            }
             _ => self.fail(
                 codes::E5002,
                 r.span,
                 format!(
-                    "`{}` is not a plane: use plane.XY, plane.YZ, plane.XZ or a `plane` feature (planes on faces need persistent naming, milestone M6)",
+                    "`{}` is not a plane: use plane.XY, plane.YZ, plane.XZ, a `plane` feature or a planar face of an existing body",
                     r.dotted()
                 ),
             ),
         }
     }
 
-    fn plane_expr(&mut self, e: &Expr) -> Res<Frame> {
+    pub(crate) fn plane_expr(&mut self, e: &Expr) -> Res<Frame> {
         match &e.kind {
             ExprKind::Ref(r) => self.plane_of(r),
+            ExprKind::Query(..) if self.body.is_some() => self.face_plane_expr(e, "a plane"),
             _ => self.fail(codes::E5002, e.span, "expected a plane"),
         }
     }
 
-    fn axis_expr(&mut self, e: &Expr) -> Res<(V3, V3)> {
+    pub(crate) fn axis_expr(&mut self, e: &Expr) -> Res<(V3, V3)> {
         let ExprKind::Ref(r) = &e.kind else {
             return self.fail(codes::E5002, e.span, "expected an axis");
         };
@@ -326,7 +449,7 @@ impl<K: Kernel> Cx<'_, K> {
 
     /// Profiles named by a `from=` / `sections=` value: `sketch`, `sketch.entity`, or an inline
     /// `rect(...)` / `circle(...)`.
-    fn profiles(&mut self, e: &Expr) -> Res<Vec<Profile>> {
+    pub(crate) fn profiles(&mut self, e: &Expr) -> Res<Vec<NamedProfile>> {
         match &e.kind {
             ExprKind::Ref(r) => {
                 let Some(sk) = r.segments.first().map(|s| s.name.clone()) else {
@@ -341,11 +464,12 @@ impl<K: Kernel> Cx<'_, K> {
                     .get(&sk)
                     .copied()
                     .unwrap_or_else(Frame::xy);
-                let loops = match profile::loops_of(sketch, only.as_deref(), self.tol.max(1e-6)) {
+                let loops = match profile::loops_named(sketch, only.as_deref(), self.tol.max(1e-6))
+                {
                     Ok(l) => l,
                     Err(m) => return self.fail(codes::E5005, r.span, m),
                 };
-                Ok(profile::nest(frame, loops))
+                Ok(profile::nest_named(frame, loops))
             }
             ExprKind::Profile(kind, args) => self.inline_profile(e, kind, args),
             _ => self.fail(
@@ -356,7 +480,12 @@ impl<K: Kernel> Cx<'_, K> {
         }
     }
 
-    fn inline_profile(&mut self, e: &Expr, kind: &str, args: &[Arg]) -> Res<Vec<Profile>> {
+    pub(crate) fn inline_profile(
+        &mut self,
+        e: &Expr,
+        kind: &str,
+        args: &[Arg],
+    ) -> Res<Vec<NamedProfile>> {
         let get = |n: &str| args.iter().find(|a| a.name == n);
         let Some(on) = get("on").and_then(|a| a.values.first()) else {
             return self.fail(
@@ -388,6 +517,7 @@ impl<K: Kernel> Cx<'_, K> {
                 None => Ok(None),
             }
         };
+        let names: Vec<String>;
         let outer = match kind {
             "rect" => {
                 let (Some(w), Some(h)) = (len(self, "w")?, len(self, "h")?) else {
@@ -406,6 +536,10 @@ impl<K: Kernel> Cx<'_, K> {
                     }
                 };
                 let p = [o, [o[0] + w, o[1]], [o[0] + w, o[1] + h], [o[0], o[1] + h]];
+                names = ["rect.bottom", "rect.right", "rect.top", "rect.left"]
+                    .iter()
+                    .map(|s| s.to_string())
+                    .collect();
                 tcad_kernel::Loop {
                     segments: (0..4)
                         .map(|i| Segment::Line {
@@ -422,6 +556,7 @@ impl<K: Kernel> Cx<'_, K> {
                     _ => return self.fail(codes::E5001, e.span, "`circle(...)` needs `r` or `d`"),
                 };
                 let c = xy(self, "center")?.unwrap_or([0.0, 0.0]);
+                names = vec!["circle".to_string()];
                 tcad_kernel::Loop {
                     segments: vec![Segment::Circle { center: c, r }],
                 }
@@ -434,46 +569,85 @@ impl<K: Kernel> Cx<'_, K> {
                 );
             }
         };
-        Ok(vec![Profile {
-            frame,
-            outer,
-            holes: vec![],
+        Ok(vec![NamedProfile {
+            profile: Profile {
+                frame,
+                outer,
+                holes: vec![],
+            },
+            names: vec![names],
         }])
     }
 
     // ---- statements ----
 
-    fn item(&mut self, item: &Item) -> Res {
+    pub(crate) fn item(&mut self, item: &Item) -> Res {
+        self.current = item.name.clone();
         match &item.kind {
             ItemKind::Sketch(sk) => {
                 let frame = self.plane_of(&sk.plane)?;
                 self.sketch_frames.insert(item.name.clone(), frame);
                 Ok(())
             }
-            ItemKind::Tag(_) => Ok(()),
-            ItemKind::Import(_) => self.fail(codes::E5003, item.span, "STEP import is milestone M7"),
+            ItemKind::Tag(target) => {
+                // a tag must resolve where it is declared
+                let e = Expr {
+                    kind: ExprKind::Ref(target.clone()),
+                    span: target.span,
+                };
+                if self.body.is_some() {
+                    self.select(&e, select::Want::Faces, "a tag")
+                        .or_else(|()| {
+                            // not a face: it may be an edge tag
+                            self.diags.pop();
+                            self.select(&e, select::Want::Edges, "a tag")
+                        })
+                        .map(|_| ())?;
+                }
+                self.tags.insert(item.name.clone(), target.clone());
+                Ok(())
+            }
+            ItemKind::Import(_) => {
+                self.fail(codes::E5003, item.span, "STEP import is milestone M7")
+            }
             ItemKind::RefGeom => match item.keyword.as_str() {
                 "plane" => self.plane_feature(item),
                 "axis" => self.axis_feature(item),
                 "point" => self.point_feature(item),
                 "csys" => self.csys_feature(item),
-                other => self.fail(codes::E5003, item.span, format!("`{other}` is not supported yet")),
-            },
-            ItemKind::Feature => match item.keyword.as_str() {
-                "extrude" => self.extrude(item),
-                "revolve" => self.revolve(item),
-                "sweep" => self.sweep(item),
-                "loft" => self.loft(item),
                 other => self.fail(
                     codes::E5003,
                     item.span,
-                    format!("`{other}` is not supported yet (detail features and patterns arrive with milestone M6)"),
+                    format!("`{other}` is not supported yet"),
                 ),
             },
+            ItemKind::Feature => {
+                self.rank += 1;
+                match item.keyword.as_str() {
+                    "extrude" => self.extrude(item),
+                    "revolve" => self.revolve(item),
+                    "sweep" => self.sweep(item),
+                    "loft" => self.loft(item),
+                    "hole" => self.hole(item),
+                    "fillet" => self.fillet(item),
+                    "chamfer" => self.chamfer(item),
+                    "shell" => self.shell(item),
+                    "draft" => self.draft(item),
+                    "rib" => self.rib(item),
+                    "linear_pattern" => self.linear_pattern(item),
+                    "circular_pattern" => self.circular_pattern(item),
+                    "mirror" => self.mirror(item),
+                    other => self.fail(
+                        codes::E5003,
+                        item.span,
+                        format!("`{other}` is not supported"),
+                    ),
+                }
+            }
         }
     }
 
-    fn point_feature(&mut self, item: &Item) -> Res {
+    pub(crate) fn point_feature(&mut self, item: &Item) -> Res {
         self.only(item, &["at"])?;
         let at = self.require(item, "at")?;
         let p = self.triple(&at.values[0], false)?;
@@ -481,7 +655,7 @@ impl<K: Kernel> Cx<'_, K> {
         Ok(())
     }
 
-    fn axis_feature(&mut self, item: &Item) -> Res {
+    pub(crate) fn axis_feature(&mut self, item: &Item) -> Res {
         self.only(item, &["through", "from", "direction"])?;
         if let Some(t) = Self::arg(item, "through") {
             let pts = Self::flat(t);
@@ -507,7 +681,7 @@ impl<K: Kernel> Cx<'_, K> {
         Ok(())
     }
 
-    fn plane_feature(&mut self, item: &Item) -> Res {
+    pub(crate) fn plane_feature(&mut self, item: &Item) -> Res {
         self.only(item, &["offset", "from", "angle", "about", "through"])?;
         if let Some(t) = Self::arg(item, "through") {
             let pts = Self::flat(t);
@@ -550,7 +724,7 @@ impl<K: Kernel> Cx<'_, K> {
         Ok(())
     }
 
-    fn csys_feature(&mut self, item: &Item) -> Res {
+    pub(crate) fn csys_feature(&mut self, item: &Item) -> Res {
         self.only(item, &["origin", "x", "y"])?;
         let o = self.require(item, "origin")?;
         let origin = self.triple(&o.values[0], false)?;
@@ -570,7 +744,7 @@ impl<K: Kernel> Cx<'_, K> {
         Ok(())
     }
 
-    fn op_of(&mut self, item: &Item) -> Res<&'static str> {
+    pub(crate) fn op_of(&mut self, item: &Item) -> Res<&'static str> {
         match Self::arg(item, "op") {
             None => Ok("add"),
             Some(a) => {
@@ -590,35 +764,117 @@ impl<K: Kernel> Cx<'_, K> {
         }
     }
 
+    /// Names the faces of a freshly made solid from the roles its construction reported.
+    pub(crate) fn make_tool(
+        &mut self,
+        item: &Item,
+        shape: K::Shape,
+        role: &dyn Fn(Role) -> Option<String>,
+    ) -> Tool<K::Shape> {
+        match self.k.topology(&shape) {
+            Ok(topo) => {
+                let lin = self.k.lineage(&shape);
+                let names = Names::derive(&item.name, self.rank, &topo, &lin, &[], role);
+                Tool {
+                    shape,
+                    topo: Some(topo),
+                    names,
+                }
+            }
+            Err(_) => Tool {
+                shape,
+                topo: None,
+                names: Names::default(),
+            },
+        }
+    }
+
+    /// Names the faces of the result of a boolean from the names of its operands.
+    pub(crate) fn derived_tool(
+        &mut self,
+        item: &Item,
+        shape: K::Shape,
+        inputs: &[&Names],
+    ) -> Tool<K::Shape> {
+        match self.k.topology(&shape) {
+            Ok(topo) => {
+                let lin = self.k.lineage(&shape);
+                let names = Names::derive(&item.name, self.rank, &topo, &lin, inputs, &|_| None);
+                Tool {
+                    shape,
+                    topo: Some(topo),
+                    names,
+                }
+            }
+            Err(_) => Tool {
+                shape,
+                topo: None,
+                names: Names::default(),
+            },
+        }
+    }
+
     /// Unites several solids made by one feature.
-    fn unite(&mut self, item: &Item, mut shapes: Vec<K::Shape>) -> Res<K::Shape> {
-        let mut acc = shapes.remove(0);
-        for s in shapes {
-            acc = match self.k.boolean(BoolOp::Union, &acc, &s, self.tol) {
+    pub(crate) fn unite(
+        &mut self,
+        item: &Item,
+        mut tools: Vec<Tool<K::Shape>>,
+    ) -> Res<Tool<K::Shape>> {
+        let mut acc = tools.remove(0);
+        for t in tools {
+            let shape = match self
+                .k
+                .boolean(BoolOp::Union, &acc.shape, &t.shape, self.tol)
+            {
                 Ok(v) => v,
                 Err(e) => return self.kernel_error(item, e),
             };
+            acc = self.derived_tool(item, shape, &[&acc.names, &t.names]);
         }
         Ok(acc)
     }
 
-    fn combine(&mut self, item: &Item, shape: K::Shape) -> Res {
-        let op = self.op_of(item)?;
-        let next = match (op, self.body.take()) {
-            ("add", None) => shape,
-            ("add", Some(b)) => self.combine_with(item, BoolOp::Union, b, shape)?,
-            ("subtract", Some(b)) => self.combine_with(item, BoolOp::Subtract, b, shape)?,
-            ("intersect", Some(b)) => self.combine_with(item, BoolOp::Intersect, b, shape)?,
-            (_, None) => {
+    /// Combines a tool with the body, naming the result. Does not record the feature.
+    pub(crate) fn merge_tool(&mut self, item: &Item, op: BoolOp, tool: Tool<K::Shape>) -> Res {
+        let next = match self.body.take() {
+            None if op == BoolOp::Union => {
+                self.body = Some(tool.shape);
+                self.body_topo = tool.topo;
+                self.names = tool.names;
+                return Ok(());
+            }
+            None => {
                 return self.fail(
                     codes::E5006,
                     item.span,
-                    format!("`{}` `{}` with op={op} needs a body to modify; the first solid feature must add", item.keyword, item.name),
+                    format!(
+                        "`{}` `{}` needs a body to modify; the first solid feature must add",
+                        item.keyword, item.name
+                    ),
                 );
             }
-            _ => unreachable!(),
+            Some(b) => match self.k.boolean(op, &b, &tool.shape, self.tol) {
+                Ok(s) => s,
+                Err(e) => {
+                    self.body = Some(b);
+                    return self.kernel_error(item, e);
+                }
+            },
         };
-        let props = match self.k.properties(&next) {
+        let prev = std::mem::take(&mut self.names);
+        let t = self.derived_tool(item, next, &[&prev, &tool.names]);
+        self.body = Some(t.shape);
+        self.body_topo = t.topo;
+        self.names = t.names;
+        Ok(())
+    }
+
+    /// Checks the body after a feature and records the feature.
+    pub(crate) fn finish_feature(&mut self, item: &Item) -> Res {
+        let Some(body) = self.body.as_ref() else {
+            return self.fail(codes::E5006, item.span, "there is no body");
+        };
+        let props = match self.k.properties(body) {
             Ok(p) => p,
             Err(e) => return self.kernel_error(item, e),
         };
@@ -629,40 +885,119 @@ impl<K: Kernel> Cx<'_, K> {
                 format!("`{}` `{}` leaves no solid", item.keyword, item.name),
             );
         }
+        let topology = self.topology_entries();
         self.features.push(FeatureRecord {
             name: item.name.clone(),
             keyword: item.keyword.clone(),
             topology: props.topology,
             volume: props.volume,
+            topology_map: topology,
+            thread: None,
         });
-        self.body = Some(next);
         Ok(())
     }
 
-    fn combine_with(
+    /// Faces and edges of the body with their persistent names.
+    pub(crate) fn topology_entries(&self) -> Vec<TopoEntry> {
+        let Some(topo) = &self.body_topo else {
+            return Vec::new();
+        };
+        let faces = self.names.all_texts(topo);
+        let edges = self.names.edge_texts(topo);
+        let mut out = Vec::new();
+        for (i, f) in topo.faces.iter().enumerate() {
+            out.push(TopoEntry {
+                kind: "face",
+                id: faces[i][0].clone(),
+                aliases: faces[i][1..].to_vec(),
+                geometry: f.kind.word().to_string(),
+                size: f.area,
+                at: f.centroid,
+            });
+        }
+        for (i, e) in topo.edges.iter().enumerate() {
+            if e.faces.is_empty() {
+                continue;
+            }
+            out.push(TopoEntry {
+                kind: "edge",
+                id: edges[i].clone(),
+                aliases: Vec::new(),
+                geometry: match e.kind {
+                    tcad_kernel::CurveKind::Line => "line",
+                    tcad_kernel::CurveKind::Circle => "circle",
+                    tcad_kernel::CurveKind::Ellipse => "ellipse",
+                    tcad_kernel::CurveKind::BSpline => "bspline",
+                }
+                .to_string(),
+                size: e.length,
+                at: e.midpoint,
+            });
+        }
+        out
+    }
+
+    /// Remembers the tool pieces of a feature so patterns can copy them.
+    pub(crate) fn register_tool(
         &mut self,
         item: &Item,
         op: BoolOp,
-        body: K::Shape,
-        tool: K::Shape,
-    ) -> Res<K::Shape> {
-        match self.k.boolean(op, &body, &tool, self.tol) {
-            Ok(s) => Ok(s),
-            Err(e) => {
-                self.body = Some(body);
-                self.kernel_error(item, e)
-            }
-        }
+        tools: Vec<(K::Shape, Vec<String>)>,
+    ) {
+        self.tools.insert(
+            item.name.clone(),
+            ToolRec {
+                op,
+                pieces: tools
+                    .into_iter()
+                    .map(|(shape, roles)| ToolPiece { shape, roles })
+                    .collect(),
+            },
+        );
     }
 
-    fn body_diagonal(&self) -> f64 {
+    /// The role text of every face of a tool: its primary ID without the feature name.
+    pub(crate) fn roles_of(&self, item: &Item, tool: &Tool<K::Shape>) -> Vec<String> {
+        let prefix = format!("{}.", item.name);
+        tool.names
+            .faces
+            .iter()
+            .map(|ids| {
+                let t = &ids[0].text;
+                t.strip_prefix(&prefix).unwrap_or(t).to_string()
+            })
+            .collect()
+    }
+
+    /// Adds a tool to the body (or subtracts, or intersects), records the feature and remembers the
+    /// tool for patterns.
+    pub(crate) fn combine(&mut self, item: &Item, tool: Tool<K::Shape>) -> Res {
+        let op = match self.op_of(item)? {
+            "add" => BoolOp::Union,
+            "subtract" => BoolOp::Subtract,
+            _ => BoolOp::Intersect,
+        };
+        self.combine_as(item, op, tool)
+    }
+
+    /// Like [`Cx::combine`] with the operation fixed by the feature kind.
+    pub(crate) fn combine_as(&mut self, item: &Item, op: BoolOp, tool: Tool<K::Shape>) -> Res {
+        let roles = self.roles_of(item, &tool);
+        let copy = tool.shape.clone();
+        self.merge_tool(item, op, tool)?;
+        self.finish_feature(item)?;
+        self.register_tool(item, op, vec![(copy, roles)]);
+        Ok(())
+    }
+
+    pub(crate) fn body_diagonal(&self) -> f64 {
         self.body
             .as_ref()
             .and_then(|b| self.k.properties(b).ok())
             .map_or(0.0, |p| norm(sub(p.bbox_max, p.bbox_min)))
     }
 
-    fn extrude(&mut self, item: &Item) -> Res {
+    pub(crate) fn extrude(&mut self, item: &Item) -> Res {
         self.only(
             item,
             &[
@@ -727,7 +1062,8 @@ impl<K: Kernel> Cx<'_, K> {
         let reach = 2.0 * self.body_diagonal() + 1.0;
 
         let mut shapes = Vec::new();
-        for p in &profiles {
+        for np in &profiles {
+            let p = &np.profile;
             let n = p.frame.z;
             let (start, len) = if let Some(d) = distance {
                 if symmetric {
@@ -759,15 +1095,15 @@ impl<K: Kernel> Cx<'_, K> {
                 ..p.clone()
             };
             match self.k.extrude(&moved, n, len, draft) {
-                Ok(s) => shapes.push(s),
+                Ok(s) => shapes.push(self.make_tool(item, s, &sweep_role(&np.names))),
                 Err(e) => return self.kernel_error(item, e),
             }
         }
-        let shape = self.unite(item, shapes)?;
-        self.combine(item, shape)
+        let tool = self.unite(item, shapes)?;
+        self.combine(item, tool)
     }
 
-    fn revolve(&mut self, item: &Item) -> Res {
+    pub(crate) fn revolve(&mut self, item: &Item) -> Res {
         self.only(item, &["from", "axis", "angle", "op"])?;
         let from = self.require(item, "from")?;
         let profiles = self.profiles(&from.values[0])?;
@@ -778,17 +1114,17 @@ impl<K: Kernel> Cx<'_, K> {
             None => 2.0 * std::f64::consts::PI,
         };
         let mut shapes = Vec::new();
-        for p in &profiles {
-            match self.k.revolve(p, origin, dir, angle) {
-                Ok(s) => shapes.push(s),
+        for np in &profiles {
+            match self.k.revolve(&np.profile, origin, dir, angle) {
+                Ok(s) => shapes.push(self.make_tool(item, s, &sweep_role(&np.names))),
                 Err(e) => return self.kernel_error(item, e),
             }
         }
-        let shape = self.unite(item, shapes)?;
-        self.combine(item, shape)
+        let tool = self.unite(item, shapes)?;
+        self.combine(item, tool)
     }
 
-    fn path(&mut self, e: &Expr) -> Res<Path> {
+    pub(crate) fn path(&mut self, e: &Expr) -> Res<Path> {
         let ExprKind::Ref(r) = &e.kind else {
             return self.fail(
                 codes::E5002,
@@ -812,7 +1148,7 @@ impl<K: Kernel> Cx<'_, K> {
         }
     }
 
-    fn sweep(&mut self, item: &Item) -> Res {
+    pub(crate) fn sweep(&mut self, item: &Item) -> Res {
         self.only(item, &["from", "path", "guide", "op"])?;
         let from = self.require(item, "from")?;
         let profiles = self.profiles(&from.values[0])?;
@@ -825,17 +1161,17 @@ impl<K: Kernel> Cx<'_, K> {
             None => None,
         };
         let mut shapes = Vec::new();
-        for p in &profiles {
-            match self.k.sweep(p, &path, guide.as_ref()) {
-                Ok(s) => shapes.push(s),
+        for np in &profiles {
+            match self.k.sweep(&np.profile, &path, guide.as_ref()) {
+                Ok(s) => shapes.push(self.make_tool(item, s, &sweep_role(&np.names))),
                 Err(e) => return self.kernel_error(item, e),
             }
         }
-        let shape = self.unite(item, shapes)?;
-        self.combine(item, shape)
+        let tool = self.unite(item, shapes)?;
+        self.combine(item, tool)
     }
 
-    fn loft(&mut self, item: &Item) -> Res {
+    pub(crate) fn loft(&mut self, item: &Item) -> Res {
         self.only(item, &["sections", "ruled", "op"])?;
         let secs = self.require(item, "sections")?;
         let refs = Self::flat(secs);
@@ -847,6 +1183,7 @@ impl<K: Kernel> Cx<'_, K> {
             );
         }
         let mut sections = Vec::new();
+        let mut first_names: Vec<Vec<String>> = Vec::new();
         for r in refs {
             let mut ps = self.profiles(r)?;
             if ps.len() != 1 {
@@ -856,13 +1193,18 @@ impl<K: Kernel> Cx<'_, K> {
                     "each loft section must be exactly one closed profile",
                 );
             }
-            sections.push(ps.remove(0));
+            let np = ps.remove(0);
+            if first_names.is_empty() {
+                first_names = np.names.clone();
+            }
+            sections.push(np.profile);
         }
         let ruled = Self::arg(item, "ruled").is_some();
         let shape = match self.k.loft(&sections, ruled) {
             Ok(s) => s,
             Err(e) => return self.kernel_error(item, e),
         };
-        self.combine(item, shape)
+        let tool = self.make_tool(item, shape, &sweep_role(&first_names));
+        self.combine(item, tool)
     }
 }

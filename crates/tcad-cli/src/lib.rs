@@ -27,6 +27,7 @@ Commands:
   build   Regenerate the part with the geometry kernel and fill the .cache (needs a build with
           the `occt` feature)
   props   Mass properties, bounding box and topology counts of the result
+  refs    Every face/edge reference of the part and the persistent name it resolves to
 
 Options:
   --json     Machine-readable output
@@ -86,7 +87,7 @@ pub fn run(args: &[String], out: &mut dyn Write, err: &mut dyn Write) -> i32 {
         let _ = writeln!(err, "tcad: --config needs a name");
         return 2;
     }
-    if !matches!(command, "check" | "fmt" | "build" | "props") {
+    if !matches!(command, "check" | "fmt" | "build" | "props" | "refs") {
         let _ = writeln!(err, "tcad: unknown command `{command}`\n\n{USAGE}");
         return 2;
     }
@@ -94,7 +95,7 @@ pub fn run(args: &[String], out: &mut dyn Write, err: &mut dyn Write) -> i32 {
         let _ = writeln!(err, "tcad: --check only applies to `fmt`");
         return 2;
     }
-    if matches!(command, "build" | "props") {
+    if matches!(command, "build" | "props" | "refs") {
         if paths.len() != 1 {
             let _ = writeln!(
                 err,
@@ -110,7 +111,7 @@ pub fn run(args: &[String], out: &mut dyn Write, err: &mut dyn Write) -> i32 {
         };
         return run_geometry(command, &o, out, err);
     }
-    if (config.is_some() || force) && !matches!(command, "build" | "props") {
+    if (config.is_some() || force) && !matches!(command, "build" | "props" | "refs") {
         let _ = writeln!(
             err,
             "tcad: --config and --force apply to `build` and `props`"
@@ -193,6 +194,7 @@ fn run_geometry(
     let k = tcad_occt::OcctKernel::new();
     match command {
         "build" => geom::build_command(&k, o, out, err),
+        "refs" => geom::refs_command(&k, o, out, err),
         _ => geom::props_command(&k, o, out, err),
     }
 }
@@ -230,6 +232,7 @@ pub fn run_with_kernel<K: tcad_kernel::Kernel>(
     };
     match command {
         "build" => geom::build_command(k, &o, out, err),
+        "refs" => geom::refs_command(k, &o, out, err),
         _ => geom::props_command(k, &o, out, err),
     }
 }

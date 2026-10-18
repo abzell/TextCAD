@@ -6,8 +6,10 @@
 
 pub mod geometry;
 pub mod mock;
+pub mod topo;
 
 pub use geometry::{Frame, Loop, P2, Path, Profile, Segment, V3};
+pub use topo::{CurveKind, EdgeInfo, FaceInfo, Lineage, Role, SurfaceKind, TopoInfo};
 
 /// Working name of the format. Defined once per crate so it can be renamed later
 /// (see `spec/name.md`).
@@ -78,6 +80,53 @@ pub struct Properties {
     pub topology: Topology,
 }
 
+/// An edge to fillet: the radius changes linearly from `r1` at the edge start to `r2` at its end.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct FilletEdge {
+    /// Edge index.
+    pub edge: u32,
+    /// Radius at the start (mm).
+    pub r1: f64,
+    /// Radius at the end (mm).
+    pub r2: f64,
+}
+
+/// An edge to chamfer: `d1` on the reference `face`, `d2` on the other adjacent face.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct ChamferEdge {
+    /// Edge index.
+    pub edge: u32,
+    /// Reference face index (one of the two faces adjacent to the edge).
+    pub face: u32,
+    /// Distance on the reference face (mm).
+    pub d1: f64,
+    /// Distance on the other face (mm).
+    pub d2: f64,
+}
+
+/// A rigid motion or a mirror image.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Transform {
+    /// Move by a vector (mm).
+    Translate(V3),
+    /// Turn about the axis through `origin` with unit direction `dir` by `angle` (radians).
+    Rotate {
+        /// A point on the axis.
+        origin: V3,
+        /// Unit direction of the axis.
+        dir: V3,
+        /// Angle (radians).
+        angle: f64,
+    },
+    /// Reflect in the plane through `origin` with unit normal `normal`.
+    Mirror {
+        /// A point on the plane.
+        origin: V3,
+        /// Unit normal of the plane.
+        normal: V3,
+    },
+}
+
 /// The operations a geometry kernel provides (requirements 8.1). Lengths are in millimetres and
 /// angles in radians. Every operation is a pure function of its inputs: no hidden state, no
 /// parallel reductions, fixed iteration orders.
@@ -121,6 +170,44 @@ pub trait Kernel {
         b: &Self::Shape,
         tolerance: f64,
     ) -> KResult<Self::Shape>;
+
+    /// Rounds edges. The faces next to the edges are trimmed; each edge gets a new face.
+    fn fillet(&self, shape: &Self::Shape, edges: &[FilletEdge]) -> KResult<Self::Shape>;
+
+    /// Bevels edges.
+    fn chamfer(&self, shape: &Self::Shape, edges: &[ChamferEdge]) -> KResult<Self::Shape>;
+
+    /// Hollows a solid: the faces in `remove` are opened and the walls get `thickness` (mm),
+    /// growing inward, or outward if `outward`.
+    fn shell(
+        &self,
+        shape: &Self::Shape,
+        remove: &[u32],
+        thickness: f64,
+        outward: bool,
+    ) -> KResult<Self::Shape>;
+
+    /// Tilts faces by `angle` (radians) about their intersection with the neutral plane
+    /// (through `neutral_origin`, normal `neutral_normal`), relative to the pull direction.
+    fn draft(
+        &self,
+        shape: &Self::Shape,
+        faces: &[u32],
+        pull: V3,
+        angle: f64,
+        neutral_origin: V3,
+        neutral_normal: V3,
+    ) -> KResult<Self::Shape>;
+
+    /// Moves a copy of a shape. The lineage maps every face to itself.
+    fn transform(&self, shape: &Self::Shape, by: &Transform) -> KResult<Self::Shape>;
+
+    /// Lists the faces and edges of a shape.
+    fn topology(&self, shape: &Self::Shape) -> KResult<TopoInfo>;
+
+    /// Where the faces of `shape` came from, as recorded when the operation that made it ran.
+    /// Empty for shapes read from the cache.
+    fn lineage(&self, shape: &Self::Shape) -> Lineage;
 
     /// Measures a shape.
     fn properties(&self, shape: &Self::Shape) -> KResult<Properties>;

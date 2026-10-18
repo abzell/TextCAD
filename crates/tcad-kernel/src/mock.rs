@@ -5,7 +5,10 @@
 //! else is a [`KernelError`]. Booleans, revolves, sweeps and lofts are not available.
 
 use crate::geometry::{Frame, Profile, Segment, V3, add, scale};
-use crate::{BoolOp, KResult, Kernel, KernelError, Path, Properties, Topology};
+use crate::{
+    BoolOp, ChamferEdge, FilletEdge, KResult, Kernel, KernelError, Lineage, Path, Properties,
+    TopoInfo, Topology, Transform,
+};
 use std::f64::consts::PI;
 
 /// The mock backend.
@@ -73,6 +76,34 @@ impl Kernel for MockKernel {
 
     fn boolean(&self, _: BoolOp, _: &MockShape, _: &MockShape, _: f64) -> KResult<MockShape> {
         unsupported("boolean operations")
+    }
+
+    fn fillet(&self, _: &MockShape, _: &[FilletEdge]) -> KResult<MockShape> {
+        unsupported("fillet")
+    }
+
+    fn chamfer(&self, _: &MockShape, _: &[ChamferEdge]) -> KResult<MockShape> {
+        unsupported("chamfer")
+    }
+
+    fn shell(&self, _: &MockShape, _: &[u32], _: f64, _: bool) -> KResult<MockShape> {
+        unsupported("shell")
+    }
+
+    fn draft(&self, _: &MockShape, _: &[u32], _: V3, _: f64, _: V3, _: V3) -> KResult<MockShape> {
+        unsupported("draft")
+    }
+
+    fn transform(&self, _: &MockShape, _: &Transform) -> KResult<MockShape> {
+        unsupported("transform")
+    }
+
+    fn topology(&self, _: &MockShape) -> KResult<TopoInfo> {
+        unsupported("topology queries")
+    }
+
+    fn lineage(&self, _: &MockShape) -> Lineage {
+        Lineage::default()
     }
 
     fn properties(&self, s: &MockShape) -> KResult<Properties> {

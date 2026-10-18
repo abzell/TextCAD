@@ -300,16 +300,9 @@ fn failures_name_the_feature_and_stop() {
         codes(&format!("{sk}  extrude e from s through_all")),
         ["E5006"]
     );
-    assert_eq!(codes(&format!("{sk}  hole h on=s.r d=1 mm")), ["E5003"]);
+    assert_eq!(codes(&format!("{sk}  hole h on=s.r d=1 mm")), ["E5006"]);
     let open = "  sketch o on plane.XY {\n    line a start=(0 mm, 0 mm) end=(5 mm, 0 mm)\n    line b start=(5 mm, 0 mm) end=(5 mm, 5 mm)\n  }\n  extrude e from o distance=1 mm";
     assert_eq!(codes(open), ["E5005"]);
     let d = run(open).err().unwrap();
     assert!(d[0].message.contains("not closed"), "{}", d[0].message);
-    // a sketch on a face needs persistent naming
-    assert_eq!(
-        codes(&format!(
-            "{sk}  extrude e from s distance=1 mm\n  sketch t on e.cap_end {{\n    circle c center=(1 mm, 1 mm) r=0.5 mm\n  }}\n  extrude f from t distance=1 mm"
-        )),
-        ["E5002"]
-    );
 }

@@ -3,7 +3,10 @@
 use crate::bridge::ffi;
 use cxx::UniquePtr;
 use tcad_kernel::geometry::{Frame, Path, Profile, Segment, V3};
-use tcad_kernel::{BoolOp, KResult, Kernel, KernelError, Properties, Topology};
+use tcad_kernel::{
+    BoolOp, ChamferEdge, CurveKind, EdgeInfo, FaceInfo, FilletEdge, KResult, Kernel, KernelError,
+    Lineage, Properties, Role, SurfaceKind, TopoInfo, Topology, Transform,
+};
 
 /// The OpenCASCADE backend.
 #[derive(Clone, Copy, Debug, Default)]
@@ -169,6 +172,128 @@ impl Kernel for OcctKernel {
             BoolOp::Intersect => 2,
         };
         shape(ffi::boolean_op(code, &a.0, &b.0, tolerance))
+    }
+
+    fn fillet(&self, s: &OcctShape, edges: &[FilletEdge]) -> KResult<OcctShape> {
+        let idx: Vec<u32> = edges.iter().map(|e| e.edge).collect();
+        let radii: Vec<f64> = edges.iter().flat_map(|e| [e.r1, e.r2]).collect();
+        shape(ffi::fillet(&s.0, &idx, &radii))
+    }
+
+    fn chamfer(&self, s: &OcctShape, edges: &[ChamferEdge]) -> KResult<OcctShape> {
+        let idx: Vec<u32> = edges.iter().map(|e| e.edge).collect();
+        let faces: Vec<u32> = edges.iter().map(|e| e.face).collect();
+        let dists: Vec<f64> = edges.iter().flat_map(|e| [e.d1, e.d2]).collect();
+        shape(ffi::chamfer(&s.0, &idx, &faces, &dists))
+    }
+
+    fn shell(
+        &self,
+        s: &OcctShape,
+        remove: &[u32],
+        thickness: f64,
+        outward: bool,
+    ) -> KResult<OcctShape> {
+        shape(ffi::shell(&s.0, remove, thickness, outward, 1e-6))
+    }
+
+    fn draft(
+        &self,
+        s: &OcctShape,
+        faces: &[u32],
+        pull: V3,
+        angle: f64,
+        neutral_origin: V3,
+        neutral_normal: V3,
+    ) -> KResult<OcctShape> {
+        shape(ffi::draft(
+            &s.0,
+            faces,
+            v3(pull),
+            angle,
+            v3(neutral_origin),
+            v3(neutral_normal),
+        ))
+    }
+
+    fn transform(&self, s: &OcctShape, by: &Transform) -> KResult<OcctShape> {
+        match *by {
+            Transform::Translate(v) => shape(ffi::translate(&s.0, v3(v))),
+            Transform::Rotate { origin, dir, angle } => {
+                shape(ffi::rotate(&s.0, v3(origin), v3(dir), angle))
+            }
+            Transform::Mirror { origin, normal } => {
+                shape(ffi::mirror(&s.0, v3(origin), v3(normal)))
+            }
+        }
+    }
+
+    fn topology(&self, s: &OcctShape) -> KResult<TopoInfo> {
+        let v = |v: &ffi::Vec3| [v.x, v.y, v.z];
+        let faces = ffi::faces_of(&s.0).map_err(err)?;
+        let edges = ffi::edges_of(&s.0).map_err(err)?;
+        Ok(TopoInfo {
+            faces: faces
+                .iter()
+                .map(|f| FaceInfo {
+                    kind: match f.kind {
+                        0 => SurfaceKind::Plane,
+                        1 => SurfaceKind::Cylinder,
+                        2 => SurfaceKind::Cone,
+                        3 => SurfaceKind::Sphere,
+                        4 => SurfaceKind::Torus,
+                        _ => SurfaceKind::BSpline,
+                    },
+                    normal: (f.has & 1 != 0).then(|| v(&f.normal)),
+                    axis: (f.has & 2 != 0).then(|| (v(&f.axis_origin), v(&f.axis_dir))),
+                    radius: (f.has & 4 != 0).then_some(f.radius),
+                    centroid: v(&f.centroid),
+                    area: f.area,
+                    edges: f.edges.clone(),
+                })
+                .collect(),
+            edges: edges
+                .iter()
+                .map(|e| EdgeInfo {
+                    kind: match e.kind {
+                        0 => CurveKind::Line,
+                        1 => CurveKind::Circle,
+                        2 => CurveKind::Ellipse,
+                        _ => CurveKind::BSpline,
+                    },
+                    ends: (v(&e.start), v(&e.end)),
+                    midpoint: v(&e.mid),
+                    length: e.length,
+                    radius: (e.has & 2 != 0).then_some(e.radius),
+                    direction: (e.has & 1 != 0).then(|| v(&e.direction)),
+                    faces: e.faces.clone(),
+                })
+                .collect(),
+        })
+    }
+
+    fn lineage(&self, s: &OcctShape) -> Lineage {
+        let inherited = ffi::lineage_inherited(&s.0)
+            .chunks_exact(3)
+            .map(|c| (c[0], c[1] as u8, c[2]))
+            .collect();
+        let created = ffi::lineage_created(&s.0)
+            .chunks_exact(4)
+            .map(|c| {
+                let role = match c[1] {
+                    0 => Role::CapStart,
+                    1 => Role::CapEnd,
+                    2 => Role::Side {
+                        lp: c[2],
+                        seg: c[3],
+                    },
+                    3 => Role::FromEdge(c[2]),
+                    _ => Role::FromFace(c[2]),
+                };
+                (c[0], role)
+            })
+            .collect();
+        Lineage { inherited, created }
     }
 
     fn properties(&self, s: &OcctShape) -> KResult<Properties> {

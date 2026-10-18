@@ -80,6 +80,11 @@ registry! {
     E2501 = "E2501", "unknown value for an enumerated argument";
     E2601 = "E2601", "suppress condition must be a boolean";
     E2701 = "E2701", "a file must contain exactly one part";
+    E3001 = "E3001", "reference does not resolve";
+    E3002 = "E3002", "reference is ambiguous";
+    E3003 = "E3003", "query does not match the expected number of entities";
+    E3004 = "E3004", "invalid query filter";
+    E3005 = "E3005", "reference resolves to the wrong kind of entity";
     E4001 = "E4001", "invalid sketch entity argument";
     E4002 = "E4002", "unknown sketch constraint";
     E4003 = "E4003", "invalid constraint arguments";

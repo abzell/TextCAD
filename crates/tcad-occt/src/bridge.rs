@@ -66,6 +66,36 @@ pub mod ffi {
         vertices: u32,
     }
 
+    /// One face. `kind`: 0 plane, 1 cylinder, 2 cone, 3 sphere, 4 torus, 5 other. `has` bit 0:
+    /// normal valid, bit 1: axis valid, bit 2: radius valid.
+    #[derive(Clone, Debug, Default)]
+    struct FaceRec {
+        kind: u32,
+        has: u32,
+        normal: Vec3,
+        axis_origin: Vec3,
+        axis_dir: Vec3,
+        radius: f64,
+        centroid: Vec3,
+        area: f64,
+        edges: Vec<u32>,
+    }
+
+    /// One edge. `kind`: 0 line, 1 circle, 2 ellipse, 3 other. `has` bit 0: direction valid,
+    /// bit 1: radius valid.
+    #[derive(Clone, Debug, Default)]
+    struct EdgeRec {
+        kind: u32,
+        has: u32,
+        start: Vec3,
+        end: Vec3,
+        mid: Vec3,
+        length: f64,
+        radius: f64,
+        direction: Vec3,
+        faces: Vec<u32>,
+    }
+
     unsafe extern "C++" {
         include!("cpp/shim.h");
 
@@ -93,6 +123,35 @@ pub mod ffi {
         ) -> Result<UniquePtr<Shape>>;
         fn loft(sections: &Vec<ProfileData>, ruled: bool) -> Result<UniquePtr<Shape>>;
         fn boolean_op(op: u32, a: &Shape, b: &Shape, tolerance: f64) -> Result<UniquePtr<Shape>>;
+        fn fillet(s: &Shape, edges: &[u32], radii: &[f64]) -> Result<UniquePtr<Shape>>;
+        fn chamfer(
+            s: &Shape,
+            edges: &[u32],
+            faces: &[u32],
+            dists: &[f64],
+        ) -> Result<UniquePtr<Shape>>;
+        fn shell(
+            s: &Shape,
+            remove: &[u32],
+            thickness: f64,
+            outward: bool,
+            tolerance: f64,
+        ) -> Result<UniquePtr<Shape>>;
+        fn draft(
+            s: &Shape,
+            faces: &[u32],
+            pull: Vec3,
+            angle: f64,
+            neutral_origin: Vec3,
+            neutral_normal: Vec3,
+        ) -> Result<UniquePtr<Shape>>;
+        fn translate(s: &Shape, v: Vec3) -> Result<UniquePtr<Shape>>;
+        fn rotate(s: &Shape, origin: Vec3, dir: Vec3, angle: f64) -> Result<UniquePtr<Shape>>;
+        fn mirror(s: &Shape, origin: Vec3, normal: Vec3) -> Result<UniquePtr<Shape>>;
+        fn faces_of(s: &Shape) -> Result<Vec<FaceRec>>;
+        fn edges_of(s: &Shape) -> Result<Vec<EdgeRec>>;
+        fn lineage_inherited(s: &Shape) -> Vec<u32>;
+        fn lineage_created(s: &Shape) -> Vec<u32>;
         fn properties(s: &Shape) -> Result<Props>;
         fn write_brep(s: &Shape) -> Result<Vec<u8>>;
         fn read_brep(bytes: &[u8]) -> Result<UniquePtr<Shape>>;

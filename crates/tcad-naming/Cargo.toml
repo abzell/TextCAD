@@ -10,3 +10,8 @@ authors.workspace = true
 
 [lints]
 workspace = true
+
+[dependencies]
+tcad-diag.workspace = true
+tcad-expr.workspace = true
+tcad-kernel.workspace = true

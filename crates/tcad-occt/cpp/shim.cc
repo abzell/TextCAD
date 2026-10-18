@@ -17,13 +17,22 @@
 
 #include "tcad-occt/src/bridge.rs.h"
 
+#include <BRepAdaptor_Curve.hxx>
+#include <BRepAdaptor_Surface.hxx>
 #include <BRepAlgoAPI_Common.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <BRepBndLib.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
+#include <BRepBuilderAPI_MakeVertex.hxx>
+#include <BRepExtrema_DistShapeShape.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
+#include <BRepBuilderAPI_Transform.hxx>
+#include <BRepFilletAPI_MakeChamfer.hxx>
+#include <BRepFilletAPI_MakeFillet.hxx>
+#include <BRepOffsetAPI_DraftAngle.hxx>
+#include <BRepOffsetAPI_MakeThickSolid.hxx>
 #include <BRepGProp.hxx>
 #include <BRepOffsetAPI_MakePipe.hxx>
 #include <BRepOffsetAPI_MakePipeShell.hxx>
@@ -34,11 +43,15 @@
 #include <BRep_Builder.hxx>
 #include <Bnd_Box.hxx>
 #include <GC_MakeArcOfCircle.hxx>
+#include <GCPnts_AbscissaPoint.hxx>
 #include <GProp_GProps.hxx>
+#include <GeomAbs_CurveType.hxx>
+#include <GeomAbs_SurfaceType.hxx>
 #include <GeomAPI_Interpolate.hxx>
 #include <Geom_BSplineCurve.hxx>
 #include <LocOpe_DPrism.hxx>
 #include <Precision.hxx>
+#include <ShapeBuild_ReShape.hxx>
 #include <ShapeFix_Face.hxx>
 #include <ShapeFix_Shape.hxx>
 #include <ShapeUpgrade_UnifySameDomain.hxx>
@@ -50,13 +63,23 @@
 #include <TColgp_HArray1OfPnt.hxx>
 #include <TopAbs_ShapeEnum.hxx>
 #include <TopExp.hxx>
+#include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
+#include <TopTools_ListIteratorOfListOfShape.hxx>
+#include <BRep_Tool.hxx>
+#include <gp_Trsf.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Face.hxx>
 #include <TopoDS_Wire.hxx>
+#include <BRepOffset_Mode.hxx>
+#include <GeomAbs_JoinType.hxx>
 #include <gp_Ax1.hxx>
+#include <gp_Cone.hxx>
+#include <gp_Cylinder.hxx>
+#include <gp_Sphere.hxx>
+#include <gp_Torus.hxx>
 #include <gp_Ax2.hxx>
 #include <gp_Ax3.hxx>
 #include <gp_Circ.hxx>
@@ -159,27 +182,60 @@ TopoDS_Edge make_edge(const Frame3& f, const Seg& s) {
   }
 }
 
-TopoDS_Wire make_wire(const Frame3& f, const rust::Vec<Seg>& segs) {
+// Edges of a profile in (loop, segment) order, so history can be traced back to segments.
+using EdgeGrid = std::vector<std::vector<TopoDS_Edge>>;
+
+TopoDS_Wire make_wire(const Frame3& f, const rust::Vec<Seg>& segs, std::vector<TopoDS_Edge>* edges = nullptr) {
   BRepBuilderAPI_MakeWire mk;
   for (const Seg& s : segs) {
-    mk.Add(make_edge(f, s));
+    TopoDS_Edge e = make_edge(f, s);
+    if (edges != nullptr) edges->push_back(e);
+    mk.Add(e);
     if (!mk.IsDone()) throw std::runtime_error("segments do not connect into a wire");
   }
   if (!mk.IsDone()) throw std::runtime_error("empty wire");
   return mk.Wire();
 }
 
-TopoDS_Face make_face(const ProfileData& p) {
+TopoDS_Face make_face(const ProfileData& p, EdgeGrid* grid = nullptr) {
   if (p.loops.empty()) throw std::runtime_error("profile has no outer loop");
   gp_Pln plane(gp_Ax3(P(p.frame.o), D(p.frame.z), D(p.frame.x)));
-  BRepBuilderAPI_MakeFace mk(plane, make_wire(p.frame, p.loops[0].segs), Standard_True);
+  EdgeGrid local;
+  local.resize(p.loops.size());
+  BRepBuilderAPI_MakeFace mk(plane, make_wire(p.frame, p.loops[0].segs, &local[0]), Standard_True);
   if (!mk.IsDone()) throw std::runtime_error("cannot build a face from the outer loop");
   // all loops arrive counterclockwise in the profile plane; a hole runs the other way round
   for (size_t i = 1; i < p.loops.size(); i++) {
-    mk.Add(TopoDS::Wire(make_wire(p.frame, p.loops[i].segs).Reversed()));
+    mk.Add(TopoDS::Wire(make_wire(p.frame, p.loops[i].segs, &local[i]).Reversed()));
   }
   ShapeFix_Face fix(mk.Face());
   fix.Perform();
+  if (grid != nullptr) {
+    // Fixing may rebuild edges; find each segment's edge in the final face by its midpoint.
+    TopTools_IndexedMapOfShape fe;
+    TopExp::MapShapes(fix.Face(), TopAbs_EDGE, fe);
+    auto mid = [](const TopoDS_Edge& e) {
+      BRepAdaptor_Curve c(e);
+      return c.Value(0.5 * (c.FirstParameter() + c.LastParameter()));
+    };
+    for (auto& loop : local) {
+      for (auto& e : loop) {
+        gp_Pnt m = mid(e);
+        double best = 1e300;
+        TopoDS_Edge pick_e = e;
+        for (int k = 1; k <= fe.Extent(); k++) {
+          TopoDS_Edge cand = TopoDS::Edge(fe(k));
+          double d = mid(cand).Distance(m);
+          if (d < best) {
+            best = d;
+            pick_e = cand;
+          }
+        }
+        e = pick_e;
+      }
+    }
+    *grid = local;
+  }
   return fix.Face();
 }
 
@@ -215,21 +271,129 @@ uint32_t count(const TopoDS_Shape& s, TopAbs_ShapeEnum kind) {
   return (uint32_t)m.Extent();
 }
 
+
+// ---- topology indices and history ----
+
+TopTools_IndexedMapOfShape face_map(const TopoDS_Shape& s) {
+  TopTools_IndexedMapOfShape m;
+  TopExp::MapShapes(s, TopAbs_FACE, m);
+  return m;
+}
+
+TopTools_IndexedMapOfShape edge_map(const TopoDS_Shape& s) {
+  TopTools_IndexedMapOfShape m;
+  TopExp::MapShapes(s, TopAbs_EDGE, m);
+  return m;
+}
+
+// 0-based index of `f` in `m`, or -1.
+int index_in(const TopTools_IndexedMapOfShape& m, const TopoDS_Shape& f) {
+  int i = m.FindIndex(f);
+  return i == 0 ? -1 : i - 1;
+}
+
+enum RoleCode : uint32_t { kCapStart = 0, kCapEnd = 1, kSide = 2, kFromEdge = 3, kFromFace = 4 };
+
+void add_created(Shape& out, const TopTools_IndexedMapOfShape& faces, const TopoDS_Shape& f,
+                 uint32_t role, uint32_t a, uint32_t b) {
+  if (f.IsNull()) return;
+  int i = index_in(faces, f);
+  if (i >= 0) out.created.push_back({(uint32_t)i, role, a, b});
+}
+
+void add_created_list(Shape& out, const TopTools_IndexedMapOfShape& faces,
+                      const TopTools_ListOfShape& l, uint32_t role, uint32_t a, uint32_t b) {
+  for (TopTools_ListIteratorOfListOfShape it(l); it.More(); it.Next()) {
+    if (it.Value().ShapeType() == TopAbs_FACE) add_created(out, faces, it.Value(), role, a, b);
+  }
+}
+
+// Runs `maker` history on every input face: result faces that are the (possibly modified) input
+// face are recorded as inherited from `operand`.
+template <typename Maker>
+void inherit_from(Shape& out, Maker& mk, const TopoDS_Shape& input, uint32_t operand,
+                  const TopTools_IndexedMapOfShape& result_faces) {
+  TopTools_IndexedMapOfShape in_faces = face_map(input);
+  for (int i = 1; i <= in_faces.Extent(); i++) {
+    const TopoDS_Shape& f = in_faces(i);
+    if (mk.IsDeleted(f)) continue;
+    const TopTools_ListOfShape& mod = mk.Modified(f);
+    if (mod.IsEmpty()) {
+      int r = index_in(result_faces, f);
+      if (r >= 0) out.inherited.push_back({(uint32_t)r, operand, (uint32_t)(i - 1)});
+    } else {
+      for (TopTools_ListIteratorOfListOfShape it(mod); it.More(); it.Next()) {
+        int r = index_in(result_faces, it.Value());
+        if (r >= 0) out.inherited.push_back({(uint32_t)r, operand, (uint32_t)(i - 1)});
+      }
+    }
+  }
+}
+
+// The lowest-numbered face of `faces` that contains three sample points of `e`, or a null shape.
+TopoDS_Shape face_containing(const TopTools_IndexedMapOfShape& faces, const TopoDS_Edge& e) {
+  BRepAdaptor_Curve c(e);
+  double t0 = c.FirstParameter(), t1 = c.LastParameter();
+  gp_Pnt samples[3] = {c.Value(t0 + 0.25 * (t1 - t0)), c.Value(t0 + 0.5 * (t1 - t0)),
+                       c.Value(t0 + 0.75 * (t1 - t0))};
+  for (int i = 1; i <= faces.Extent(); i++) {
+    bool all = true;
+    for (const gp_Pnt& p : samples) {
+      BRepExtrema_DistShapeShape d(BRepBuilderAPI_MakeVertex(p).Vertex(), faces(i));
+      if (!d.IsDone() || d.Value() > 1e-6) {
+        all = false;
+        break;
+      }
+    }
+    if (all) return faces(i);
+  }
+  return TopoDS_Shape();
+}
+
+// Roles of the sides of a swept profile: `Generated` of each profile edge.
+template <typename Maker>
+void created_sides(Shape& out, Maker& mk, const EdgeGrid& grid,
+                   const TopTools_IndexedMapOfShape& faces) {
+  for (size_t l = 0; l < grid.size(); l++) {
+    for (size_t g = 0; g < grid[l].size(); g++) {
+      const TopTools_ListOfShape& gl = mk.Generated(grid[l][g]);
+      if (!gl.IsEmpty()) {
+        add_created_list(out, faces, gl, kSide, (uint32_t)l, (uint32_t)g);
+      } else {
+        // some sweeps (a segment perpendicular to the axis of a revolution) report nothing:
+        // find the face the swept segment lies on
+        add_created(out, faces, face_containing(faces, grid[l][g]), kSide, (uint32_t)l, (uint32_t)g);
+      }
+    }
+  }
+}
+
 }  // namespace
 
 rust::String occt_version() { return rust::String(OCC_VERSION_STRING_EXT); }
 
-std::unique_ptr<Shape> clone_shape(const Shape& s) { return wrap(s.s); }
+std::unique_ptr<Shape> clone_shape(const Shape& s) {
+  auto out = wrap(s.s);
+  out->inherited = s.inherited;
+  out->created = s.created;
+  return out;
+}
 
 std::unique_ptr<Shape> extrude(const ProfileData& p, Vec3 dir, double distance, double draft) {
   return guarded("extrude", [&]() {
-    TopoDS_Face face = make_face(p);
+    EdgeGrid grid;
+    TopoDS_Face face = make_face(p, &grid);
     if (draft == 0.0) {
       gp_Vec v(dir.x * distance, dir.y * distance, dir.z * distance);
       BRepPrimAPI_MakePrism mk(face, v);
       mk.Build();
       if (!mk.IsDone()) throw std::runtime_error("prism failed");
-      return wrap(orient_positive(mk.Shape()));
+      auto out = wrap(orient_positive(mk.Shape()));
+      auto faces = face_map(out->s);
+      add_created(*out, faces, mk.FirstShape(), kCapStart, 0, 0);
+      add_created(*out, faces, mk.LastShape(), kCapEnd, 0, 0);
+      created_sides(*out, mk, grid, faces);
+      return out;
     }
     // A drafted extrusion goes along the face normal; the direction must be that normal.
     double along = dir.x * p.frame.z.x + dir.y * p.frame.z.y + dir.z * p.frame.z.z;
@@ -241,19 +405,37 @@ std::unique_ptr<Shape> extrude(const ProfileData& p, Vec3 dir, double distance, 
     double height = std::fabs(distance) / std::cos(draft);
     if (along * distance < 0.0) face.Reverse();
     LocOpe_DPrism dp(face, height, draft);
-    return wrap(orient_positive(dp.Shape()));
+    auto out = wrap(orient_positive(dp.Shape()));
+    auto faces = face_map(out->s);
+    add_created(*out, faces, dp.FirstShape(), kCapStart, 0, 0);
+    add_created(*out, faces, dp.LastShape(), kCapEnd, 0, 0);
+    for (size_t l = 0; l < grid.size(); l++) {
+      for (size_t g = 0; g < grid[l].size(); g++) {
+        add_created_list(*out, faces, dp.Shapes(grid[l][g]), kSide, (uint32_t)l, (uint32_t)g);
+      }
+    }
+    return out;
   });
 }
 
 std::unique_ptr<Shape> revolve(const ProfileData& p, Vec3 origin, Vec3 dir, double angle) {
   return guarded("revolve", [&]() {
-    TopoDS_Face face = make_face(p);
+    EdgeGrid grid;
+    TopoDS_Face face = make_face(p, &grid);
     gp_Ax1 axis(P(origin), D(dir));
-    BRepPrimAPI_MakeRevol mk = (angle >= 2.0 * M_PI - 1e-12) ? BRepPrimAPI_MakeRevol(face, axis)
-                                                              : BRepPrimAPI_MakeRevol(face, axis, angle);
+    bool full = angle >= 2.0 * M_PI - 1e-12;
+    BRepPrimAPI_MakeRevol mk = full ? BRepPrimAPI_MakeRevol(face, axis)
+                                    : BRepPrimAPI_MakeRevol(face, axis, angle);
     mk.Build();
     if (!mk.IsDone()) throw std::runtime_error("revolve failed");
-    return wrap(orient_positive(mk.Shape()));
+    auto out = wrap(orient_positive(mk.Shape()));
+    auto faces = face_map(out->s);
+    if (!full) {
+      add_created(*out, faces, mk.FirstShape(), kCapStart, 0, 0);
+      add_created(*out, faces, mk.LastShape(), kCapEnd, 0, 0);
+    }
+    created_sides(*out, mk, grid, faces);
+    return out;
   });
 }
 
@@ -261,21 +443,34 @@ std::unique_ptr<Shape> sweep(const ProfileData& p, const PathData& path, const P
                              bool has_guide) {
   return guarded("sweep", [&]() {
     TopoDS_Wire spine = make_wire(path.frame, path.segs);
+    EdgeGrid grid;
     if (!has_guide) {
-      BRepOffsetAPI_MakePipe mk(spine, make_face(p));
+      BRepOffsetAPI_MakePipe mk(spine, make_face(p, &grid));
       mk.Build();
       if (!mk.IsDone()) throw std::runtime_error("pipe failed");
-      return wrap(orient_positive(mk.Shape()));
+      auto out = wrap(orient_positive(mk.Shape()));
+      auto faces = face_map(out->s);
+      add_created(*out, faces, mk.FirstShape(), kCapStart, 0, 0);
+      add_created(*out, faces, mk.LastShape(), kCapEnd, 0, 0);
+      created_sides(*out, mk, grid, faces);
+      return out;
     }
     if (p.loops.size() != 1) throw std::runtime_error("a guided sweep needs a profile without holes");
     TopoDS_Wire aux = make_wire(guide.frame, guide.segs);
+    grid.resize(1);
+    TopoDS_Wire prof = make_wire(p.frame, p.loops[0].segs, &grid[0]);
     BRepOffsetAPI_MakePipeShell mk(spine);
     mk.SetMode(aux, Standard_True, BRepFill_NoContact);
-    mk.Add(outer_wire(p));
+    mk.Add(prof);
     mk.Build();
     if (!mk.IsDone()) throw std::runtime_error("guided pipe failed");
     if (!mk.MakeSolid()) throw std::runtime_error("guided pipe did not close into a solid");
-    return wrap(orient_positive(mk.Shape()));
+    auto out = wrap(orient_positive(mk.Shape()));
+    auto faces = face_map(out->s);
+    add_created(*out, faces, mk.FirstShape(), kCapStart, 0, 0);
+    add_created(*out, faces, mk.LastShape(), kCapEnd, 0, 0);
+    created_sides(*out, mk, grid, faces);
+    return out;
   });
 }
 
@@ -283,13 +478,28 @@ std::unique_ptr<Shape> loft(const rust::Vec<ProfileData>& sections, bool ruled) 
   return guarded("loft", [&]() {
     BRepOffsetAPI_ThruSections gen(Standard_True, ruled ? Standard_True : Standard_False, Precision::Confusion());
     gen.CheckCompatibility(Standard_False);
+    EdgeGrid grid;
+    grid.resize(1);
+    bool first = true;
     for (const ProfileData& s : sections) {
       if (s.loops.size() != 1) throw std::runtime_error("loft sections must not have holes");
-      gen.AddWire(outer_wire(s));
+      if (first) {
+        gen.AddWire(make_wire(s.frame, s.loops[0].segs, &grid[0]));
+        first = false;
+      } else {
+        gen.AddWire(outer_wire(s));
+      }
     }
     gen.Build();
     if (!gen.IsDone()) throw std::runtime_error("loft failed");
-    return wrap(orient_positive(gen.Shape()));
+    auto out = wrap(orient_positive(gen.Shape()));
+    auto faces = face_map(out->s);
+    add_created(*out, faces, gen.FirstShape(), kCapStart, 0, 0);
+    add_created(*out, faces, gen.LastShape(), kCapEnd, 0, 0);
+    for (size_t g = 0; g < grid[0].size(); g++) {
+      add_created(*out, faces, gen.GeneratedFace(grid[0][g]), kSide, 0, (uint32_t)g);
+    }
+    return out;
   });
 }
 
@@ -306,7 +516,42 @@ std::unique_ptr<Shape> boolean_op(uint32_t op, const Shape& a, const Shape& b, d
       alg.SetNonDestructive(Standard_True);
       alg.Build();
       if (alg.HasErrors() || !alg.IsDone()) throw std::runtime_error("boolean operation failed");
-      return wrap(unify(alg.Shape()));
+      ShapeUpgrade_UnifySameDomain u(alg.Shape(), Standard_True, Standard_True, Standard_False);
+      u.Build();
+      auto out = wrap(u.Shape());
+      auto faces = face_map(out->s);
+      Handle(BRepTools_History) uh = u.History();
+      // input face -> result faces, through the boolean and then the face merge
+      auto trace = [&](const TopoDS_Shape& input, uint32_t operand) {
+        TopTools_IndexedMapOfShape in_faces = face_map(input);
+        for (int i = 1; i <= in_faces.Extent(); i++) {
+          const TopoDS_Shape& f = in_faces(i);
+          if (alg.IsDeleted(f)) continue;
+          std::vector<TopoDS_Shape> cur;
+          const TopTools_ListOfShape& mod = alg.Modified(f);
+          if (mod.IsEmpty()) {
+            cur.push_back(f);
+          } else {
+            for (TopTools_ListIteratorOfListOfShape it(mod); it.More(); it.Next()) cur.push_back(it.Value());
+          }
+          for (const TopoDS_Shape& c : cur) {
+            std::vector<TopoDS_Shape> fin;
+            if (!uh.IsNull() && uh->IsRemoved(c)) continue;
+            if (!uh.IsNull() && !uh->Modified(c).IsEmpty()) {
+              for (TopTools_ListIteratorOfListOfShape it(uh->Modified(c)); it.More(); it.Next()) fin.push_back(it.Value());
+            } else {
+              fin.push_back(c);
+            }
+            for (const TopoDS_Shape& r : fin) {
+              int ri = index_in(faces, r);
+              if (ri >= 0) out->inherited.push_back({(uint32_t)ri, (uint8_t)operand, (uint32_t)(i - 1)});
+            }
+          }
+        }
+      };
+      trace(a.s, 0);
+      trace(b.s, 1);
+      return out;
     };
     if (op == 0) {
       BRepAlgoAPI_Fuse alg;
@@ -319,6 +564,293 @@ std::unique_ptr<Shape> boolean_op(uint32_t op, const Shape& a, const Shape& b, d
     BRepAlgoAPI_Common alg;
     return run(alg);
   });
+}
+
+// ---- detail features ----
+
+TopoDS_Shape pick(const TopTools_IndexedMapOfShape& m, uint32_t i, const char* what) {
+  if ((int)i >= m.Extent()) throw std::runtime_error(std::string(what) + " index out of range");
+  return m((int)i + 1);
+}
+
+std::unique_ptr<Shape> fillet(const Shape& sh, rust::Slice<const uint32_t> edges,
+                              rust::Slice<const double> radii) {
+  return guarded("fillet", [&]() {
+    TopTools_IndexedMapOfShape em = edge_map(sh.s);
+    BRepFilletAPI_MakeFillet mk(sh.s);
+    for (size_t i = 0; i < edges.size(); i++) {
+      TopoDS_Edge e = TopoDS::Edge(pick(em, edges[i], "edge"));
+      double r1 = radii[2 * i], r2 = radii[2 * i + 1];
+      if (std::fabs(r1 - r2) < 1e-12) mk.Add(r1, e); else mk.Add(r1, r2, e);
+    }
+    mk.Build();
+    if (!mk.IsDone()) throw std::runtime_error("fillet failed");
+    auto out = wrap(mk.Shape());
+    auto faces = face_map(out->s);
+    inherit_from(*out, mk, sh.s, 0, faces);
+    for (size_t i = 0; i < edges.size(); i++) {
+      add_created_list(*out, faces, mk.Generated(pick(em, edges[i], "edge")), kFromEdge, edges[i], 0);
+    }
+    return out;
+  });
+}
+
+std::unique_ptr<Shape> chamfer(const Shape& sh, rust::Slice<const uint32_t> edges,
+                               rust::Slice<const uint32_t> faces_in, rust::Slice<const double> dists) {
+  return guarded("chamfer", [&]() {
+    TopTools_IndexedMapOfShape em = edge_map(sh.s), fm = face_map(sh.s);
+    BRepFilletAPI_MakeChamfer mk(sh.s);
+    for (size_t i = 0; i < edges.size(); i++) {
+      mk.Add(dists[2 * i], dists[2 * i + 1], TopoDS::Edge(pick(em, edges[i], "edge")),
+             TopoDS::Face(pick(fm, faces_in[i], "face")));
+    }
+    mk.Build();
+    if (!mk.IsDone()) throw std::runtime_error("chamfer failed");
+    auto out = wrap(mk.Shape());
+    auto faces = face_map(out->s);
+    inherit_from(*out, mk, sh.s, 0, faces);
+    for (size_t i = 0; i < edges.size(); i++) {
+      add_created_list(*out, faces, mk.Generated(pick(em, edges[i], "edge")), kFromEdge, edges[i], 0);
+    }
+    return out;
+  });
+}
+
+std::unique_ptr<Shape> shell(const Shape& sh, rust::Slice<const uint32_t> remove, double thickness,
+                             bool outward, double tolerance) {
+  return guarded("shell", [&]() {
+    TopTools_IndexedMapOfShape fm = face_map(sh.s);
+    TopTools_ListOfShape closing;
+    for (uint32_t i : remove) closing.Append(pick(fm, i, "face"));
+    BRepOffsetAPI_MakeThickSolid mk;
+    mk.MakeThickSolidByJoin(sh.s, closing, outward ? thickness : -thickness, tolerance,
+                            BRepOffset_Skin, Standard_True, Standard_False, GeomAbs_Intersection);
+    mk.Build();
+    if (!mk.IsDone()) throw std::runtime_error("shell failed");
+    auto out = wrap(mk.Shape());
+    auto faces = face_map(out->s);
+    inherit_from(*out, mk, sh.s, 0, faces);
+    // the walls on the inside are generated from the faces that stayed
+    std::vector<bool> removed(fm.Extent(), false);
+    for (uint32_t i : remove) removed[i] = true;
+    for (int i = 1; i <= fm.Extent(); i++) {
+      if (removed[i - 1]) continue;
+      add_created_list(*out, faces, mk.Generated(fm(i)), kFromFace, (uint32_t)(i - 1), 0);
+    }
+    TopTools_IndexedMapOfShape em = edge_map(sh.s);
+    for (int i = 1; i <= em.Extent(); i++) {
+      add_created_list(*out, faces, mk.Generated(em(i)), kFromEdge, (uint32_t)(i - 1), 0);
+    }
+    return out;
+  });
+}
+
+std::unique_ptr<Shape> draft(const Shape& sh, rust::Slice<const uint32_t> faces_in, Vec3 pull,
+                             double angle, Vec3 neutral_origin, Vec3 neutral_normal) {
+  return guarded("draft", [&]() {
+    TopTools_IndexedMapOfShape fm = face_map(sh.s);
+    BRepOffsetAPI_DraftAngle mk(sh.s);
+    gp_Pln neutral(P(neutral_origin), D(neutral_normal));
+    for (uint32_t i : faces_in) {
+      mk.Add(TopoDS::Face(pick(fm, i, "face")), D(pull), angle, neutral);
+      if (!mk.AddDone()) throw std::runtime_error("a face cannot be drafted");
+    }
+    mk.Build();
+    if (!mk.IsDone()) throw std::runtime_error("draft failed");
+    auto out = wrap(mk.Shape());
+    auto faces = face_map(out->s);
+    inherit_from(*out, mk, sh.s, 0, faces);
+    return out;
+  });
+}
+
+std::unique_ptr<Shape> moved(const Shape& sh, const gp_Trsf& t) {
+  BRepBuilderAPI_Transform mk(sh.s, t, Standard_True);
+  mk.Build();
+  if (!mk.IsDone()) throw std::runtime_error("transform failed");
+  auto out = wrap(mk.Shape());
+  auto faces = face_map(out->s);
+  TopTools_IndexedMapOfShape in_faces = face_map(sh.s);
+  for (int i = 1; i <= in_faces.Extent(); i++) {
+    int r = index_in(faces, mk.ModifiedShape(in_faces(i)));
+    if (r >= 0) out->inherited.push_back({(uint32_t)r, 0, (uint32_t)(i - 1)});
+  }
+  return out;
+}
+
+std::unique_ptr<Shape> translate(const Shape& sh, Vec3 v) {
+  return guarded("translate", [&]() {
+    gp_Trsf t;
+    t.SetTranslation(gp_Vec(v.x, v.y, v.z));
+    return moved(sh, t);
+  });
+}
+
+std::unique_ptr<Shape> rotate(const Shape& sh, Vec3 origin, Vec3 dir, double angle) {
+  return guarded("rotate", [&]() {
+    gp_Trsf t;
+    t.SetRotation(gp_Ax1(P(origin), D(dir)), angle);
+    return moved(sh, t);
+  });
+}
+
+std::unique_ptr<Shape> mirror(const Shape& sh, Vec3 origin, Vec3 normal) {
+  return guarded("mirror", [&]() {
+    gp_Trsf t;
+    t.SetMirror(gp_Ax2(P(origin), D(normal)));
+    return moved(sh, t);
+  });
+}
+
+// ---- topology listing ----
+
+rust::Vec<FaceRec> faces_of(const Shape& sh) {
+  return guarded("faces", [&]() {
+    TopTools_IndexedMapOfShape fm = face_map(sh.s), em = edge_map(sh.s);
+    rust::Vec<FaceRec> out;
+    for (int i = 1; i <= fm.Extent(); i++) {
+      TopoDS_Face f = TopoDS::Face(fm(i));
+      FaceRec r;
+      r.has = 0;
+      r.radius = 0;
+      r.normal = Vec3{0, 0, 0};
+      r.axis_origin = Vec3{0, 0, 0};
+      r.axis_dir = Vec3{0, 0, 0};
+      BRepAdaptor_Surface surf(f);
+      switch (surf.GetType()) {
+        case GeomAbs_Plane: {
+          r.kind = 0;
+          gp_Dir n = surf.Plane().Axis().Direction();
+          if (f.Orientation() == TopAbs_REVERSED) n.Reverse();
+          r.normal = Vec3{n.X(), n.Y(), n.Z()};
+          r.has |= 1;
+          break;
+        }
+        case GeomAbs_Cylinder: {
+          r.kind = 1;
+          gp_Cylinder c = surf.Cylinder();
+          r.radius = c.Radius();
+          r.has |= 4;
+          gp_Ax1 ax = c.Axis();
+          r.axis_origin = Vec3{ax.Location().X(), ax.Location().Y(), ax.Location().Z()};
+          r.axis_dir = Vec3{ax.Direction().X(), ax.Direction().Y(), ax.Direction().Z()};
+          r.has |= 2;
+          break;
+        }
+        case GeomAbs_Cone: {
+          r.kind = 2;
+          gp_Cone c = surf.Cone();
+          r.radius = c.RefRadius();
+          r.has |= 4;
+          gp_Ax1 ax = c.Axis();
+          r.axis_origin = Vec3{ax.Location().X(), ax.Location().Y(), ax.Location().Z()};
+          r.axis_dir = Vec3{ax.Direction().X(), ax.Direction().Y(), ax.Direction().Z()};
+          r.has |= 2;
+          break;
+        }
+        case GeomAbs_Sphere: {
+          r.kind = 3;
+          r.radius = surf.Sphere().Radius();
+          r.has |= 4;
+          gp_Pnt c = surf.Sphere().Location();
+          r.axis_origin = Vec3{c.X(), c.Y(), c.Z()};
+          break;
+        }
+        case GeomAbs_Torus: {
+          r.kind = 4;
+          gp_Torus t = surf.Torus();
+          r.radius = t.MajorRadius();
+          r.has |= 4;
+          gp_Ax1 ax = t.Axis();
+          r.axis_origin = Vec3{ax.Location().X(), ax.Location().Y(), ax.Location().Z()};
+          r.axis_dir = Vec3{ax.Direction().X(), ax.Direction().Y(), ax.Direction().Z()};
+          r.has |= 2;
+          break;
+        }
+        default:
+          r.kind = 5;
+      }
+      GProp_GProps g;
+      BRepGProp::SurfaceProperties(f, g);
+      r.area = g.Mass();
+      gp_Pnt c = g.CentreOfMass();
+      r.centroid = Vec3{c.X(), c.Y(), c.Z()};
+      TopTools_IndexedMapOfShape fe;
+      TopExp::MapShapes(f, TopAbs_EDGE, fe);
+      for (int k = 1; k <= fe.Extent(); k++) {
+        int ei = index_in(em, fe(k));
+        if (ei >= 0) r.edges.push_back((uint32_t)ei);
+      }
+      out.push_back(std::move(r));
+    }
+    return out;
+  });
+}
+
+rust::Vec<EdgeRec> edges_of(const Shape& sh) {
+  return guarded("edges", [&]() {
+    TopTools_IndexedMapOfShape fm = face_map(sh.s), em = edge_map(sh.s);
+    TopTools_IndexedDataMapOfShapeListOfShape anc;
+    TopExp::MapShapesAndAncestors(sh.s, TopAbs_EDGE, TopAbs_FACE, anc);
+    rust::Vec<EdgeRec> out;
+    for (int i = 1; i <= em.Extent(); i++) {
+      TopoDS_Edge e = TopoDS::Edge(em(i));
+      EdgeRec r;
+      r.has = 0;
+      r.radius = 0;
+      r.direction = Vec3{0, 0, 0};
+      BRepAdaptor_Curve c(e);
+      double t0 = c.FirstParameter(), t1 = c.LastParameter();
+      gp_Pnt a = c.Value(t0), b = c.Value(t1), m = c.Value(0.5 * (t0 + t1));
+      r.start = Vec3{a.X(), a.Y(), a.Z()};
+      r.end = Vec3{b.X(), b.Y(), b.Z()};
+      r.mid = Vec3{m.X(), m.Y(), m.Z()};
+      r.length = GCPnts_AbscissaPoint::Length(c);
+      switch (c.GetType()) {
+        case GeomAbs_Line: {
+          r.kind = 0;
+          gp_Dir d = c.Line().Direction();
+          if (e.Orientation() == TopAbs_REVERSED) d.Reverse();
+          r.direction = Vec3{d.X(), d.Y(), d.Z()};
+          r.has |= 1;
+          break;
+        }
+        case GeomAbs_Circle:
+          r.kind = 1;
+          r.radius = c.Circle().Radius();
+          r.has |= 2;
+          break;
+        case GeomAbs_Ellipse:
+          r.kind = 2;
+          break;
+        default:
+          r.kind = 3;
+      }
+      if (anc.Contains(e)) {
+        std::vector<uint32_t> seen;
+        for (TopTools_ListIteratorOfListOfShape it(anc.FindFromKey(e)); it.More(); it.Next()) {
+          int fi = index_in(fm, it.Value());
+          if (fi >= 0 && std::find(seen.begin(), seen.end(), (uint32_t)fi) == seen.end()) seen.push_back((uint32_t)fi);
+        }
+        std::sort(seen.begin(), seen.end());
+        for (uint32_t fi : seen) r.faces.push_back(fi);
+      }
+      out.push_back(std::move(r));
+    }
+    return out;
+  });
+}
+
+rust::Vec<uint32_t> lineage_inherited(const Shape& sh) {
+  rust::Vec<uint32_t> out;
+  for (const auto& t : sh.inherited) for (uint32_t v : t) out.push_back(v);
+  return out;
+}
+
+rust::Vec<uint32_t> lineage_created(const Shape& sh) {
+  rust::Vec<uint32_t> out;
+  for (const auto& t : sh.created) for (uint32_t v : t) out.push_back(v);
+  return out;
 }
 
 Props properties(const Shape& sh) {

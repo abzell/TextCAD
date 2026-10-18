@@ -317,7 +317,7 @@ impl Checker<'_> {
         local_before: usize,
     ) {
         let head = r.head();
-        if matches!(head, "plane" | "axis" | "origin") {
+        if matches!(head, "plane" | "axis" | "origin" | "edge") {
             return;
         }
         if let Some(&pos) = locals.get(head) {

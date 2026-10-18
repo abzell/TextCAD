@@ -4,8 +4,8 @@ use serde_json::{Value, json};
 use std::io::Write;
 use std::path::PathBuf;
 use tcad_cache::{
-    FeatureEntry, Manifest, ResultEntry, cache_dir, is_fresh, load_bundle, sha256_hex, source_hash,
-    write_cache,
+    FeatureEntry, Manifest, ResultEntry, TopologyEntry, cache_dir, is_fresh, load_bundle,
+    sha256_hex, source_hash, write_cache,
 };
 use tcad_diag::{Diagnostic, render_json, render_text};
 use tcad_kernel::Kernel;
@@ -104,6 +104,19 @@ fn produce<K: Kernel>(k: &K, o: &Options<'_>) -> Result<Produced, Failure> {
                 edges: f.topology.edges,
                 vertices: f.topology.vertices,
                 volume_mm3: f.volume,
+                thread: f.thread.clone(),
+                topology: f
+                    .topology_map
+                    .iter()
+                    .map(|t| TopologyEntry {
+                        kind: t.kind.to_string(),
+                        id: t.id.clone(),
+                        aliases: t.aliases.clone(),
+                        geometry: t.geometry.clone(),
+                        size: t.size,
+                        at: t.at,
+                    })
+                    .collect(),
             })
             .collect(),
         result: ResultEntry {
@@ -283,4 +296,95 @@ pub fn props_command<K: Kernel>(
         );
     }
     0
+}
+
+/// `tcad refs`: every face/edge reference of the part and the persistent name(s) it resolves to.
+/// Unresolved references are listed too (with the reason), so this also explains a failed build.
+pub fn refs_command<K: Kernel>(
+    k: &K,
+    o: &Options<'_>,
+    out: &mut dyn Write,
+    err: &mut dyn Write,
+) -> i32 {
+    let bundle = match load_bundle(std::path::Path::new(o.path)) {
+        Ok(b) => b,
+        Err(m) => {
+            let _ = writeln!(err, "tcad: {m}");
+            return 2;
+        }
+    };
+    let name = bundle.entry.display().to_string();
+    let src = match std::fs::read_to_string(&bundle.entry) {
+        Ok(s) => s,
+        Err(e) => {
+            let _ = writeln!(err, "tcad: cannot read {name}: {e}");
+            return 2;
+        }
+    };
+    let analysis = tcad_model::analyze(&src);
+    let failed = analysis.has_errors();
+    let Some(model) = analysis.model.filter(|_| !failed) else {
+        return report_failure(
+            Failure::Diagnostics(name, src, analysis.diagnostics),
+            o.json,
+            out,
+            err,
+        );
+    };
+    let (result, refs) = tcad_build::build_traced(k, &model, o.config);
+    let index = tcad_diag::LineIndex::new(&src);
+    let ok = result.is_ok();
+    if o.json {
+        let list: Vec<Value> = refs
+            .iter()
+            .map(|r| {
+                let (line, col) = index.line_col(r.span.start);
+                match &r.resolved {
+                    Ok(names) => json!({
+                        "feature": r.feature, "line": line, "column": col, "text": r.text,
+                        "resolved": names,
+                    }),
+                    Err(m) => json!({
+                        "feature": r.feature, "line": line, "column": col, "text": r.text,
+                        "error": m,
+                    }),
+                }
+            })
+            .collect();
+        let mut v = json!({ "command": "refs", "ok": ok, "file": name, "refs": list });
+        if let Err(d) = &result {
+            v["diagnostics"] = render_json(&name, &src, d)["diagnostics"].clone();
+        }
+        let _ = writeln!(
+            out,
+            "{}",
+            serde_json::to_string_pretty(&v).unwrap_or_default()
+        );
+    } else {
+        for r in &refs {
+            let (line, col) = index.line_col(r.span.start);
+            match &r.resolved {
+                Ok(names) => {
+                    let _ = writeln!(
+                        out,
+                        "{name}:{line}:{col}: {} {} -> {}",
+                        r.feature,
+                        r.text,
+                        names.join(", ")
+                    );
+                }
+                Err(m) => {
+                    let _ = writeln!(
+                        out,
+                        "{name}:{line}:{col}: {} {} -> error: {m}",
+                        r.feature, r.text
+                    );
+                }
+            }
+        }
+        if let Err(d) = &result {
+            let _ = write!(err, "{}", render_text(&name, &src, d));
+        }
+    }
+    i32::from(!ok)
 }
