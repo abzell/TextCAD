@@ -24,6 +24,10 @@ license = "Apache-2.0"
 repository = "https://github.com/abzell/TextCAD"
 authors = ["The TextCAD authors"]
 
+[workspace.dependencies]
+tcad-diag = { path = "crates/tcad-diag", version = "0.0.1" }
+tcad-syntax = { path = "crates/tcad-syntax", version = "0.0.1" }
+
 [workspace.lints.rust]
 unsafe_code = "forbid"
 missing_docs = "warn"

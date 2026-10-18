@@ -9,7 +9,7 @@ repository.workspace = true
 authors.workspace = true
 
 [dependencies]
-tcad-diag = { path = "../tcad-diag" }
+tcad-diag.workspace = true
 
 [lints]
 workspace = true
