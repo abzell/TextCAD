@@ -421,6 +421,13 @@ dependencies = [
 [[package]]
 name = "tcad-lsp"
 version = "0.0.1"
+dependencies = [
+ "serde_json",
+ "tcad-cache",
+ "tcad-diag",
+ "tcad-model",
+ "tcad-syntax",
+]
 
 [[package]]
 name = "tcad-mcp"

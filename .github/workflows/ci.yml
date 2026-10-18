@@ -72,7 +72,7 @@ jobs:
         run: >
           cargo build --target wasm32-unknown-unknown
           -p tcad-diag -p tcad-syntax -p tcad-expr -p tcad-model -p tcad-solver
-          -p tcad-naming -p tcad-kernel -p tcad-cache -p tcad-io
+          -p tcad-naming -p tcad-kernel -p tcad-cache -p tcad-io -p tcad-lsp
 
   deny:
     runs-on: ubuntu-latest
