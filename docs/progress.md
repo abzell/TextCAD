@@ -75,3 +75,15 @@ Deferred:
 - Splines in tangency/on-curve constraints; `project` (needs the kernel).
 - The remaining ~34 corpus parts (primitives, features, naming robustness, hydraulics) arrive with
   the kernel (M5-M7).
+
+## M5: kernel, OCCT, core solids, cache
+
+Done:
+- `Kernel` trait with mock and OpenCASCADE backends; canonical B-rep text; T1 (bit-identical across
+  runs) and T2 (analytic/build123d, 1e-6 relative) verified on eight primitive parts.
+- Features: reference geometry, extrude (distance, symmetric, through_all, to, draft, add/subtract/
+  intersect), revolve, sweep (with guide), ruled and smooth loft.
+- Bundles and `.cache/` with manifest and invalidation; `tcad build`, `tcad props`.
+
+Deferred: guided loft (ThruSections has no guides), sketches on faces and topology maps (M6),
+STEP/GLB export (M7), multi-body handling beyond union.

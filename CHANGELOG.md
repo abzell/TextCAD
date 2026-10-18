@@ -20,5 +20,11 @@ All notable changes are recorded here. Format follows [Keep a Changelog](https:/
   `Model::resolve`); `tcad check` now performs the full semantic check; diagnostics E2xxx; spec
   chapters for units, expressions and parameters; ADR 0006; randomized property and mutation tests.
 
+- M5: `tcad-kernel` (Kernel trait, mock backend), `tcad-occt` (OpenCASCADE via cxx, dynamic linking),
+  `tcad-build` (reference geometry, extrude, revolve, sweep, loft, booleans), `tcad-cache` (bundles,
+  `.cache/`, source hashing), `tcad build` and `tcad props`, eight primitive corpus parts with analytic
+  expectations and a build123d cross-check, spec chapters kernel/bundle/features, ADRs 0008-0009,
+  `docs/building.md`, OCCT and cross-check CI jobs.
+
 ### Changed
 - Replaced the MIT `LICENSE` with Apache-2.0 (locked decision, requirements section 2).

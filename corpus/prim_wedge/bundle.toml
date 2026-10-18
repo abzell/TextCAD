@@ -1,0 +1,5 @@
+format = "0.1"
+name = "prim_wedge"
+entry = "parts/prim_wedge.tcad"
+units = "mm"
+license = "Apache-2.0"

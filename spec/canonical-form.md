@@ -57,7 +57,7 @@ chapters [sketch.md](sketch.md) and [features.md](features.md) as those are writ
 | rect | on, corner, center, w, h |
 | polygon | center, sides, d, r |
 | project | edges |
-| plane | offset, from, angle, through |
+| plane | from, offset, angle, about, through |
 | axis | through, from, direction |
 | csys | origin, x, y |
 | extrude | distance, depth, to, draft, op |

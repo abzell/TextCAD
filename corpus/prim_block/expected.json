@@ -1,0 +1,26 @@
+{
+  "note": "A rectangle extruded: the simplest solid.",
+  "volume_mm3": 10000,
+  "area_mm2": 3300,
+  "center_of_mass_mm": [
+    20,
+    12.5,
+    5
+  ],
+  "bbox_min_mm": [
+    0,
+    0,
+    0
+  ],
+  "bbox_max_mm": [
+    40,
+    25,
+    10
+  ],
+  "topology": {
+    "solids": 1,
+    "faces": 6,
+    "edges": 12,
+    "vertices": 8
+  }
+}

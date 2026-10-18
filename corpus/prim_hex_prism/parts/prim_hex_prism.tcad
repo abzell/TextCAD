@@ -1,0 +1,8 @@
+tcad 0.1
+
+part prim_hex_prism "Hex prism" {
+  sketch s on plane.XY {
+    polygon g center=(0 mm, 0 mm) sides=6 r=12 mm
+  }
+  extrude e from s distance=20 mm
+}

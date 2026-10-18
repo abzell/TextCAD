@@ -1,0 +1,9 @@
+tcad 0.1
+
+part prim_tube "Tube" {
+  sketch s on plane.XY {
+    circle outer center=(0 mm, 0 mm) r=20 mm
+    circle inner center=(0 mm, 0 mm) r=14 mm
+  }
+  extrude e from s distance=50 mm
+}

@@ -1,0 +1,26 @@
+{
+  "note": "A closed chain of three lines extruded.",
+  "volume_mm3": 4500.0,
+  "area_mm2": 1890.8326913195983,
+  "center_of_mass_mm": [
+    10,
+    6.666666666666667,
+    7.5
+  ],
+  "bbox_min_mm": [
+    0,
+    0,
+    0
+  ],
+  "bbox_max_mm": [
+    30,
+    20,
+    15
+  ],
+  "topology": {
+    "solids": 1,
+    "faces": 5,
+    "edges": 9,
+    "vertices": 6
+  }
+}

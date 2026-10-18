@@ -4,6 +4,7 @@ members = [
   "crates/tcad-diag",
   "crates/tcad-syntax",
   "crates/tcad-model",
+  "crates/tcad-build",
   "crates/tcad-expr",
   "crates/tcad-solver",
   "crates/tcad-naming",
@@ -29,6 +30,10 @@ tcad-diag = { path = "crates/tcad-diag", version = "0.0.1" }
 tcad-syntax = { path = "crates/tcad-syntax", version = "0.0.1" }
 tcad-expr = { path = "crates/tcad-expr", version = "0.0.1" }
 tcad-solver = { path = "crates/tcad-solver", version = "0.0.1" }
+tcad-kernel = { path = "crates/tcad-kernel", version = "0.0.1" }
+tcad-build = { path = "crates/tcad-build", version = "0.0.1" }
+tcad-cache = { path = "crates/tcad-cache", version = "0.0.1" }
+tcad-occt = { path = "crates/tcad-occt", version = "0.0.1" }
 tcad-model = { path = "crates/tcad-model", version = "0.0.1" }
 
 [workspace.lints.rust]

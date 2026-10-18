@@ -1,0 +1,26 @@
+{
+  "note": "A triangle revolved about the axis along one of its sides.",
+  "volume_mm3": 9424.77796076938,
+  "area_mm2": 2719.991801947696,
+  "center_of_mass_mm": [
+    0,
+    0,
+    10.0
+  ],
+  "bbox_min_mm": [
+    -15,
+    -15,
+    0
+  ],
+  "bbox_max_mm": [
+    15,
+    15,
+    40
+  ],
+  "topology": {
+    "solids": 1,
+    "faces": 2,
+    "edges": 3,
+    "vertices": 2
+  }
+}

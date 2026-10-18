@@ -1,0 +1,9 @@
+tcad 0.1
+
+part prim_sphere "Sphere" {
+  sketch s on plane.XZ {
+    arc a start=(0 mm, -20 mm) end=(0 mm, 20 mm) through=(20 mm, 0 mm)
+    line l start=(0 mm, 20 mm) end=(0 mm, -20 mm)
+  }
+  revolve v from s axis=axis.Z
+}

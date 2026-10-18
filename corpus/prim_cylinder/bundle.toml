@@ -1,0 +1,5 @@
+format = "0.1"
+name = "prim_cylinder"
+entry = "parts/prim_cylinder.tcad"
+units = "mm"
+license = "Apache-2.0"

@@ -1,0 +1,5 @@
+format = "0.1"
+name = "prim_hex_prism"
+entry = "parts/prim_hex_prism.tcad"
+units = "mm"
+license = "Apache-2.0"

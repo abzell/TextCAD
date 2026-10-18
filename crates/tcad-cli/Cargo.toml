@@ -16,7 +16,15 @@ path = "src/main.rs"
 tcad-diag.workspace = true
 tcad-syntax.workspace = true
 tcad-model.workspace = true
+tcad-build.workspace = true
+tcad-kernel.workspace = true
+tcad-cache.workspace = true
+tcad-occt = { workspace = true, optional = true }
 serde_json = "1"
+
+[features]
+# Link the OpenCASCADE geometry kernel (needed for `build` and `props`).
+occt = ["dep:tcad-occt", "tcad-occt/occt"]
 
 [lints]
 workspace = true

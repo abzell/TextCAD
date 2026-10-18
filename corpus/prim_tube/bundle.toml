@@ -1,0 +1,5 @@
+format = "0.1"
+name = "prim_tube"
+entry = "parts/prim_tube.tcad"
+units = "mm"
+license = "Apache-2.0"

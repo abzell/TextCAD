@@ -1,0 +1,5 @@
+format = "0.1"
+name = "prim_sphere"
+entry = "parts/prim_sphere.tcad"
+units = "mm"
+license = "Apache-2.0"

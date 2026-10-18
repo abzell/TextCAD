@@ -109,3 +109,26 @@ jobs:
           if [ -n "$missing" ]; then
             echo "Commits missing a DCO sign-off (use git commit -s):"; echo "$missing"; exit 1
           fi
+
+  occt-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.97.0
+      - uses: Swatinem/rust-cache@v2
+      - name: Install OpenCASCADE
+        run: sudo apt-get update && sudo apt-get install -y libocct-foundation-dev libocct-modeling-data-dev libocct-modeling-algorithms-dev libocct-data-exchange-dev g++
+      - name: Test with OCCT
+        run: cargo test --workspace --features tcad-cli/occt,tcad-build/occt
+
+  build123d-crosscheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install build123d
+      - run: python3 corpus/tools/compare_reference.py corpus

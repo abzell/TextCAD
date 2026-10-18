@@ -64,6 +64,10 @@ fn every_corpus_entry_matches_its_expectations() {
             &std::fs::read_to_string(dir.join("expected.json")).expect("expected"),
         )
         .expect("json");
+        // parts with measured properties are checked by the geometry harness in tcad-build
+        if want.get("volume_mm3").is_some() {
+            continue;
+        }
         let a = analyze(&src);
 
         let got: Vec<&str> = a

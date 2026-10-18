@@ -88,6 +88,12 @@ registry! {
     I4201 = "I4201", "sketch has degrees of freedom";
     E4301 = "E4301", "sketch cannot be solved near its starting geometry";
     W4601 = "W4601", "projected geometry is not available before the kernel runs";
+    E5001 = "E5001", "invalid feature argument";
+    E5002 = "E5002", "reference cannot be resolved to geometry";
+    E5003 = "E5003", "feature not yet supported";
+    E5004 = "E5004", "the geometry kernel failed";
+    E5005 = "E5005", "profile problem";
+    E5006 = "E5006", "feature needs an existing body";
 }
 
 #[cfg(test)]

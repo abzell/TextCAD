@@ -1,6 +1,8 @@
 //! `tcad-cli`: the `tcad` command-line tool. All commands support `--json` and return a non-zero
 //! exit code on failure (1: the input is invalid or would change, 2: usage or I/O error).
 
+mod geom;
+
 use serde_json::{Value, json};
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -22,11 +24,16 @@ Usage: tcad <command> [options] <path>...
 Commands:
   check   Parse, resolve names, units and configurations; report diagnostics (no geometry)
   fmt     Rewrite files in canonical form; with --check only report differences
+  build   Regenerate the part with the geometry kernel and fill the .cache (needs a build with
+          the `occt` feature)
+  props   Mass properties, bounding box and topology counts of the result
 
 Options:
   --json     Machine-readable output
   --check    (fmt) do not write, exit 1 if any file would change
   --solve    (fmt) also write solved sketch coordinates as @hint(...)
+  --config NAME  (build, props) build a configuration instead of the default one
+  --force    (build, props) rebuild even if the cache is up to date
   --help     Show this help
   --version  Show the version
 
@@ -38,10 +45,20 @@ pub fn run(args: &[String], out: &mut dyn Write, err: &mut dyn Write) -> i32 {
     let mut json = false;
     let mut check_only = false;
     let mut solve = false;
+    let mut force = false;
+    let mut config: Option<&str> = None;
+    let mut want_config = false;
     let mut command: Option<&str> = None;
     let mut paths: Vec<&str> = Vec::new();
     for a in args {
+        if want_config {
+            config = Some(a.as_str());
+            want_config = false;
+            continue;
+        }
         match a.as_str() {
+            "--config" => want_config = true,
+            "--force" => force = true,
             "--json" => json = true,
             "--check" => check_only = true,
             "--solve" => solve = true,
@@ -65,12 +82,39 @@ pub fn run(args: &[String], out: &mut dyn Write, err: &mut dyn Write) -> i32 {
         let _ = write!(err, "{USAGE}");
         return 2;
     };
-    if !matches!(command, "check" | "fmt") {
+    if want_config {
+        let _ = writeln!(err, "tcad: --config needs a name");
+        return 2;
+    }
+    if !matches!(command, "check" | "fmt" | "build" | "props") {
         let _ = writeln!(err, "tcad: unknown command `{command}`\n\n{USAGE}");
         return 2;
     }
     if check_only && command != "fmt" {
         let _ = writeln!(err, "tcad: --check only applies to `fmt`");
+        return 2;
+    }
+    if matches!(command, "build" | "props") {
+        if paths.len() != 1 {
+            let _ = writeln!(
+                err,
+                "tcad {command}: expected exactly one bundle or part path"
+            );
+            return 2;
+        }
+        let o = geom::Options {
+            path: paths[0],
+            config,
+            force,
+            json,
+        };
+        return run_geometry(command, &o, out, err);
+    }
+    if (config.is_some() || force) && !matches!(command, "build" | "props") {
+        let _ = writeln!(
+            err,
+            "tcad: --config and --force apply to `build` and `props`"
+        );
         return 2;
     }
     if solve && command != "fmt" {
@@ -137,6 +181,57 @@ pub fn run(args: &[String], out: &mut dyn Write, err: &mut dyn Write) -> i32 {
         );
     }
     if io_error { 2 } else { i32::from(failed) }
+}
+
+#[cfg(feature = "occt")]
+fn run_geometry(
+    command: &str,
+    o: &geom::Options<'_>,
+    out: &mut dyn Write,
+    err: &mut dyn Write,
+) -> i32 {
+    let k = tcad_occt::OcctKernel::new();
+    match command {
+        "build" => geom::build_command(&k, o, out, err),
+        _ => geom::props_command(&k, o, out, err),
+    }
+}
+
+#[cfg(not(feature = "occt"))]
+fn run_geometry(
+    command: &str,
+    _: &geom::Options<'_>,
+    _: &mut dyn Write,
+    err: &mut dyn Write,
+) -> i32 {
+    let _ = writeln!(
+        err,
+        "tcad {command}: this build of tcad has no geometry kernel; rebuild with `--features occt` \
+         (OpenCASCADE must be installed, see docs/building.md)"
+    );
+    2
+}
+
+/// Runs `build` or `props` with a given kernel (used by the tests with the mock kernel).
+pub fn run_with_kernel<K: tcad_kernel::Kernel>(
+    k: &K,
+    command: &str,
+    path: &str,
+    config: Option<&str>,
+    json: bool,
+    out: &mut dyn Write,
+    err: &mut dyn Write,
+) -> i32 {
+    let o = geom::Options {
+        path,
+        config,
+        force: false,
+        json,
+    };
+    match command {
+        "build" => geom::build_command(k, &o, out, err),
+        _ => geom::props_command(k, &o, out, err),
+    }
 }
 
 fn check_file(src: &str) -> (&'static str, Vec<Diagnostic>) {

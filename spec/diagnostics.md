@@ -82,6 +82,12 @@ The registry lives in `crates/tcad-diag/src/codes.rs`; a test keeps it unique an
 | I4201 | sketch has degrees of freedom (information) |
 | E4301 | sketch cannot be solved near its starting geometry |
 | W4601 | projected geometry is not available before the kernel runs |
+| E5001 | invalid feature argument (unknown, missing, misplaced or conflicting) |
+| E5002 | reference does not resolve to the right kind of geometry |
+| E5003 | feature not yet supported |
+| E5004 | the kernel failed to build the feature |
+| E5005 | profile problem (open chain, self-intersection, empty sketch) |
+| E5006 | the first solid feature must add material, or the feature needs an existing body |
 
 ## Output
 

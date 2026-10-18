@@ -1,0 +1,26 @@
+{
+  "note": "A regular polygon extruded.",
+  "volume_mm3": 7482.45948869755,
+  "area_mm2": 2188.245948869755,
+  "center_of_mass_mm": [
+    0,
+    0,
+    10.0
+  ],
+  "bbox_min_mm": [
+    -12,
+    -10.392304845413264,
+    0
+  ],
+  "bbox_max_mm": [
+    12,
+    10.392304845413264,
+    20
+  ],
+  "topology": {
+    "solids": 1,
+    "faces": 8,
+    "edges": 18,
+    "vertices": 12
+  }
+}

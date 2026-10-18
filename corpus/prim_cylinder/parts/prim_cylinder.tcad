@@ -1,0 +1,8 @@
+tcad 0.1
+
+part prim_cylinder "Cylinder" {
+  sketch s on plane.XY {
+    circle c center=(0 mm, 0 mm) r=12.5 mm
+  }
+  extrude e from s distance=30 mm
+}

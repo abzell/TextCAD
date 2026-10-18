@@ -707,7 +707,7 @@ impl Parser {
                 K::At if !features => self.hint()?,
                 K::Ident => {
                     let w = self.peek().text.clone();
-                    if w == "from" && features {
+                    if w == "from" && features && self.look(1).kind != K::Eq {
                         self.parse_from()?;
                     } else if w == "suppress" && features {
                         self.start(NodeKind::SuppressClause);

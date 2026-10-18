@@ -1,0 +1,10 @@
+tcad 0.1
+
+part prim_cone "Cone" {
+  sketch s on plane.XZ {
+    line a start=(0 mm, 0 mm) end=(15 mm, 0 mm)
+    line b start=(15 mm, 0 mm) end=(0 mm, 40 mm)
+    line c start=(0 mm, 40 mm) end=(0 mm, 0 mm)
+  }
+  revolve v from s axis=axis.Z
+}
