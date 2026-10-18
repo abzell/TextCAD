@@ -130,15 +130,20 @@ jobs:
           pip install build123d
           cargo build -p tcad-cli --features occt
           python3 corpus/tools/check_step_exports.py target/debug/tcad corpus
+      - uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-name: freecad
+          create-args: freecad
+          cache-environment: true
       - name: Open the hydraulic STEP exports in FreeCAD
+        shell: bash -el {0}
         run: |
-          sudo apt-get install -y freecad
           mkdir -p "$RUNNER_TEMP/step"
           for d in corpus/hyd_*/; do
             n=$(basename "$d")
             target/debug/tcad export --to step --out "$RUNNER_TEMP/step/$n.step" "$d"
           done
-          STEP_DIR="$RUNNER_TEMP/step" CORPUS_DIR="$PWD/corpus" xvfb-run -a freecadcmd corpus/tools/check_freecad.py
+          STEP_DIR="$RUNNER_TEMP/step" CORPUS_DIR="$PWD/corpus" freecadcmd corpus/tools/check_freecad.py
       - uses: actions/setup-node@v4
         with:
           node-version: 22
