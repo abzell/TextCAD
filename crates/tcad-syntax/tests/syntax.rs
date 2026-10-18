@@ -276,3 +276,17 @@ fn a_unit_name_followed_by_equals_is_an_argument_name() {
     assert_eq!(once, twice);
     assert!(once.contains("depth=45 m=subtract"), "{once}");
 }
+
+/// Found by the fuzzer: an argument named `or` (or `and`) right after a value read as the logical
+/// operator once the arguments were sorted, and the formatted text no longer parsed.
+#[test]
+fn and_or_followed_by_equals_are_argument_names() {
+    let src = "tcad 0.1\n\npart p {\n  fillet j edges=e r=2 mm rod_thread or=body.x and=1 mm type=tapped\n}\n";
+    let once = tcad_syntax::format_source(src).expect("formats");
+    let twice = tcad_syntax::format_source(&once).expect("the formatted text parses");
+    assert_eq!(once, twice);
+    assert!(
+        once.contains("and=1 mm") && once.contains("or=body.x"),
+        "{once}"
+    );
+}

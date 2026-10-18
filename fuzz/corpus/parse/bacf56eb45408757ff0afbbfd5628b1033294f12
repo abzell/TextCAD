@@ -1,0 +1,11 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mmend, w= fillet jaw_round edges=query(edges, parallel_to=axis.Y, created_by=slsuppressmm
+  chamfer bore_edges edges=[pin_bore.rim(jaw_inner_a), pin_erbro.im(jaw_innerfiges=query(edges, parallel_to=axis.Y, created_by=slsuppressmm
+  chamfer bore_edges edges=[pin_bore.rim(jaw_inner_a), pin_bore.rim(jaw_nd edges=query(edges, parallel_to=axis.Y, created_by=slsuppressmm
+  chamfer bore_edges edges=[pin_bore.rim(jaw_inner_a), pin_erbro.im(jaw_innerfiges=query(edges, parallel_to=axis.Y, created_by=splserpussmm
+  chamf=1md
+ m
+  configvey ha { pin_dia = 25 mm; jaef0ault standard { }
+}

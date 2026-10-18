@@ -1,0 +1,15 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 19 mm nip" {
+  tolerancmm range(10 mm, outline.right
+tcad 0.1
+c
+  extrude slot from rect
+pa-6`mm
+  mata AISI 1045"outline.right
+tcad 0.1
+c
+  extrude slot from rect
+part rod_clevis "Rodm,andard AISI 1045" dejsity=7.85 g/cm^3
+
+  param pin_dia = 20 mm (e} ga1{r

@@ -1,0 +1,21 @@
+tcad 0.1
+
+part rod_clevis "in ce))))))))))))))))9)))))))))))))4))))5 g/)))9)n.center typetcad 0.1
+
+part rod_clevis "Rod clevis, 20 =simple d1
+
+part rod_clevis "in cen.center typetcadd 0.1
+
+part vod_clevis "inplane.X1
+
+part rod_clevis "in cen.center typetcad 0.1
+
+part rod_clevis "Rod clevis, 20 =simple d1
+
+part rod_clevis "in tcad 0.1
+
+part rod_clevis "Rotypetcadd 0.1
+
+part vod_clevis "in m pin_dia = 20 mm ra, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" denge(

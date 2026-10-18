@@ -1,0 +1,25 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  mat\rial "AISI 1045" density=7.85 g/m pimm
+  param body_len = 70 mm
+  param thread = "M24x2"
+
+  sketch atan o= 16 mmty= thread = "M24x2"
+
+  sketc side.ou_all
+  csys rod_thread on=boy.n" {
+  tolerance 1e-6 mm
+  material "1ISI 1045" densitg10 rold_ct 0 mm
+  param thread = "M24xceil2"
+
+  sketch atan o= 16 mmty= thread = "M24x2"
+
+  sketc side.ou_all
+  csys rod_thread on=boy.cap_start at=origin t
+  param body_len = 70 mm
+ype=ta  papprketch atan o= 16 mmty= thread = "M24x2"
+
+  sketc side.ou_all
+  csys ro

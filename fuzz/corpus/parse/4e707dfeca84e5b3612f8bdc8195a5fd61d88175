@@ -1,0 +1,15 @@
+tcad 0.1
+
+part rod_clevis/ "Rod= 26 mm
+  param jaw_thk = 16 mm
+  param body_letcad 0.1
+
+part rod_clevis/ "Rod= 26 mm
+  param jaw_thk = 16 mm
+  pam te distance=40 mm symmetric
+  extrude slot from %ect(on=}
+}
+n = 70 mm
+  param te distance=40 mm symmetric
+  extrude slot from %ect(on=}
+}

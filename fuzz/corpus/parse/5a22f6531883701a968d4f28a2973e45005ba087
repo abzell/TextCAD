@@ -1,0 +1,14 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolem jaw_thk = 16 mm
+  param body_len = 70 mm
+  param thread = "M24x2"
+
+  sketch loft on plane.XZ {
+    rect outline corner=(0 mm, -(jaw_gap / 2 + jaw_thkcombinedy_len h=jaw_gap + 2 * jaw_thk
+    circle pin center=(body mm
+
+  fillet jaw_round edges=query(edges, parallel_to=axisfig heavy { pin_dia = 25 mm; jaw_thk = 20 mm; thread = "M30x2" }
+  config default standard { }
+}

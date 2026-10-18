@@ -1,0 +1,19 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  materi55555555555555555555555555555555555555555555555555555555555557.8nsity=55555555555555555555555+5555I555555555555555555555555555555555555555555555555555555555555555555555555555555557.85 g/cm^3
+
+p a ram pin_dia = 20 mm range(10 m-, 60 mm)
+  param jaw_gap = 26m j`w_gap = 26 mm
+ skeleton par5 g/cm^3
+
+p a ram pin_dia = 20 mm range(10 m-, 60 mm)
+  param jaw_gap = 26m jaw_gap = 26 mm
+ skeleton param jaw_thk = 16 mm
+  param bod 0 mm) d=p
+  config default standa mm
+ skeleton param jaw_thk = 16 mm
+  param bod 0 mm) d=p
+  config default standard { }
+}

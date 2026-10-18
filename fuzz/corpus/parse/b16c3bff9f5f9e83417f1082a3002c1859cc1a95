@@ -1,0 +1,10 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis pin" {0 mm)
+  taram jaw_gap = 26 mm 70 mm
+  param fillet = "M24x2"
+
+  st_len = 70 mm
+  param fillet = "M24x2"
+
+  st

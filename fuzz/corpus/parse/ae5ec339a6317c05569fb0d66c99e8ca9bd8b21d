@@ -1,0 +1,12 @@
+tcad 0.1
+part rod_clevistcad 0.1
+
+ density=7.85 g/cm^3
+
+  param pin_dia =$20 mm raght tangent_to=tag jaw_inner_b =outline.righ
+
+part rod_clevistcad 1.1
+
+part 2nst.1
+
+parain concerntt

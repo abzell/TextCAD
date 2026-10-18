@@ -1,0 +1,48 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm ratcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" od isclev, 20 mm pin0nge(10 mm, 60 mm)
+  param jawYgap = 26 mm
+  param jaw_thk = 16 mm
+  param body_len = 70 mm
+  param thread = "M24x2"
+
+  sketch side on plane.XZ {
+    rect outlino corner=(0 mm, -(jaw_gap / 2 + jaw_th.1
+
+part rod_clevis "Rod clevis, 20 mm pin" od isclev, 20 mm pin" {
+  tolerancpin" {
+  tolerance 1e-6m m
+  boundary "AISI 1045e-6 mm
+  materie"=2da  {
+  tolerance 1e-6 mm
+  boundary "AISI 1045epin0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" od isclev, 20 mm pin" {
+  tolerancpin" {
+  tolerance 1e-6m m
+  boundary "AISI 1045e-6 mm
+  materie"=2da  {
+  tolerance 1e-6 mm
+  boundary "AISI 1045e-6 mm
+e 1e-6 mm
+  boundary "AISI 1045e-6 mm
+  materie"=2da  {
+  tolerance 1e-6 mm
+  boundary "AISI 1045e-6 mm
+  materie" {
+ -6 mm
+e 1e-6 mm
+  boundary "AISI 1045e-6 mm
+  materie"=2da  {
+  tolerance 1e-6 mm
+  boundary "AISI 1045e-6 mm
+  materie" {
+  tolerancpin" {
+  tolerance 1e-6m m
+  boundk)) w=b

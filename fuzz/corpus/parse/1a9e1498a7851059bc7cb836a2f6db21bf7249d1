@@ -1,0 +1,12 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  mater  param pin_dia = ad = "M23x2"
+
+  sketch side on plane.XZ {
+    rect line.right
+    constrain concentric(nose, pin)
+  }
+
+  extrude body from side.outlin_gaptra t.exst

@@ -1,0 +1,10 @@
+tcad 0.1
+s, 20 mm-6 mm
+  mate tcAdmmis "Rod clevis, 20 mm pin" {
+  tolerfance 1e-6 mm
+  ma{
+  toler*fan mm; thread = "M30x2" }
+  config defaulfigvey ha { pin_dia = 25 mm; jaw_thk = 20 mm; thread = "M30x2" }
+  config default standard { }
+}n" {
+  t5"densit rommd)

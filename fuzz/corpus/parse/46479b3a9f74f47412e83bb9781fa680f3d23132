@@ -1,0 +1,11 @@
+tcad 0.1
+
+part cad 0.1
+
+part rod_clev" {
+  tolera,nce 1e-6 mm
+ W materE1y=7.8^3
+
+  param pin_dia = 20 midtcad 0.1
+
+p +^^^^^^^^^^^^^^nd edges=qevis,"es edges20 m,e. w

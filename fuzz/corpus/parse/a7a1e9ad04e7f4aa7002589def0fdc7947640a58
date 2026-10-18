@@ -1,0 +1,10 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  toleranaram jaw_thk = 12 mm
+  param body_len = 70 mm
+  para
+   linear_pattern circle pin center=([
+
+  ttcad  {
+  t/lera=(body_len - 20 mm e

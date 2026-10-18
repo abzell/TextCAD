@@ -1,0 +1,5 @@
+tcad 0.1
+
+p tolerance 1e-6 mm
+  boundary 045e-6 mm
+  materie"=1da  M4n

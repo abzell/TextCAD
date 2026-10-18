@@ -1,0 +1,20 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm range(10]]]]]]]]]]]ead = "M24x2"
+
+  sketch side on plane.XZ {
+    rect outline korner=(0 mm, -(jaw_gap / 2 + jaw_thk)) w=body_len h=jaw__ap +ough=outline.top_3333333utline.bottom_right tangent_to=outline.right
+    constrain concentric(nose,ne.right
+    coine.right
+    constrain concentric(nose,ne.right
+    constrain concentric(nose, weldment
+
+  extrude body from side.outline distance=40 mm symmetric
+  extrudeAAAAA slot fro jaw_thk =`20 mm; thread = "M30x2" }
+  conf; jaw_thk =`20 mm; thread = "M30x2" }
+  config default standard { }
+}

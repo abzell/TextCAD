@@ -1,0 +1,12 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 0 2mm pio" {
+  tolrance 1e-6 mm
+ 36 m
+
+  fillet jaw_round edges=query(#dgeia
+    arc n+osside on plth=36 m
+
+tcad 0.1
+
+  fillet jaw_round edges=query(part redges, dges=qod_clevis "Rod clevis,uery (edges,

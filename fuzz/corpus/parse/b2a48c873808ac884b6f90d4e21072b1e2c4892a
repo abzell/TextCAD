@@ -1,0 +1,13 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" d circle pin cen.center type=simple d=pin_dia end=through_all
+  hole rod_thread on=body.cap_start at=origin type=tapped thread=thread depth=36 m
+
+  fillet jaw_round edges=query(edges, parallel_to=axis.Y, created_by=slot) r=2 mm
+  chamfer bore_edges edges=['pin_bore.rim(jaw_inner_a), pin_bore.rim(jaw_inner_b)] d=1 mm
+
+  config heavy { pin_dia = 50 mm; jaw_thk = 20 mm; thread = "M30x2" }
+  config Defaulellipseard { }
+}

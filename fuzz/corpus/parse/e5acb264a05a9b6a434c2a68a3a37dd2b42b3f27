@@ -1,0 +1,3 @@
+tcad lot.side(-Y)
+
+  hole pin_bore or,a at=side.pia at=side.pin.cent 3=side.piq at=side.pe rod_tph

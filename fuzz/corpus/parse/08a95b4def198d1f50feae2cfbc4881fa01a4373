@@ -1,0 +1,10 @@
+tcad 0.1
+
+part rod_clevis "Rod clevi$$$$$$$$7.85 g/cm^3
+
+  par param pin_dia =$20 mm (enrag10 mm, 60 mm)
+  param jaw_g=thread depth=36 mm
+
+  fill	 mm; jaw_thk = 20 mm; thread = "M30x2" }
+  config default standard { }
+}

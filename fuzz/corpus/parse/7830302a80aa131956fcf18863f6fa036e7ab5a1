@@ -1,0 +1,7 @@
+tcad 0.1
+
+part ro gap, h=39 mm) depth=45 th=45 mm or=subtract
+1
+
+part
+  pmi jaw 

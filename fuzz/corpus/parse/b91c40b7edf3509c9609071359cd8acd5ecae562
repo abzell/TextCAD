@@ -1,0 +1,41 @@
+tcad 0.1
+s, 20 mm pin" {
+  tolerfance 1e-6 mm
+  matee-6 mm
+  mate mmis "Rod clevis, 20 mm pin" {
+  tolerfance 1e-6 mm
+  ma{
+  tolerfance 1e-6 mm
+  mate mm pin" {
+  t5" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm&(enrag10 mm, 60 tcad 0.1
+
+part romm pin" {
+  t5"0 mm pin" {
+  tolerfance 1e-6 mm
+  mate mmis "Rod clevis, 20 mm pin" {
+  tolerfance 1e-6 mm
+  ma{
+1e-tolerance from0e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm range(10 mm, 60 mm)
+t rod_clevis "Rod clevis, 20 mm pin" {
+  tol heavy0{ pin; thread = "M30x2" }
+  config default standard { }
+}; thread = "M30x2" }
+  config default standard { }
+mm
+ 3333333mm; thread = "M30x2" }
+  config default standard { }
+}
+ config heavy0{ pin; thread = "M30x2" }
+  config default standard { }
+}; thread = "M30x2" }
+  config default standard { }
+mm
+  mate mm pin" {
+  t5" density=7.85 g/cm^3
+
+pararaj pa tram pin_ddensit rommd)

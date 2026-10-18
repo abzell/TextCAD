@@ -1,0 +1,12 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-r_b = slot.side(-Y)
+
+ loft hole py.cap_end, w=jaw_gap, h=80 mm) depth=45 mm op=subtract
+
+  tag fillet jaw_round edgserqu=ey(edges,ner_a), pin_bore.rim(jaw_inner_b)] d=1 mm
+
+  config heavy0{ pin_dia = 25 mm; jaw_thk = 20 mm; thread = "M3002" }
+  config default standard { }
+}

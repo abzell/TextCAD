@@ -918,11 +918,15 @@ impl Parser {
     }
 
     fn or_expr(&mut self) -> R {
-        self.binary_loop(Self::and_expr, |p| p.is_word("or"))
+        self.binary_loop(Self::and_expr, |p| {
+            p.is_word("or") && p.look(1).kind != K::Eq
+        })
     }
 
     fn and_expr(&mut self) -> R {
-        self.binary_loop(Self::not_expr, |p| p.is_word("and"))
+        self.binary_loop(Self::not_expr, |p| {
+            p.is_word("and") && p.look(1).kind != K::Eq
+        })
     }
 
     fn not_expr(&mut self) -> R {

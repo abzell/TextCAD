@@ -1,0 +1,9 @@
+(((((((((mend, w/////////////////////******/////// hole rodrM30x2" ssssssspartssssssssss}
+  config dedonfig detcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerancejaw_thk = 16 mm
+  param body_len = 70 mm
+  param thread = "M24x2"
+
+  sketchfault staend, w/////////////////////******//// sid/// h

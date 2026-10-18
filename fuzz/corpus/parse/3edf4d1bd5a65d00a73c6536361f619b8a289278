@@ -1,0 +1,44 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" od isclev, 20 mm pin0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" od isclev, 20 mm pin" {
+  tolerancpin" {
+  tolerance 1e-6m m
+  boundary "AISI 1045e-6 mm
+  materie"=2da  {
+  tolerance 1e-6 mm
+  boundary "AISI 1045epin0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" od isclev, 20 mm pin" {
+  tolerancpin" {
+  tolerance 1e-6m m
+  boundary "AISI 1045e-6 mm
+  materie"=2da  {
+  tolerance 1e-6 mm
+  boundary "AISI 1045e-6 mm
+e 1e-6 mm
+  boundary "AISI 1045e-6 mm
+  materie"=2da  {
+  tolerance 1e-6 mm
+  boundary "AISI 1045e-6 mm
+  materie" {
+ -6 mm
+e 1e-6 mm
+  boundary "AISI 1045e-6 mm
+  materie"=2da  {
+  tolerance 1e-6 mm
+  boundary "AISI 1045e-6 mm
+  materie" {
+  tolerancpin" {
+  tolerance 1e-6m m
+  boundary "AISI 1045e-6 mm
+  materie"=2da  {
+  tolerance 1e-6 mm
+  boundary "AISI 1045e-6 mm
+e 1g-6 mm
+  boundary "AISI 1045e-6 mm
+  materie"=2da  {
+  tolerance 1e-6 mm
+  boundary "AISI 1045e-6 mm
+  materie"=2da  M4n

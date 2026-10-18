@@ -1,0 +1,3 @@
+tcad 0m pin" {
+  tolerance 2e-6`md_c material "AISI 104\" de3
+ param 3n33066 6, mm

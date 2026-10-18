@@ -1,0 +1,14 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045"  g/cm^3
+
+   jaw_gap = 26 mm
+  par 70 mm
+=7.85 g/cm^3
+
+  para'm pin_dia = 20 mm range(10 mm, 60 mm)
+  p param body_len = 70 mm
+  param flange = "M24x2"333g default standard { }
+}
