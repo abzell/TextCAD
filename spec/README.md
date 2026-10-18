@@ -24,5 +24,6 @@ Chapters marked *normative* are complete for their milestone; the others are stu
 | [features.md](features.md) | Features | M5, M6 |
 | [naming.md](naming.md) | Persistent naming | M6 |
 | [io.md](io.md) | Import and export | M7 |
+| [viewer.md](viewer.md) | Viewer server, language server | M8 |
 
 Examples live in [`examples/`](examples/); CI keeps them parseable and in canonical form.

@@ -227,3 +227,5 @@ __marimo__/
 /fuzz/Cargo.lock
 
 # A bundle keeps its sources in parts/ (spec/bundle.md); never ignore it.
+
+node_modules/

@@ -130,6 +130,32 @@ jobs:
           pip install build123d
           cargo build -p tcad-cli --features occt
           python3 corpus/tools/check_step_exports.py target/debug/tcad corpus
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Viewer (typecheck, bundle is current, browser test)
+        working-directory: viewer
+        run: |
+          npm ci
+          npm run check
+          npm run build
+          git diff --exit-code -- ../crates/tcad-cli/assets/viewer.js
+          npx playwright-core install --with-deps chromium
+          TCAD="$GITHUB_WORKSPACE/target/debug/tcad" npm test
+
+  # The VS Code / Theia extension must compile and bundle.
+  editors:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - working-directory: editors/vscode
+        run: |
+          npm ci
+          npm run check
+          npm run build
 
   build123d-crosscheck:
     runs-on: ubuntu-latest

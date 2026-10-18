@@ -4,6 +4,8 @@
 mod diff;
 mod export;
 mod geom;
+mod serve;
+pub use serve::serve_on;
 mod verify;
 
 use serde_json::{Value, json};
@@ -34,6 +36,7 @@ Commands:
   export  Write STEP, STL, 3MF or GLB (--to step|stl|3mf|glb [--out FILE])
   verify  Regenerate and compare with the cache: T1 identical, T2 equivalent, T3 failed
   diff    Semantic difference between two versions of a part (two paths)
+  serve   Local web viewer: feature tree, source and 3D view linked both ways (--port N)
 
 Options:
   --json     Machine-readable output
@@ -46,6 +49,7 @@ Options:
   --linear MM    (export stl/3mf/glb) chordal tolerance, default 0.05
   --angular DEG  (export stl/3mf/glb) angular tolerance, default 10
   --no-geometry  (diff) compare the text only
+  --port N   (serve) TCP port on 127.0.0.1, default 8765 (0 picks a free one)
   --help     Show this help
   --version  Show the version
 
@@ -87,6 +91,7 @@ fn run_impl(
     let mut out_file: Option<&str> = None;
     let mut linear: Option<&str> = None;
     let mut angular: Option<&str> = None;
+    let mut port: Option<&str> = None;
     let mut no_geometry = false;
     let mut command: Option<&str> = None;
     let mut paths: Vec<&str> = Vec::new();
@@ -101,6 +106,7 @@ fn run_impl(
                 "--to" => to = Some(a.as_str()),
                 "--out" => out_file = Some(a.as_str()),
                 "--linear" => linear = Some(a.as_str()),
+                "--port" => port = Some(a.as_str()),
                 _ => angular = Some(a.as_str()),
             }
             continue;
@@ -111,6 +117,7 @@ fn run_impl(
             "--out" => pending = Some("--out"),
             "--linear" => pending = Some("--linear"),
             "--angular" => pending = Some("--angular"),
+            "--port" => pending = Some("--port"),
             "--no-geometry" => no_geometry = true,
             "--force" => force = true,
             "--json" => json = true,
@@ -146,7 +153,7 @@ fn run_impl(
     }
     if !matches!(
         command,
-        "check" | "fmt" | "build" | "props" | "refs" | "export" | "verify" | "diff"
+        "check" | "fmt" | "build" | "props" | "refs" | "export" | "verify" | "diff" | "serve"
     ) {
         let _ = writeln!(err, "tcad: unknown command `{command}`\n\n{USAGE}");
         return 2;
@@ -154,6 +161,28 @@ fn run_impl(
     if check_only && command != "fmt" {
         let _ = writeln!(err, "tcad: --check only applies to `fmt`");
         return 2;
+    }
+    if command == "serve" {
+        if paths.len() != 1 {
+            let _ = writeln!(err, "tcad serve: expected exactly one bundle or part path");
+            return 2;
+        }
+        let port = match port.map(str::parse::<u16>) {
+            None => 8765,
+            Some(Ok(p)) => p,
+            Some(Err(_)) => {
+                let _ = writeln!(err, "tcad serve: --port needs a number from 0 to 65535");
+                return 2;
+            }
+        };
+        return geometry(
+            &Request::Serve(serve::ServeOptions {
+                path: paths[0],
+                port,
+            }),
+            out,
+            err,
+        );
     }
     if matches!(
         command,
@@ -304,6 +333,7 @@ enum Request<'a> {
     Export(export::ExportOptions<'a>),
     Verify(geom::Options<'a>),
     Diff(diff::DiffOptions<'a>),
+    Serve(serve::ServeOptions<'a>),
 }
 
 fn dispatch<K: tcad_kernel::Kernel>(
@@ -319,6 +349,7 @@ fn dispatch<K: tcad_kernel::Kernel>(
         Request::Export(o) => export::export_command(k, o, out, err),
         Request::Verify(o) => verify::verify_command(k, o, out, err),
         Request::Diff(o) => diff::diff_command(k, o, out, err),
+        Request::Serve(o) => serve::serve_command(k, o, out, err),
     }
 }
 
@@ -334,6 +365,7 @@ fn run_geometry(req: &Request<'_>, _: &mut dyn Write, err: &mut dyn Write) -> i3
         Request::Export(_) => "export",
         Request::Verify(_) => "verify",
         Request::Diff(_) => "diff",
+        Request::Serve(_) => "serve",
     };
     let _ = writeln!(
         err,
