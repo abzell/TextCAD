@@ -65,6 +65,10 @@ exports.run = async function run() {
     insertSpaces: true,
   });
   assert.ok(edits && edits.length, "formatting edits");
-  assert.ok(edits[0].newText.includes("param w = 10 mm"), edits[0].newText);
+  // VS Code turns the server's whole-document edit into minimal edits: apply them and compare
+  const we = new vscode.WorkspaceEdit();
+  we.set(messy.uri, edits);
+  assert.ok(await vscode.workspace.applyEdit(we), "edits apply");
+  assert.ok(messy.getText().includes("  param w = 10 mm\n"), messy.getText());
   console.log("VS Code language server checks passed");
 };
