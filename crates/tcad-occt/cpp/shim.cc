@@ -97,7 +97,6 @@
 #include <TopAbs_ShapeEnum.hxx>
 #include <TopExp.hxx>
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <BRep_Tool.hxx>
 #include <gp_Trsf.hxx>
 #include <TopExp_Explorer.hxx>
@@ -336,7 +335,7 @@ void add_created(Shape& out, const TopTools_IndexedMapOfShape& faces, const Topo
 
 void add_created_list(Shape& out, const TopTools_IndexedMapOfShape& faces,
                       const TopTools_ListOfShape& l, uint32_t role, uint32_t a, uint32_t b) {
-  for (TopTools_ListIteratorOfListOfShape it(l); it.More(); it.Next()) {
+  for (TopTools_ListOfShape::Iterator it(l); it.More(); it.Next()) {
     if (it.Value().ShapeType() == TopAbs_FACE) add_created(out, faces, it.Value(), role, a, b);
   }
 }
@@ -355,7 +354,7 @@ void inherit_from(Shape& out, Maker& mk, const TopoDS_Shape& input, uint32_t ope
       int r = index_in(result_faces, f);
       if (r >= 0) out.inherited.push_back({(uint32_t)r, operand, (uint32_t)(i - 1)});
     } else {
-      for (TopTools_ListIteratorOfListOfShape it(mod); it.More(); it.Next()) {
+      for (TopTools_ListOfShape::Iterator it(mod); it.More(); it.Next()) {
         int r = index_in(result_faces, it.Value());
         if (r >= 0) out.inherited.push_back({(uint32_t)r, operand, (uint32_t)(i - 1)});
       }
@@ -447,7 +446,7 @@ std::unique_ptr<Shape> extrude(const ProfileData& p, Vec3 dir, double distance, 
     for (size_t l = 0; l < grid.size(); l++) {
       for (size_t g = 0; g < grid[l].size(); g++) {
         const TopTools_ListOfShape& sides = mk.Generated(grid[l][g]);
-        for (TopTools_ListIteratorOfListOfShape it(sides); it.More(); it.Next()) {
+        for (TopTools_ListOfShape::Iterator it(sides); it.More(); it.Next()) {
           da.Add(TopoDS::Face(it.Value()), pull, draft, neutral);
           if (!da.AddDone()) throw std::runtime_error("a side face cannot be drafted");
         }
@@ -469,7 +468,7 @@ std::unique_ptr<Shape> extrude(const ProfileData& p, Vec3 dir, double distance, 
     map_face(mk.LastShape(), kCapEnd, 0, 0);
     for (size_t l = 0; l < grid.size(); l++) {
       for (size_t g = 0; g < grid[l].size(); g++) {
-        for (TopTools_ListIteratorOfListOfShape it(mk.Generated(grid[l][g])); it.More(); it.Next()) {
+        for (TopTools_ListOfShape::Iterator it(mk.Generated(grid[l][g])); it.More(); it.Next()) {
           map_face(it.Value(), kSide, (uint32_t)l, (uint32_t)g);
         }
       }
@@ -633,13 +632,13 @@ std::unique_ptr<Shape> boolean_op(uint32_t op, const Shape& a, const Shape& b, d
           if (mod.IsEmpty()) {
             cur.push_back(f);
           } else {
-            for (TopTools_ListIteratorOfListOfShape it(mod); it.More(); it.Next()) cur.push_back(it.Value());
+            for (TopTools_ListOfShape::Iterator it(mod); it.More(); it.Next()) cur.push_back(it.Value());
           }
           for (const TopoDS_Shape& c : cur) {
             std::vector<TopoDS_Shape> fin;
             if (!uh.IsNull() && uh->IsRemoved(c)) continue;
             if (!uh.IsNull() && !uh->Modified(c).IsEmpty()) {
-              for (TopTools_ListIteratorOfListOfShape it(uh->Modified(c)); it.More(); it.Next()) fin.push_back(it.Value());
+              for (TopTools_ListOfShape::Iterator it(uh->Modified(c)); it.More(); it.Next()) fin.push_back(it.Value());
             } else {
               fin.push_back(c);
             }
@@ -929,7 +928,7 @@ rust::Vec<EdgeRec> edges_of(const Shape& sh) {
       }
       if (anc.Contains(e)) {
         std::vector<uint32_t> seen;
-        for (TopTools_ListIteratorOfListOfShape it(anc.FindFromKey(e)); it.More(); it.Next()) {
+        for (TopTools_ListOfShape::Iterator it(anc.FindFromKey(e)); it.More(); it.Next()) {
           int fi = index_in(fm, it.Value());
           if (fi >= 0 && std::find(seen.begin(), seen.end(), (uint32_t)fi) == seen.end()) seen.push_back((uint32_t)fi);
         }
