@@ -82,6 +82,11 @@ The registry lives in `crates/tcad-diag/src/codes.rs`; a test keeps it unique an
 | I4201 | sketch has degrees of freedom (information) |
 | E4301 | sketch cannot be solved near its starting geometry |
 | W4601 | projected geometry is not available before the kernel runs |
+| E3001 | reference does not resolve (the message gives the nearest names) |
+| E3002 | reference is ambiguous: a split face needs an ordinal |
+| E3003 | query does not match the expected number of entities |
+| E3004 | invalid query filter |
+| E3005 | reference resolves to the wrong kind of entity |
 | E5001 | invalid feature argument (unknown, missing, misplaced or conflicting) |
 | E5002 | reference does not resolve to the right kind of geometry |
 | E5003 | feature not yet supported |

@@ -1,0 +1,9 @@
+tcad 0.1
+
+part feat_chamfer "Block with two chamfered edges" {
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=50 mm h=30 mm
+  }
+  extrude boss from s.r distance=12 mm
+  chamfer bevel edges=[edge(boss.cap_end & boss.side(s.r.bottom)), edge(boss.cap_end & boss.side(s.r.top))] d=3 mm
+}

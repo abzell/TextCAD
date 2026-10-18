@@ -1,0 +1,5 @@
+format = "0.1"
+name = "feat_pattern_linear"
+entry = "parts/feat_pattern_linear.tcad"
+units = "mm"
+license = "Apache-2.0"

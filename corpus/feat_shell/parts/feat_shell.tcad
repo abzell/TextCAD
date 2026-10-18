@@ -1,0 +1,9 @@
+tcad 0.1
+
+part feat_shell "Open box" {
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=50 mm h=30 mm
+  }
+  extrude boss from s.r distance=20 mm
+  shell box faces=[boss.cap_end] thickness=2 mm
+}

@@ -194,4 +194,50 @@ mod with_occt {
         assert_eq!(hash("manifest.json"), h1);
         let _ = OcctKernel::new();
     }
+
+    #[test]
+    fn refs_lists_what_every_reference_resolves_to_and_why_one_fails() {
+        let d = Dir::new("refs");
+        let good = "tcad 0.1\n\npart p {\n  sketch s on plane.XY {\n    rect r corner=(0 mm, 0 mm) w=20 mm h=10 mm\n  }\n  extrude boss from s.r distance=5 mm\n  fillet f edges=[edge(boss.cap_end & boss.side(s.r.bottom))] r=1 mm\n}\n";
+        let f = d.write("p.tcad", good);
+        let k = OcctKernel::new();
+        let (mut out, mut err) = (Vec::new(), Vec::new());
+        let code = run_with_kernel(
+            &k,
+            "refs",
+            &f.display().to_string(),
+            None,
+            true,
+            &mut out,
+            &mut err,
+        );
+        assert_eq!(code, 0, "{}", String::from_utf8_lossy(&err));
+        let v: Value = serde_json::from_slice(&out).expect("json");
+        assert_eq!(v["refs"][0]["feature"], "f");
+        assert_eq!(
+            v["refs"][0]["resolved"][0],
+            "edge(boss.cap_end & boss.side(s.r.bottom))"
+        );
+        let bad = good.replace("s.r.bottom", "s.r.botom");
+        let f = d.write("q.tcad", &bad);
+        let (mut out, mut err) = (Vec::new(), Vec::new());
+        let code = run_with_kernel(
+            &k,
+            "refs",
+            &f.display().to_string(),
+            None,
+            true,
+            &mut out,
+            &mut err,
+        );
+        assert_eq!(code, 1, "{}", String::from_utf8_lossy(&err));
+        let v: Value = serde_json::from_slice(&out).expect("json");
+        assert!(
+            v["refs"][0]["error"]
+                .as_str()
+                .expect("error")
+                .contains("s.r.bottom")
+        );
+        assert_eq!(v["diagnostics"][0]["code"], "E3001");
+    }
 }

@@ -132,7 +132,7 @@ impl<'a> Resolver<'a> {
     }
 
     /// Resolves a reference to its entities (several if the reference is a tag on more).
-    /// Used for faces and edges alike; see [`Resolver::face`] and [`Resolver::edge`].
+    /// Used for faces and edges alike; see [`Resolver::face`].
     pub fn resolve(&self, r: &Reference) -> Result<Entity, NameError> {
         self.resolve_depth(r, 0, false)
     }

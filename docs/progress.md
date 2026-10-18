@@ -87,3 +87,22 @@ Done:
 
 Deferred: guided loft (ThruSections has no guides), sketches on faces and topology maps (M6),
 STEP/GLB export (M7), multi-body handling beyond union.
+
+## M6: naming, detail features, patterns
+
+Done:
+- Kernel lineage and topology listing; fillet, chamfer, shell, draft and transforms in the OpenCASCADE
+  backend (tests: `crates/tcad-occt/tests/detail.rs`).
+- `tcad-naming`: IDs, aliases, ordinals, edge names, tags, queries, resolver errors with candidates.
+- `tcad-build`: names threaded through extrude, revolve, sweep, loft and booleans; holes, fillets,
+  chamfers, shell, draft, rib, patterns, mirror; sketches/planes/`to=` on faces; manifest topology map.
+- `tcad refs`.
+- Corpus: `feat_*` (11 parts) and `nam_*` (2 parts, 54 swept parameter sets), all at T2 against
+  closed-form volumes and build123d, T1-deterministic.
+
+Findings: OpenCASCADE reports no `Generated` face for a profile segment perpendicular to the axis of a
+revolution (hence the geometric fallback); `ShapeFix_Face` may rebuild profile edges, so segments are
+matched back to edges by midpoint; sweeping profile edges map cleanly through `Generated`.
+
+Deferred: variable-radius fillet direction follows the edge orientation (documented, tested for
+volume only); `rib` along arcs; vertex queries; loft guides.

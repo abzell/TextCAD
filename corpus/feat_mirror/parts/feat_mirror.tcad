@@ -1,0 +1,10 @@
+tcad 0.1
+
+part feat_mirror "Bar with a mirrored hole" {
+  sketch s on plane.XY {
+    rect r corner=(-30 mm, 0 mm) w=60 mm h=20 mm
+  }
+  extrude bar from s.r distance=10 mm
+  hole h on=bar.cap_end at=(15 mm, 10 mm) d=6 mm end=through_all
+  mirror m of=h plane=plane.YZ
+}

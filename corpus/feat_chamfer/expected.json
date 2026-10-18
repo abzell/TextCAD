@@ -1,0 +1,27 @@
+{
+  "note": "Equal-distance chamfers on the two long top edges, named by the faces they join.",
+  "volume_mm3": 17550.0,
+  "area_mm2": 4726.264068711928,
+  "center_of_mass_mm": [
+    25.0,
+    15.0,
+    5.871794871794871
+  ],
+  "bbox_min_mm": [
+    0,
+    0,
+    0
+  ],
+  "bbox_max_mm": [
+    50,
+    30,
+    12
+  ],
+  "topology": {
+    "solids": 1
+  },
+  "baseline": [
+    "area_mm2",
+    "center_of_mass_mm"
+  ]
+}

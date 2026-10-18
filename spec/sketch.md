@@ -72,7 +72,7 @@ A reference `name.role` names a point or a curve of an entity; the bare name is 
 | `ellipse` | `center` | (the entity) |
 | `rect` | `bottom_left`, `bottom_right`, `top_right`, `top_left` | `bottom`, `right`, `top`, `left` (counterclockwise) |
 | `polygon` | `center`, `v0` ... | `e0` ... (edge `i` runs from `v_i` to `v_i+1`) |
-| `slot` | `start`, `end` | (the entity, as its centerline) |
+| `slot` | `start`, `end` | (the entity, as its centerline); its four outline segments are `right`, `end_cap`, `left`, `start_cap` (counterclockwise from the right side) |
 | `spline` | `p0`, `p1`, ... | |
 
 ## Constraints

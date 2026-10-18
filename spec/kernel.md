@@ -27,11 +27,22 @@ the format never encodes behavior specific to OpenCASCADE.
 | `sweep` | profile, path, optional guide | The profile moved along the path. With a guide, the guide controls the orientation of the profile (auxiliary spine); a guided profile has no holes. | path not a chain; result not a solid |
 | `loft` | two or more profiles (no holes), ruled flag | A solid through the sections in order: smooth, or ruled with straight sides. | incompatible sections |
 | `boolean` | union / subtract / intersect, two shapes, modeling tolerance | The combined shape. Faces on the same surface are merged afterwards, so a union of two blocks with a common top has one top face. Disjoint results stay separate solids. | the operation fails |
+| `fillet` | shape, edges with start and end radius | The edges rounded; faces next to them are trimmed and each edge gets a new face (corner patches where several meet). | radius too large for the geometry |
+| `chamfer` | shape, edges with a reference face and two distances | The edges beveled: `d1` on the reference face, `d2` on the other. | distances too large |
+| `shell` | shape, faces to open, thickness, outward flag | The solid hollowed with constant walls, inward unless `outward`. | thickness too large |
+| `draft` | shape, faces, pull direction, angle, neutral plane | The faces tilted about their intersection with the neutral plane; a positive angle narrows the body along the pull direction. | a face cannot be drafted |
+| `transform` | shape, translate / rotate / mirror | A copy moved or reflected. | |
+| `topology` | shape | Every face (surface type, outward normal of planar faces, axis, radius, centroid, area, edges) and edge (curve type, ends, midpoint, length, radius, direction, adjacent faces), by index | |
+| `lineage` | shape | Where the faces of the result came from, as recorded when the operation ran: `inherited` (result face, operand, input face; a face may come from several inputs when merged and an input may produce several faces when split) and `created` (result face, role: cap start/end, side of profile loop `lp` segment `seg`, from an input edge, from an input face). Empty for shapes read back from the cache. | |
 | `properties` | shape | volume, area, center of mass, inertia tensor **about the center of mass** (axes parallel to the world axes, unit density), bounding box, counts of solids, faces, edges, vertices | |
 | `canonical_brep` / `from_brep` | shape / bytes | A serialization that is identical for identical shapes built by the same backend on the same platform. It is also the cache format. | malformed input |
 
 The modeling tolerance of the part (default 1e-6 mm) is the fuzzy value of booleans and the gap
 within which sketch end points join into profiles.
+
+Entities are identified by their **index** in the backend's enumeration of the result. The numbering
+is deterministic (tier T1) and survives a cache round trip, but it is not part of the format:
+persistent names (`spec/naming.md`) are built from the lineage, never from indices.
 
 ## Backend identity
 

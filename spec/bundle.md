@@ -40,7 +40,8 @@ the canonical text changes), the resolved configuration name, and the bytes of e
 ```
 { "format": "0.1", "part": "...", "config": null | "name", "source_hash": "...", "kernel": "occt-7.6.3",
   "tolerance_mm": 1e-6,
-  "features": [ { "name", "keyword", "solids", "faces", "edges", "vertices", "volume_mm3" } ],
+  "features": [ { "name", "keyword", "solids", "faces", "edges", "vertices", "volume_mm3",
+                  "thread"?, "topology"? } ],
   "result": { "solids", "faces", "edges", "vertices", "volume_mm3", "area_mm2",
               "center_of_mass_mm", "bbox_min_mm", "bbox_max_mm" },
   "brep_sha256": "..." }
@@ -52,4 +53,7 @@ A cache entry is valid only if the manifest's source hash and kernel id/version 
 `brep.brep` hashes to `brep_sha256`; otherwise it is regenerated. Consumers without a kernel (viewers,
 PLM systems, agents) read the cached results directly: recipe plus result.
 
-The per-feature topology map used by persistent naming (milestone M6) is added to the manifest then.
+`topology` is the **topology map**: after each solid-changing feature, every face and edge of the
+result as `{ "kind": "face" | "edge", "id", "aliases"?, "geometry", "size", "at" }` with the primary
+semantic ID (ordinal included), the other IDs, the surface or curve type, the area (mm^2) or length
+(mm) and the centroid or midpoint (mm). `thread` is the designation of a tapped hole.

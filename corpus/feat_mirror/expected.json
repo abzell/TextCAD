@@ -1,0 +1,27 @@
+{
+  "note": "The hole at x=15 and its mirror image in the YZ plane at x=-15.",
+  "volume_mm3": 11434.513322353838,
+  "area_mm2": 4263.893782901542,
+  "center_of_mass_mm": [
+    -7.158548934438907e-16,
+    10.000000000000002,
+    5.000000000000001
+  ],
+  "bbox_min_mm": [
+    -30,
+    0,
+    0
+  ],
+  "bbox_max_mm": [
+    30,
+    20,
+    10
+  ],
+  "topology": {
+    "solids": 1
+  },
+  "baseline": [
+    "area_mm2",
+    "center_of_mass_mm"
+  ]
+}

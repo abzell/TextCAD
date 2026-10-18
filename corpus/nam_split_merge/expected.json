@@ -1,0 +1,353 @@
+{
+  "note": "A groove splits the top face in two; the hole refers to the right-hand piece by ordinal (#2) and the groove floor edges by the faces they join. Swept groove position and width must keep every reference valid.",
+  "volume_mm3": 20329.679241353646,
+  "area_mm2": 6068.949089234813,
+  "center_of_mass_mm": [
+    30.041126296691562,
+    15.000000000000004,
+    5.814441212405763
+  ],
+  "bbox_min_mm": [
+    0,
+    0,
+    0
+  ],
+  "bbox_max_mm": [
+    60,
+    30,
+    12
+  ],
+  "topology": {
+    "solids": 1
+  },
+  "baseline": [
+    "area_mm2",
+    "center_of_mass_mm"
+  ],
+  "sweeps": [
+    {
+      "set": {
+        "w": "60 mm",
+        "gx": "12 mm",
+        "gw": "6 mm"
+      },
+      "volume_mm3": 20569.679241353646,
+      "bbox_min_mm": [
+        0,
+        0,
+        0
+      ],
+      "bbox_max_mm": [
+        60,
+        30,
+        12
+      ]
+    },
+    {
+      "set": {
+        "w": "60 mm",
+        "gx": "12 mm",
+        "gw": "8 mm"
+      },
+      "volume_mm3": 20329.679241353646,
+      "bbox_min_mm": [
+        0,
+        0,
+        0
+      ],
+      "bbox_max_mm": [
+        60,
+        30,
+        12
+      ]
+    },
+    {
+      "set": {
+        "w": "60 mm",
+        "gx": "12 mm",
+        "gw": "12 mm"
+      },
+      "volume_mm3": 19849.679241353646,
+      "bbox_min_mm": [
+        0,
+        0,
+        0
+      ],
+      "bbox_max_mm": [
+        60,
+        30,
+        12
+      ]
+    },
+    {
+      "set": {
+        "w": "60 mm",
+        "gx": "20 mm",
+        "gw": "6 mm"
+      },
+      "volume_mm3": 20569.679241353646,
+      "bbox_min_mm": [
+        0,
+        0,
+        0
+      ],
+      "bbox_max_mm": [
+        60,
+        30,
+        12
+      ]
+    },
+    {
+      "set": {
+        "w": "60 mm",
+        "gx": "20 mm",
+        "gw": "8 mm"
+      },
+      "volume_mm3": 20329.679241353646,
+      "bbox_min_mm": [
+        0,
+        0,
+        0
+      ],
+      "bbox_max_mm": [
+        60,
+        30,
+        12
+      ]
+    },
+    {
+      "set": {
+        "w": "60 mm",
+        "gx": "20 mm",
+        "gw": "12 mm"
+      },
+      "volume_mm3": 19849.679241353646,
+      "bbox_min_mm": [
+        0,
+        0,
+        0
+      ],
+      "bbox_max_mm": [
+        60,
+        30,
+        12
+      ]
+    },
+    {
+      "set": {
+        "w": "60 mm",
+        "gx": "30 mm",
+        "gw": "6 mm"
+      },
+      "volume_mm3": 20569.679241353646,
+      "bbox_min_mm": [
+        0,
+        0,
+        0
+      ],
+      "bbox_max_mm": [
+        60,
+        30,
+        12
+      ]
+    },
+    {
+      "set": {
+        "w": "60 mm",
+        "gx": "30 mm",
+        "gw": "8 mm"
+      },
+      "volume_mm3": 20329.679241353646,
+      "bbox_min_mm": [
+        0,
+        0,
+        0
+      ],
+      "bbox_max_mm": [
+        60,
+        30,
+        12
+      ]
+    },
+    {
+      "set": {
+        "w": "60 mm",
+        "gx": "30 mm",
+        "gw": "12 mm"
+      },
+      "volume_mm3": 19849.679241353646,
+      "bbox_min_mm": [
+        0,
+        0,
+        0
+      ],
+      "bbox_max_mm": [
+        60,
+        30,
+        12
+      ]
+    },
+    {
+      "set": {
+        "w": "90 mm",
+        "gx": "12 mm",
+        "gw": "6 mm"
+      },
+      "volume_mm3": 31369.679241353646,
+      "bbox_min_mm": [
+        0,
+        0,
+        0
+      ],
+      "bbox_max_mm": [
+        90,
+        30,
+        12
+      ]
+    },
+    {
+      "set": {
+        "w": "90 mm",
+        "gx": "12 mm",
+        "gw": "8 mm"
+      },
+      "volume_mm3": 31129.679241353646,
+      "bbox_min_mm": [
+        0,
+        0,
+        0
+      ],
+      "bbox_max_mm": [
+        90,
+        30,
+        12
+      ]
+    },
+    {
+      "set": {
+        "w": "90 mm",
+        "gx": "12 mm",
+        "gw": "12 mm"
+      },
+      "volume_mm3": 30649.679241353646,
+      "bbox_min_mm": [
+        0,
+        0,
+        0
+      ],
+      "bbox_max_mm": [
+        90,
+        30,
+        12
+      ]
+    },
+    {
+      "set": {
+        "w": "90 mm",
+        "gx": "20 mm",
+        "gw": "6 mm"
+      },
+      "volume_mm3": 31369.679241353646,
+      "bbox_min_mm": [
+        0,
+        0,
+        0
+      ],
+      "bbox_max_mm": [
+        90,
+        30,
+        12
+      ]
+    },
+    {
+      "set": {
+        "w": "90 mm",
+        "gx": "20 mm",
+        "gw": "8 mm"
+      },
+      "volume_mm3": 31129.679241353646,
+      "bbox_min_mm": [
+        0,
+        0,
+        0
+      ],
+      "bbox_max_mm": [
+        90,
+        30,
+        12
+      ]
+    },
+    {
+      "set": {
+        "w": "90 mm",
+        "gx": "20 mm",
+        "gw": "12 mm"
+      },
+      "volume_mm3": 30649.679241353646,
+      "bbox_min_mm": [
+        0,
+        0,
+        0
+      ],
+      "bbox_max_mm": [
+        90,
+        30,
+        12
+      ]
+    },
+    {
+      "set": {
+        "w": "90 mm",
+        "gx": "30 mm",
+        "gw": "6 mm"
+      },
+      "volume_mm3": 31369.679241353646,
+      "bbox_min_mm": [
+        0,
+        0,
+        0
+      ],
+      "bbox_max_mm": [
+        90,
+        30,
+        12
+      ]
+    },
+    {
+      "set": {
+        "w": "90 mm",
+        "gx": "30 mm",
+        "gw": "8 mm"
+      },
+      "volume_mm3": 31129.679241353646,
+      "bbox_min_mm": [
+        0,
+        0,
+        0
+      ],
+      "bbox_max_mm": [
+        90,
+        30,
+        12
+      ]
+    },
+    {
+      "set": {
+        "w": "90 mm",
+        "gx": "30 mm",
+        "gw": "12 mm"
+      },
+      "volume_mm3": 30649.679241353646,
+      "bbox_min_mm": [
+        0,
+        0,
+        0
+      ],
+      "bbox_max_mm": [
+        90,
+        30,
+        12
+      ]
+    }
+  ]
+}

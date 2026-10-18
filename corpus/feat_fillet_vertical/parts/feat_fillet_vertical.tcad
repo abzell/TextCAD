@@ -1,0 +1,9 @@
+tcad 0.1
+
+part feat_fillet_vertical "Block with rounded vertical edges" {
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=50 mm h=30 mm
+  }
+  extrude boss from s.r distance=12 mm
+  fillet corners edges=query(edges, parallel_to=+Z) r=5 mm
+}

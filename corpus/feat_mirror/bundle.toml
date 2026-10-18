@@ -1,0 +1,5 @@
+format = "0.1"
+name = "feat_mirror"
+entry = "parts/feat_mirror.tcad"
+units = "mm"
+license = "Apache-2.0"

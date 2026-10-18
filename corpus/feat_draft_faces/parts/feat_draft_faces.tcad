@@ -1,0 +1,9 @@
+tcad 0.1
+
+part feat_draft_faces "Tapered block" {
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=40 mm h=40 mm
+  }
+  extrude boss from s.r distance=20 mm
+  draft taper faces=[boss.side(s.r.bottom), boss.side(s.r.right), boss.side(s.r.top), boss.side(s.r.left)] angle=3 deg pull=+Z neutral=boss.cap_start
+}

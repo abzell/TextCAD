@@ -24,6 +24,75 @@ fn vec3(v: &Value) -> [f64; 3] {
     ]
 }
 
+/// Persistent names of the faces and edges after the last feature, sorted.
+fn named(b: &tcad_build::Built<<OcctKernel as Kernel>::Shape>) -> Vec<String> {
+    let mut v: Vec<String> = b
+        .features
+        .last()
+        .map(|f| f.topology_map.iter().map(|e| e.id.clone()).collect())
+        .unwrap_or_default();
+    v.sort();
+    v
+}
+
+/// Replaces the value of `param NAME = ...` lines (keeping a trailing `range(...)`).
+fn with_params(src: &str, set: &serde_json::Map<String, Value>) -> String {
+    src.lines()
+        .map(|line| {
+            let t = line.trim_start();
+            if let Some(rest) = t.strip_prefix("param ") {
+                let name = rest.split_whitespace().next().unwrap_or("");
+                if let Some(v) = set.get(name) {
+                    let indent = &line[..line.len() - t.len()];
+                    let tail = rest.find(" range(").map_or("", |i| &rest[i..]);
+                    return format!("{indent}param {name} = {}{tail}", v.as_str().unwrap());
+                }
+            }
+            line.to_string()
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
+        + "\n"
+}
+
+/// Naming-robustness sweep: at every swept parameter set the part must build (so every reference
+/// resolves), keep exactly the same persistent names and match the closed-form volume and box.
+fn sweep(
+    k: &OcctKernel,
+    name: &str,
+    src: &str,
+    base: &tcad_build::Built<<OcctKernel as Kernel>::Shape>,
+    sweeps: &[Value],
+) {
+    let base_names = named(base);
+    assert!(!base_names.is_empty(), "{name}: no names recorded");
+    for sw in sweeps {
+        let set = sw["set"].as_object().unwrap();
+        let text = with_params(src, set);
+        let a = analyze(&text);
+        assert!(!a.has_errors(), "{name} {set:?}: {:#?}", a.diagnostics);
+        let built =
+            build(k, &a.model.unwrap(), None).unwrap_or_else(|d| panic!("{name} {set:?}: {d:#?}"));
+        let p = k.properties(built.shape.as_ref().unwrap()).unwrap();
+        let exp = sw["volume_mm3"].as_f64().unwrap();
+        assert!(
+            (p.volume - exp).abs() <= 1e-6 * exp.max(1.0),
+            "{name} {set:?}: volume {} vs {exp}",
+            p.volume
+        );
+        for (key, got) in [("bbox_min_mm", p.bbox_min), ("bbox_max_mm", p.bbox_max)] {
+            for (g, e) in got.iter().zip(vec3(&sw[key])) {
+                assert!((g - e).abs() <= 1e-5, "{name} {set:?}: {key} {got:?}");
+            }
+        }
+        assert_eq!(
+            named(&built),
+            base_names,
+            "{name} {set:?}: the names changed"
+        );
+    }
+}
+
 #[test]
 fn every_measured_corpus_part_matches() {
     let k = OcctKernel::new();
@@ -48,8 +117,8 @@ fn every_measured_corpus_part_matches() {
         assert!(!a.has_errors(), "{name}: {:#?}", a.diagnostics);
         let model = a.model.unwrap();
         let built = build(&k, &model, None).unwrap_or_else(|d| panic!("{name}: {d:#?}"));
-        let shape = built.shape.expect("shape");
-        let p = k.properties(&shape).unwrap();
+        let shape = built.shape.as_ref().expect("shape");
+        let p = k.properties(shape).unwrap();
 
         let rel = |got: f64, exp: f64, what: &str| {
             assert!(
@@ -74,19 +143,24 @@ fn every_measured_corpus_part_matches() {
         }
         if let Some(t) = want.get("topology") {
             let c = p.topology;
-            let counts = [c.solids, c.faces, c.edges, c.vertices];
-            let exp =
-                ["solids", "faces", "edges", "vertices"].map(|k| t[k].as_u64().unwrap() as usize);
-            assert_eq!(counts, exp, "{name}: topology");
+            let got = [c.solids, c.faces, c.edges, c.vertices];
+            for (k, g) in ["solids", "faces", "edges", "vertices"].iter().zip(got) {
+                if let Some(e) = t.get(*k).and_then(Value::as_u64) {
+                    assert_eq!(g, e as usize, "{name}: {k}");
+                }
+            }
+        }
+        if let Some(sweeps) = want.get("sweeps").and_then(Value::as_array) {
+            sweep(&k, &name, &src, &built, sweeps);
         }
         // T1: building again gives the same canonical B-rep, byte for byte
         let again = build(&k, &model, None).unwrap().shape.unwrap();
         assert_eq!(
-            k.canonical_brep(&shape).unwrap(),
+            k.canonical_brep(shape).unwrap(),
             k.canonical_brep(&again).unwrap(),
             "{name}: not deterministic"
         );
         checked += 1;
     }
-    assert!(checked >= 8, "only {checked} measured parts found");
+    assert!(checked >= 21, "only {checked} measured parts found");
 }

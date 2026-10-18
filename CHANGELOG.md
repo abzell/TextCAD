@@ -25,6 +25,13 @@ All notable changes are recorded here. Format follows [Keep a Changelog](https:/
   `.cache/`, source hashing), `tcad build` and `tcad props`, eight primitive corpus parts with analytic
   expectations and a build123d cross-check, spec chapters kernel/bundle/features, ADRs 0008-0009,
   `docs/building.md`, OCCT and cross-check CI jobs.
+- M6: persistent naming (`tcad-naming`: semantic IDs from operation history, aliases for merged faces,
+  ordinals for split faces, `edge(a & b)`, tags, geometric queries, `E3xxx` diagnostics with nearest
+  names and fix hints), kernel topology listing and lineage, `hole` (simple, counterbore, countersink,
+  tapped), `fillet` (constant and variable), `chamfer`, `shell`, `draft`, `rib`, `linear_pattern`,
+  `circular_pattern`, `mirror` (including patterns of patterns and skip lists), sketches and `to=` on
+  planar faces, the topology map in the manifest, `tcad refs`, thirteen corpus parts (two with
+  naming-robustness sweeps over 54 parameter sets), `spec/naming.md`, ADR 0010.
 
 ### Changed
 - Replaced the MIT `LICENSE` with Apache-2.0 (locked decision, requirements section 2).

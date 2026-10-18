@@ -1,0 +1,10 @@
+tcad 0.1
+
+part feat_pattern_linear "Bar with a row of holes" {
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=60 mm h=20 mm
+  }
+  extrude bar from s.r distance=8 mm
+  hole h1 on=bar.cap_end at=(5 mm, 10 mm) d=4 mm end=through_all
+  linear_pattern row of=h1 dir=+X count=5 spacing=10 mm skip=[3]
+}

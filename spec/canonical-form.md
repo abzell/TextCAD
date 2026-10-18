@@ -64,12 +64,12 @@ chapters [sketch.md](sketch.md) and [features.md](features.md) as those are writ
 | revolve | axis, angle, op |
 | sweep | path, guide, op |
 | loft | sections, guides, op |
-| hole | on, at, type, d, thread, depth, end |
+| hole | on, at, from, type, d, thread, cbore_d, cbore_depth, csk_d, csk_angle, depth, end, flip |
 | fillet | edges, r |
-| chamfer | edges, d, angle |
-| shell | faces, thickness |
+| chamfer | edges, d, d2, angle |
+| shell | faces, thickness, outward |
 | draft | faces, angle, pull, neutral |
-| rib | profile, thickness, direction |
+| rib | profile, thickness, direction, to, reach |
 | linear_pattern | of, dir, count, spacing, skip |
 | circular_pattern | of, axis, count, angle, skip |
 | mirror | of, plane |
