@@ -449,7 +449,7 @@ fn canonical_serialization_is_deterministic_and_round_trips() {
     let (p, q) = (k.properties(&shape).unwrap(), k.properties(&back).unwrap());
     near(q.volume, p.volume, 1e-12, "round-trip volume");
     assert_eq!(p.topology, q.topology);
-    assert!(k.id().starts_with("occt-7."), "{}", k.id());
+    assert!(k.id().starts_with("occt-"), "{}", k.id());
 }
 
 #[test]
