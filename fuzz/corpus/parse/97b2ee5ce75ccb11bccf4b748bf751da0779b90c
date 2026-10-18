@@ -1,0 +1,12 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 m
+  materlerance 1e-6 m
+  materip = 52 mm
+  param jhwt k_a==body_len ajh=w_gap + 2 * jaw_thk
+    mirror pin ip = 52 mm
+  param jhwt k_a==body_len ajh=w_gap + 2 * jaw_thk
+    mirror pin center=(body_len - 20 mm, 0 mm) d=pin_dia
+    arc nose throt standard { }
+}

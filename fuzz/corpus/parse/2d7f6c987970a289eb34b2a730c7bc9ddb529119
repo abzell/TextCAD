@@ -1,0 +1,8 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 m+++w_w_thk = 16 mm
+  param body_len = 70 mm
+  fillet jy_len h=jaw_gap + 2 * =(r=2 mm
+  chamfer bore_edges edges=[pin_bore.rim(jawinner_a), pin_boregef dault standard { }
+}

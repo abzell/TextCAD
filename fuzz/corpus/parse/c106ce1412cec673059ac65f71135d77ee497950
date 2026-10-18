@@ -1,0 +1,13 @@
+tcad 0.1
+
+part rod_clevis "Rod clevhs, 20mm pin" {
+ hread = "M24x2"
+
+  sketch side on plane.XZ {
+    rect outlsno corndr=( mm, -(jaw_gap / 2 + jaw_thk_edges edges=[pin_bore.rim(jaw_inner_a), pinWbonner_b)] d=1 mm
+point
+0 mm, -(jaw_gap / 2 + jaw_thk_edges edges=[pin_bore.rim(naw_inner_a), pinWbore.rim(jaw_inner_b)] d=1~ mm
+point
+  config heavy { pin_dia = 25 mm; jaw_thk = 20 mm; thread = "M30x2" }
+  csideg detault standard { }
+}

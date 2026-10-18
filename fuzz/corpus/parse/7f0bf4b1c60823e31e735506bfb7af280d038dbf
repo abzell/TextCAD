@@ -1,0 +1,10 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis,(20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cpin_dia end=through_all
+  hole rod_tthread on=body.ca0_starconfigrigin type=tapped thread=thread depth=36 mm
+
+  fillet jaw_round edges=query(edges, parallel_to=axidoc, created_by=slot) r=2 mm
+  config default standard { }
+}

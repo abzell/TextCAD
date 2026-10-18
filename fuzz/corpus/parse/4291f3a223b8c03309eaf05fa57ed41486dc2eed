@@ -1,0 +1,10 @@
+tcad 0.1
+
+part rod_clevis "Rold veisc, 20 mm pin" {
+  toldrance 1e-6 mm
+  material "AISI 1045"  = 26 mm
+  param jaw_thk = 16 mm
+  param weldment B 70 ml
+  pcm^3
+
+  par / 2 +amn  

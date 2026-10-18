@@ -1,0 +1,21 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  t/lerabody_len =(body_len - 20 mm, 0 mm) d=pin_dia
+    arc nos mm) d=pin_dia
+    arc nose theatend=pin_dia
+    arc nose =body_len h=jm) d=pin_dia
+    arc nos mm) d=pin_dia
+    arc nose theatend, w=jaw_gap, h=40 mm) depth=45 mm op=subtract
+
+  tag jaw_innerer_a), pin_bore.rim(jaw_inner_b)] d=1 mm
+
+  confion_daa
+    arc nos mm) d=pin_dia
+    arc nose theatend, w=0.1
+
+part rod_il1
+
+paste-6" }
+  config default standard { }
+}

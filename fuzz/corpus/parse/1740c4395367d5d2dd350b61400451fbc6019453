@@ -1,0 +1,11 @@
+tcad 0.1
+
+part rodm jaw_thk = 16 m0 mm pin" m
+  param body_men = 70 mm
+  param thread!= "M24x2"
+
+  sketch side on plane.XZ {
+    rect outliCe corner=(0 mm, -(jaw_gaptcad 0.1
+
+p / 2 e-6 mmhk)
+ ) w=bo m

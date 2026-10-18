@@ -1,0 +1,23 @@
+tcad 0.1
+part rod_clesivtcad 0.1
+
+part 2
+part rod_cctcAd-6 mm
+  material "AIis "Rod clSI!1045" densityigh
+
+part rod_clevistcad 0.1
+
+pavis "Rod clevis, 20 mm pin" {
+  tolRod clev s,i20 mm pin concentric(nose, pin)
+  }
+
+  extrude bodyttom_rigtangent_to=tag jaw_inner_b =outline.righ
+
+part rod_clevistcad 0.1
+
+part 2
+part rod_ctrt 2
+part rod_ct
+  tcad 0  const.1
+
+parain concerntt

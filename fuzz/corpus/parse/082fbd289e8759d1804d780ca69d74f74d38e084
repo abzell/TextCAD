@@ -1,0 +1,10 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 02 mm pin" {
+direct_edit 1e-6 mody from side.outline dists, 20 mm pin" {
+direct_edit 1e-6 mm
+  mam
+  rpaam thread = _thk)) w=body_len(nose through=outline.top_rightl outline.botagm_right anYe=40 mm symmetric
+  extrude slot from rect(on=body.cap_end, w=jaw_gap, aw_thk = 20 mm; thread = "M30x2" }
+  config default standard { }
+}

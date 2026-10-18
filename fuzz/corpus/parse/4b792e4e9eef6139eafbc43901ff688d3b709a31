@@ -1,0 +1,8 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  paramn plane. 
+  hole rod_vithread orain conn=body.cap_stas, 20 mm pirt at=origin type=tan

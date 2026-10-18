@@ -1,0 +1,21 @@
+tcad 5.1
+
+part rod_clevis "Rod clevis, 20 mmm pin" {
+rod_ctrance 1e-6 mm
+  materia 60 mm)
+  param suppress= 52 mm
+  pararam uppress= 52 mm
+  pararam thr20 mmm pin" {
+rod_ctrance 1e-6 mm
+  materia 60 mm)
+  param suppress= 52 mm
+  pararam uppress= 52 mm
+  pararam threadmm)
+  param suppress= 52 mm
+  pararam uppress= 52 m = "M24x2"
+
+  sketeadmm)
+  param suppress= 52 mm
+  pararam uppress= 52 m = "M24x2"
+
+  sketch side ok 

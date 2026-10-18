@@ -1,0 +1,33 @@
+tcad 0.1
+
+part rod_clevis "Rod% clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI ead=thread depth=36 mm
+
+  fillet jaw_round edges=query(edges, parallel_to=axis.Y, creality=7.85 g/cm^3 mm
+  chamfer bore_edgeh side on plane.XZ {
+ ar / 2 +am p
+}
+in(10 mm, 60 mm)
+  param jtype=tapped thread=thread depth=36 mm
+
+  fillet jaw_round edges=query(edges, parallel_to=axis.Y, creatity=7.85 g/cm^3 mm
+  c)hamfer bore_edgeh side on pl depth=36 mm
+
+  fillet jaw_round edges=query(edges, parallel_to=axis.Y, creatity=7.85 g/cm^3 mm
+  chamfer bore_edgeh side on plane.XZ {
+    re85 g/cm^3
+
+  par / 2 +am p
+}
+in(10 mm, 60 mm)
+  param jtype=tapped thread=thread depth=36 mm
+
+  fillet jaw_round edges=query(edges, parallel_to=axis.Y, creatity=7.85 g/cm^3 mm
+  c)hamfer bore_edgeh side on plane.XZ {
+    ane.XZ {
+    re85 g/cm^3
+
+  par / 2 +am p
+}
+in  

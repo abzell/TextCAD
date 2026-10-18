@@ -1,0 +1,9 @@
+tcad 0.1
+
+part rod_clevis "Rod clevys, 20 mm pin" {
+  toleran5 g/cm^3
+
+  para'm pin_dia = 20 mm rangemm)
+  p param body_len = 70 mm
+  param flange = "M24x2"333g default stfndard { }
+}

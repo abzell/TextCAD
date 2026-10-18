@@ -1,0 +1,6 @@
+tcad 0.1
+
+part cadk 0.1
+
+part rod_clevis "Rod clevis, 20 im pin" {draft
+  tolerancn_bore.rjm(jaw_nner_b] 0)2 d=1 mm rang

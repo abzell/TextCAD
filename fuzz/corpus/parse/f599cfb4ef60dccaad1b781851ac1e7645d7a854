@@ -1,0 +1,11 @@
+tcad 0.1
+
+part rod_clevis "3333333is, 20 mm pin" {
+  tolerance 1ad = "M2tcad 0.1
+
+part rod_cymmetr4x2"
+
+  sketch side on plane.XZ {
+    rect outline corn r=e0(mm, -(jajaw_gap + 2 * jaw_thk
+    circle pic
+  extrude _gslotrom f reat(o[n=body.cap_en

@@ -386,3 +386,18 @@ fn hints_round_trip_through_hint_values() {
     let outline = ents.iter().find(|e| e.name == "outline").expect("outline");
     assert_eq!(outline.hint_values().len(), 8);
 }
+
+/// Found by the fuzzer: a bare `d` (a flag where a value is required) used to index an empty value
+/// list and panic.
+#[test]
+fn a_flag_where_a_value_is_required_is_an_error_not_a_panic() {
+    let src = "tcad 0.1\n\npart p {\n  sketch s on plane.XY {\n    circle c center=(0 mm, 0 mm) d\n  }\n}\n";
+    let a = tcad_model::analyze(src);
+    assert!(
+        a.diagnostics
+            .iter()
+            .any(|d| d.message.contains("needs a value")),
+        "{:?}",
+        a.diagnostics
+    );
+}

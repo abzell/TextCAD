@@ -199,6 +199,11 @@ impl Hint {
     }
 }
 
+/// Only `closed` is a flag; every other entity argument needs a value.
+fn is_flag(a: &Arg) -> bool {
+    a.flag && a.name == "closed"
+}
+
 fn first_value(a: &Arg) -> &Expr {
     &a.values[0]
 }
@@ -515,12 +520,12 @@ impl<'a> Build<'a> {
                         allowed.join(", ")
                     ),
                 );
-            } else if !a.flag && a.values.is_empty() {
+            } else if a.values.is_empty() && !is_flag(a) {
                 self.err(codes::E4001, a.span, format!("`{}` needs a value", a.name));
             }
         }
         args.retain(|(a, _)| {
-            allowed.contains(&a.name.as_str()) && (a.flag || !a.values.is_empty())
+            allowed.contains(&a.name.as_str()) && (is_flag(a) || !a.values.is_empty())
         });
         let get = |name: &str| args.iter().find(|(a, _)| a.name == name).map(|(a, _)| *a);
         for (a, _) in &args {

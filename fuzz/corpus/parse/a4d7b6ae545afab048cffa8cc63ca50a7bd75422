@@ -1,0 +1,8 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-r_b = slot.side(-Y)
+
+ loft hole py.cap_end, w=jaw_gap, h=80 mm) de; thread = "M3002" }
+   ?tandard { }
+}

@@ -1,0 +1,10 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolem jaw_thk = 16 mm
+  param body_len = 70 mm
+  param thread = "M24x2"
+
+  sketch loft on plane.XZ {=(0 mm, -(jaw_gap / 2 + jaw_thedges=query(edges, parallel_to=axisfig heavy { pin_dia = 25 mm; jaw_thk = 20 mm; paramd = "M30x2" }
+  config default snaratdd { }
+}

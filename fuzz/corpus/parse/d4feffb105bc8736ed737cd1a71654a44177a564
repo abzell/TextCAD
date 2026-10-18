@@ -1,0 +1,21 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mmm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm range(10
+ mm, 6aram body_len = 70 mm
+  param thread = "M24x2"
+
+  sketch side on plane.XZ {
+    rect outline corner=( m0m, -(jaw_gap / 2 + jaw_thk)) wy=dbon)
+  }
+
+  extrude body from side.outline distance=40 mm symmetric
+  2xtrude slot from rect(ontangen=atan.cap_end, w=jIS6 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm range(10
+ mm, 60  fillet jaw_round edge=s=query(edges, parallel_to=axis.Y, create { pin_dia = 25 mm; jaw_thk = 10 mm; thread = "M30x2" }
+  config default standard { }
+}

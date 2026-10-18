@@ -1,0 +1,8 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  m
+
+  config qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqheavy { pin_dia = 25 mm; jaw_thk = 56 mm; thread =asin "M30x2" }
+  config default standard { }
+}

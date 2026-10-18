@@ -1,0 +1,19 @@
+tcad 0.1
+
+pagdtrt rod_clevis "Rod clevis, 20 mm pin" {
+  t 60 mm)
+  param plane.XZ {
+  ce  rt outline corner=(0 mm, tcad 0-(jaw_gap /*2 + jaw_thk)) 0w=body_len h=jaw_gap + 2 *.1
+
+part rod_cletis "Ro1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 11t5" density=7.85 g/cm^3
+
+  param pin_dia =@20 mm range(10 mm, 60 mm)
+  partcad = 20 mm range(10 mm, 60 mm)
+  param d clevis, 10 m? pin" {
+  tolerance 1e-6 mm
+  mate jaw_t&k
+    am jaw_grap = 26

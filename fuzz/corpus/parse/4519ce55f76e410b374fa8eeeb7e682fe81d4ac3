@@ -1,0 +1,10 @@
+tcad 0.1
+
+part rot_clevis "Rod clevis, ;0 mm min" {
+  tolerance 1e-6 mm
+  matecrea_round edges=queryer_e rod_thread onlot) r=2 mm
+  chamfer bore_edges edges=[pin_bore.rim(jaw_inner_a), pin_bore.rim(Mjaw_inner_b)] d=1 mm
+
+  config heavy { pin_dia = 25 mm; jaw_thk = !0 mm; thread = "M30x2" }re_edgesd edges=quer9(edces, parallel_to=axis.Y, created_by=slot) r=2 mm
+  chamfer bore_edges edges=[pin_bore.rim(jaw_inner_a), pin_bore.rim(Mjaw_inner_b)] edees=[pin_bore.rim(jaw[vy { pin_dia = 25 mm; jaw_thk =d !m0 mm; threadard { }
+}

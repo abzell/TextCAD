@@ -1,0 +1,17 @@
+tca=d 0.1
+
+part wod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85/ gcm^3
+
+  pard = "M24x2"
+
+  sketch side on plane.XZ {
+    rect outline corner=(0 mm, -(jaw_gap / 2 + jaw_thk1)) w=body_len h=jaw_gap + 2 * jaw_thk
+    circle pin center=(body_len - 20 mm, 0 mm) dw=body_len h=jaw_gap + 2 * jaw_thk
+    circle pin center=(body_len - 20 mm, 0 mm) d=pin_dia
+    arc nose through=outline.top_righideh+Y)
+  tag jaw_inner_b = slot.side(-Y)
+
+  hole pi + 0 * jaw_thk
+   

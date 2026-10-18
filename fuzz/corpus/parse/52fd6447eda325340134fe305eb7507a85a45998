@@ -1,0 +1,6 @@
+tc0{ pi= "M30x2" }
+  config default standard { }
+}; thread { }
+}; thread = w"0x2"tcad }
+  conf}
+}

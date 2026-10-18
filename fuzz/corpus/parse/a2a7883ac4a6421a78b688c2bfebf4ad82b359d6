@@ -1,0 +1,17 @@
+tcad = 20 mm ranin)
+  }
+
+  extrude body from side.outline dist_dia = 25 mm; jaw_thk = 21 mm; thread = tdca 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mmend, w=jaw_gap, h=40 mm) depth=4tract
+
+  tag jaw_inner_a = slot.sWde(+Y)
+  tag jaw_inner_b = slot.side(-Y)
+
+  hole pin_bore on=jaw_inner_a at=side.pin.center type=simple d=pin_dia and=through_all
+  hole"M30x2" }
+  _inner_b)] d=1 mm
+
+  config heavy {
+ pin

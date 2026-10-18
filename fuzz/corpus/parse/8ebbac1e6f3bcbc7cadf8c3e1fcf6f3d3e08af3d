@@ -1,0 +1,6 @@
+tocad 0.1
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" de m_thread on=bp_start at=or iitgynpe=tapped thhread = "M30x2" }
+  config defjaw_gap + ard { }
+}

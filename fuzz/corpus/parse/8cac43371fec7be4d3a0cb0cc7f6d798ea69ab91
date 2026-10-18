@@ -1,0 +1,8 @@
+tcad 0.1
+drawing
+ptc3
+
+  patcad 0.1
+
+part rod_cleram pin_di2=  a0 mm rangem
+  material "AISI 1045" denvis "Rod clevis, 20 mm pi

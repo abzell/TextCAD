@@ -1,0 +1,12 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 
+
+  sketc side.ou_all
+  csys rod_thread on=boy.cap_start at=origin t
+  param body_len = 70 mm
+ype=ta  papprketch atan o= 16 mmty= thread = "M24x2"
+
+  sketc side.ou_all
+  csys ro

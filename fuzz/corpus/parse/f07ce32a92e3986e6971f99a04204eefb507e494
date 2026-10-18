@@ -1,0 +1,5 @@
+tcad 0.1
+
+-6 mm
+surface  oaterial "AISI 1045" densrance 1e-6 mm
+surface  material "AISI 104param pin_dia = 80 mm rr_a at=side.imgange(1
