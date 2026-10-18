@@ -322,4 +322,12 @@ jobs:
           $env:OCCT_INCLUDE_DIR = "$root\include\opencascade"
           $env:OCCT_LIB_DIR = "$root\lib"
           $env:PATH = "$root\bin;$env:PATH"
+          $env:BREP_T1_DUMP = "$env:RUNNER_TEMP\brep-windows"
           cargo test --workspace --features tcad-cli/occt,tcad-build/occt,tcad-mcp/occt
+      - name: Keep the canonical B-reps (compare platforms line by line)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: brep-windows
+          path: ${{ runner.temp }}/brep-windows
+          if-no-files-found: ignore

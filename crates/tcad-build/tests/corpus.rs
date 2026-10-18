@@ -184,6 +184,15 @@ fn every_measured_corpus_part_matches() {
         // T1: building again gives the same canonical B-rep, byte for byte (three builds in all)
         let first = k.canonical_brep(shape).unwrap();
         hashes.push(format!("{name} {}", tcad_cache::sha256_hex(&first)));
+        // BREP_T1_DUMP=DIR keeps the canonical B-reps, to compare platforms line by line
+        if let Some(dump) = std::env::var_os("BREP_T1_DUMP") {
+            std::fs::create_dir_all(&dump).expect("dump dir");
+            std::fs::write(
+                std::path::Path::new(&dump).join(format!("{name}.brep")),
+                &first,
+            )
+            .expect("dump");
+        }
         for _ in 0..2 {
             let again = build(&k, &model, None).unwrap().shape.unwrap();
             assert_eq!(
