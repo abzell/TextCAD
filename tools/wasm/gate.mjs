@@ -4,8 +4,9 @@
 //
 //   node tools/wasm/gate.mjs path/to/tcad-web.js [corpus]
 //
-// occt.wasm must sit next to tcad-web.js.
-import { readFileSync, readdirSync, existsSync } from "node:fs";
+// occt.wasm must sit next to tcad-web.js. BREP_T1_DUMP=DIR keeps the canonical B-reps, to compare
+// with the native builds line by line (tools/brep-diff.py).
+import { readFileSync, readdirSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join, resolve } from "node:path";
 
@@ -15,6 +16,8 @@ if (!modulePath) {
   process.exit(2);
 }
 const corpus = resolve(corpusArg ?? "corpus");
+const dump = process.env.BREP_T1_DUMP;
+if (dump) mkdirSync(dump, { recursive: true });
 const createTcad = createRequire(import.meta.url)(resolve(modulePath));
 const M = await createTcad();
 
@@ -50,6 +53,10 @@ for (const name of [...want.keys()].sort()) {
   const t0 = Date.now();
   const r = build(readFileSync(file, "utf8"));
   const ms = Date.now() - t0;
+  if (dump && r.ok) {
+    const brep = M.HEAPU8.slice(M._tcad_brep_ptr(), M._tcad_brep_ptr() + M._tcad_brep_len());
+    writeFileSync(join(dump, `${name}.brep`), brep);
+  }
   if (!r.ok) {
     console.log(`FAIL ${name}: ${JSON.stringify(r.diagnostics).slice(0, 300)}`);
     failed++;

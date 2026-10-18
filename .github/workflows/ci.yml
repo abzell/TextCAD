@@ -272,7 +272,14 @@ jobs:
           cp occt-wasm/occt.wasm target/wasm32-unknown-emscripten/release/
           ls -la target/wasm32-unknown-emscripten/release/ | grep -E 'tcad|occt'
       - name: Regenerate the corpus in WebAssembly (T1 against the native builds)
-        run: node tools/wasm/gate.mjs target/wasm32-unknown-emscripten/release/tcad-web.js corpus
+        run: BREP_T1_DUMP="$RUNNER_TEMP/brep-wasm" node tools/wasm/gate.mjs target/wasm32-unknown-emscripten/release/tcad-web.js corpus
+      - name: Keep the canonical B-reps (compare platforms line by line)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: brep-wasm
+          path: ${{ runner.temp }}/brep-wasm
+          if-no-files-found: ignore
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -296,7 +303,7 @@ jobs:
   # primary platform: every corpus part must build here and match expected.json.
   # Where the canonical B-reps of two platforms differ (docs/adr/0014), line by line.
   brep-compare:
-    needs: [occt-linux, occt-windows]
+    needs: [occt-linux, occt-windows, browser]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -304,7 +311,10 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: breps
-      - run: python3 tools/brep-diff.py breps/brep-windows breps/brep-linux
+      - name: Windows (A) against WebAssembly (B), the Phase 1b gate
+        run: python3 tools/brep-diff.py breps/brep-windows breps/brep-wasm
+      - name: Windows (A) against Linux (B)
+        run: python3 tools/brep-diff.py breps/brep-windows breps/brep-linux
 
   occt-windows:
     runs-on: windows-latest

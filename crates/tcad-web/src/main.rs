@@ -9,5 +9,7 @@ fn main() {
         tcad_web::tcad_free as *const (),
         tcad_web::tcad_glb_ptr as *const (),
         tcad_web::tcad_glb_len as *const (),
+        tcad_web::tcad_brep_ptr as *const (),
+        tcad_web::tcad_brep_len as *const (),
     ]);
 }

@@ -22,10 +22,25 @@ pub const LINEAR_DEFLECTION_MM: f64 = 0.05;
 /// Angular deflection of the viewer mesh (radians).
 pub const ANGULAR_DEFLECTION_RAD: f64 = 10.0 * std::f64::consts::PI / 180.0;
 
+/// The result of [`regenerate`].
+pub struct Output {
+    /// The answer for the viewer.
+    pub json: Value,
+    /// The mesh, with face labels, of a successful build.
+    pub glb: Option<Vec<u8>>,
+    /// The canonical B-rep of a successful build (to compare platforms line by line).
+    pub brep: Option<Vec<u8>>,
+}
+
 /// Builds `src` (configuration `config`, `None`: the default) and describes the result as JSON:
 /// `{ok, kernel, part, config, configs, features, result, brep_sha256, topology}` or
-/// `{ok: false, diagnostics}`. The GLB of a successful build is returned separately.
-pub fn regenerate<K: Kernel>(k: &K, src: &str, config: Option<&str>) -> (Value, Option<Vec<u8>>) {
+/// `{ok: false, diagnostics}`. The GLB and canonical B-rep of a successful build come separately.
+pub fn regenerate<K: Kernel>(k: &K, src: &str, config: Option<&str>) -> Output {
+    let failed = |json| Output {
+        json,
+        glb: None,
+        brep: None,
+    };
     let analysis = tcad_model::analyze(src);
     let fail = |diags: &[tcad_diag::Diagnostic]| {
         json!({
@@ -45,11 +60,11 @@ pub fn regenerate<K: Kernel>(k: &K, src: &str, config: Option<&str>) -> (Value, 
         })
     };
     let Some(model) = analysis.model.as_ref().filter(|_| !analysis.has_errors()) else {
-        return (fail(&analysis.diagnostics), None);
+        return failed(fail(&analysis.diagnostics));
     };
     let built = match build(k, model, config) {
         Ok(b) => b,
-        Err(d) => return (fail(&d), None),
+        Err(d) => return failed(fail(&d)),
     };
     let features: Vec<Value> = built
         .features
@@ -76,7 +91,7 @@ pub fn regenerate<K: Kernel>(k: &K, src: &str, config: Option<&str>) -> (Value, 
         let v = json!({"ok": true, "kernel": k.id(), "part": model.part.name,
             "config": built.config, "configs": configs, "features": features,
             "result": Value::Null});
-        return (v, None);
+        return failed(v);
     };
     let result = match k.properties(shape) {
         Ok(p) => json!({
@@ -125,7 +140,7 @@ pub fn regenerate<K: Kernel>(k: &K, src: &str, config: Option<&str>) -> (Value, 
         "brep_sha256": brep.as_deref().map(tcad_cache::sha256_hex),
         "topology": topology,
     });
-    (v, glb)
+    Output { json: v, glb, brep }
 }
 
 #[cfg(feature = "occt")]
@@ -140,6 +155,7 @@ fn kernel() -> &'static tcad_kernel::mock::MockKernel {
 }
 
 static LAST_GLB: Mutex<Vec<u8>> = Mutex::new(Vec::new());
+static LAST_BREP: Mutex<Vec<u8>> = Mutex::new(Vec::new());
 
 /// # Safety
 /// `ptr` must point to `len` readable bytes (or be null with `len` 0).
@@ -167,11 +183,14 @@ pub unsafe extern "C" fn tcad_build(
     // SAFETY: forwarded from the caller's guarantee.
     let (src, config) = unsafe { (text(src, src_len), text(config, config_len)) };
     let config = (!config.is_empty()).then_some(config);
-    let (json, glb) = regenerate(kernel(), src, config);
+    let out = regenerate(kernel(), src, config);
     if let Ok(mut last) = LAST_GLB.lock() {
-        *last = glb.unwrap_or_default();
+        *last = out.glb.unwrap_or_default();
     }
-    CString::new(json.to_string())
+    if let Ok(mut last) = LAST_BREP.lock() {
+        *last = out.brep.unwrap_or_default();
+    }
+    CString::new(out.json.to_string())
         .unwrap_or_default()
         .into_raw()
 }
@@ -203,6 +222,22 @@ pub extern "C" fn tcad_glb_len() -> usize {
     LAST_GLB.lock().map(|g| g.len()).unwrap_or(0)
 }
 
+/// Address of the canonical B-rep of the last successful build (valid until the next build); used
+/// to compare platforms line by line (tools/brep-diff.py).
+#[unsafe(no_mangle)]
+pub extern "C" fn tcad_brep_ptr() -> *const u8 {
+    LAST_BREP
+        .lock()
+        .map(|b| b.as_ptr())
+        .unwrap_or(std::ptr::null())
+}
+
+/// Length of the canonical B-rep of the last successful build (0 if there is none).
+#[unsafe(no_mangle)]
+pub extern "C" fn tcad_brep_len() -> usize {
+    LAST_BREP.lock().map(|b| b.len()).unwrap_or(0)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -230,7 +265,8 @@ mod tests {
     #[test]
     fn errors_come_back_as_diagnostics() {
         let src = "tcad 0.1\n\npart p {\n  param h = nosuch\n}\n";
-        let (v, glb) = regenerate(kernel(), src, None);
+        let out = regenerate(kernel(), src, None);
+        let v = out.json;
         assert_eq!(v["ok"], false);
         assert!(
             v["diagnostics"][0]["code"]
@@ -238,6 +274,6 @@ mod tests {
                 .unwrap()
                 .starts_with('E')
         );
-        assert!(glb.is_none());
+        assert!(out.glb.is_none() && out.brep.is_none());
     }
 }

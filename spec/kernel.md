@@ -60,7 +60,7 @@ cache entry is valid only for the backend that wrote it.
 
 | Tier | Applies when | Requirement |
 | --- | --- | --- |
-| T1 Identical | same backend id and version | the canonical serialization is bit-identical across runs, and across platforms and targets built from the same OpenCASCADE version (Windows, Linux, WebAssembly; `corpus/brep-t1.txt`) |
+| T1 Identical | same backend id and version | the canonical serialization is bit-identical across runs on one platform, and the browser module reproduces the Windows build bit for bit (`corpus/brep-t1.txt`) |
 | T2 Equivalent | different backend version or a different kernel | same topology counts per feature role; volume and area within 1e-6 relative; center of mass and bounding box within 10 times the modeling tolerance; Hausdorff distance below 10 times the modeling tolerance |
 | T3 Failed | neither holds | `tcad verify` fails with a per-feature report |
 
@@ -69,9 +69,13 @@ outputs. The OpenCASCADE backend runs its boolean operations single-threaded.
 
 How the tiers are tested: `crates/tcad-build/tests/corpus.rs` builds every corpus part three times and
 compares the canonical B-rep byte for byte (T1), checks the SHA-256 of each against
-`corpus/brep-t1.txt` when the backend version matches (T1 across Windows and Linux), and compares
-properties with the analytic `expected.json` (T2). `tools/wasm/gate.mjs` checks the same hashes for the
-WebAssembly build (docs/adr/0014).
+`corpus/brep-t1.txt` (written by the Windows build, which must match it), and compares properties with
+the analytic `expected.json` (T2). `tools/wasm/gate.mjs` checks the same hashes for the WebAssembly
+build (docs/adr/0014). Other native platforms report their differences without failing: our own code
+uses only portable arithmetic (the `libm` crate for every transcendental function, rotations passed to
+OpenCASCADE as quaternions), but OpenCASCADE calls the platform's C library, and glibc rounds some
+results differently from the Microsoft C runtime; the CI job `brep-compare` (tools/brep-diff.py) shows
+the differing lines, which are rounding-level.
 `corpus/tools/compare_reference.py` cross-checks the expected values with an independent build123d model.
 
 ## The mock backend

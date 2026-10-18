@@ -20,6 +20,10 @@ def lines(path):
 
 
 def main(a_dir, b_dir):
+    for d in (a_dir, b_dir):
+        if not os.path.isdir(d):
+            print(f"{d}: no B-reps (that build did not get that far)")
+            return
     names = sorted(set(os.listdir(a_dir)) & set(os.listdir(b_dir)))
     differ = 0
     for name in names:

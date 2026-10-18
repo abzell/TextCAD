@@ -14,7 +14,7 @@ fn main() {
         "-sALLOW_MEMORY_GROWTH=1",
         "-sSTACK_SIZE=4MB",
         "-sEXPORTED_RUNTIME_METHODS=ccall,UTF8ToString,stringToNewUTF8,HEAPU8",
-        "-sEXPORTED_FUNCTIONS=_main,_tcad_build,_tcad_free,_tcad_glb_ptr,_tcad_glb_len,_malloc,_free",
+        "-sEXPORTED_FUNCTIONS=_main,_tcad_build,_tcad_free,_tcad_glb_ptr,_tcad_glb_len,_tcad_brep_ptr,_tcad_brep_len,_malloc,_free",
         "-fwasm-exceptions",
     ] {
         println!("cargo:rustc-link-arg={arg}");
