@@ -99,3 +99,18 @@ fn glb_carries_face_ids_in_extras() {
     assert_eq!(&b[20 + json_len + 4..20 + json_len + 8], b"BIN\0");
     assert_eq!(b.len(), 20 + json_len + 8 + bin_len);
 }
+
+#[test]
+fn png_and_views() {
+    let png = tcad_io::png_rgb(2, 1, &[255, 0, 0, 0, 255, 0]);
+    assert_eq!(&png[..8], &[0x89, b'P', b'N', b'G', 0x0d, 0x0a, 0x1a, 0x0a]);
+    assert!(png.ends_with(&[0, 0, 0, 0, b'I', b'E', b'N', b'D', 0xae, 0x42, 0x60, 0x82]));
+    // a tetrahedron seen from every view covers some pixels and the highlight changes the picture
+    for view in tcad_io::VIEWS {
+        let a = tcad_io::render_png(&tetra(), view, 64, &|_| false).expect("render");
+        let b = tcad_io::render_png(&tetra(), view, 64, &|_| true).expect("render");
+        assert_eq!(&a[..4], &[0x89, b'P', b'N', b'G']);
+        assert!(a != b, "{view}: highlight");
+    }
+    assert!(tcad_io::render_png(&tetra(), "sideways", 64, &|_| false).is_err());
+}

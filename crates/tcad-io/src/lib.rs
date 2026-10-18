@@ -4,11 +4,15 @@
 //! The writers are deterministic: the same mesh gives the same bytes (no timestamps).
 
 mod glb;
+mod png;
+mod render;
 mod stl;
 mod threemf;
 mod zip;
 
 pub use glb::{FaceLabel, glb};
+pub use png::png_rgb;
+pub use render::{VIEWS, render_png};
 pub use stl::stl_binary;
 pub use threemf::threemf;
 

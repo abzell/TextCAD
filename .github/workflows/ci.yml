@@ -121,7 +121,7 @@ jobs:
       - name: Install OpenCASCADE
         run: sudo apt-get update && sudo apt-get install -y libocct-foundation-dev libocct-modeling-data-dev libocct-modeling-algorithms-dev libocct-data-exchange-dev libocct-ocaf-dev g++
       - name: Test with OCCT
-        run: cargo test --workspace --features tcad-cli/occt,tcad-build/occt
+        run: cargo test --workspace --features tcad-cli/occt,tcad-build/occt,tcad-mcp/occt
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -168,4 +168,4 @@ jobs:
           $env:OCCT_INCLUDE_DIR = "$root\include\opencascade"
           $env:OCCT_LIB_DIR = "$root\lib"
           $env:PATH = "$root\bin;$env:PATH"
-          cargo test --workspace --features tcad-cli/occt,tcad-build/occt
+          cargo test --workspace --features tcad-cli/occt,tcad-build/occt,tcad-mcp/occt

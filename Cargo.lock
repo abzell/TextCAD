@@ -425,6 +425,19 @@ version = "0.0.1"
 [[package]]
 name = "tcad-mcp"
 version = "0.0.1"
+dependencies = [
+ "serde_json",
+ "tcad-build",
+ "tcad-cache",
+ "tcad-cli",
+ "tcad-diag",
+ "tcad-expr",
+ "tcad-io",
+ "tcad-kernel",
+ "tcad-model",
+ "tcad-occt",
+ "tcad-syntax",
+]
 
 [[package]]
 name = "tcad-model"

@@ -53,7 +53,29 @@ A path is a .tcad file or a directory searched recursively for .tcad files.
 ";
 
 /// Runs the CLI with the given arguments (without the program name); returns the exit code.
+/// Geometry commands use the OpenCASCADE kernel if this build has it.
 pub fn run(args: &[String], out: &mut dyn Write, err: &mut dyn Write) -> i32 {
+    run_impl(args, out, err, &|req, out, err| run_geometry(req, out, err))
+}
+
+/// Like [`run`] with a given kernel (used by the MCP server and the tests).
+pub fn run_with<K: tcad_kernel::Kernel>(
+    k: &K,
+    args: &[String],
+    out: &mut dyn Write,
+    err: &mut dyn Write,
+) -> i32 {
+    run_impl(args, out, err, &|req, out, err| dispatch(k, req, out, err))
+}
+
+type GeometryRunner<'a> = &'a dyn Fn(&Request<'_>, &mut dyn Write, &mut dyn Write) -> i32;
+
+fn run_impl(
+    args: &[String],
+    out: &mut dyn Write,
+    err: &mut dyn Write,
+    geometry: GeometryRunner<'_>,
+) -> i32 {
     let mut json = false;
     let mut check_only = false;
     let mut solve = false;
@@ -200,7 +222,7 @@ pub fn run(args: &[String], out: &mut dyn Write, err: &mut dyn Write) -> i32 {
                 })
             }
         };
-        return run_geometry(&req, out, err);
+        return geometry(&req, out, err);
     }
     if (config.is_some() || force) && !matches!(command, "build" | "props" | "refs") {
         let _ = writeln!(

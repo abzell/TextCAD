@@ -17,7 +17,7 @@ fn crc_table() -> [u32; 256] {
 }
 
 /// CRC-32 (IEEE) of `data`.
-pub fn crc32(data: &[u8]) -> u32 {
+pub(crate) fn crc32(data: &[u8]) -> u32 {
     let table = crc_table();
     let mut c = 0xFFFF_FFFFu32;
     for &b in data {
