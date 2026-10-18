@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 # Builds OpenCASCADE for the browser module (docs/adr/0014): the 8.0.1 sources compiled with
-# Emscripten into static libraries, then linked into one side module, occt.wasm, which the main
-# module (crates/tcad-web) loads at start-up and a user can replace with their own build.
+# Emscripten into static libraries; tools/wasm/link-occt.sh then links them into the side module.
 #
 #   tools/wasm/build-occt.sh OUT_DIR
 #
-# Needs emcc/emcmake, cmake and ninja on PATH (CI: conda-forge emscripten 4.0.9). Produces
-# OUT_DIR/include/opencascade (headers for the shim) and OUT_DIR/occt.wasm.
+# Needs emcc/emcmake (emsdk 4.0.9), cmake and ninja on PATH. Produces OUT_DIR/include/opencascade
+# (headers for the shim) and OUT_DIR/lib/libTK*.a.
 set -euo pipefail
 out=$(realpath -m "${1:?usage: build-occt.sh OUT_DIR}")
 version=V8_0_1
@@ -34,11 +33,4 @@ emcmake cmake -S "$src" -B "$work/build" -G Ninja \
 cmake --build "$work/build"
 cmake --install "$work/build"
 
-# One side module with every toolkit; undefined C/C++ runtime symbols are resolved from the main
-# module at load time.
-libs=$(find "$out" -name 'libTK*.a' | sort)
-em++ -sSIDE_MODULE=1 -fwasm-exceptions -O2 \
-  -Wl,--whole-archive $libs -Wl,--no-whole-archive \
-  -o "$out/occt.wasm"
-ls -la "$out/occt.wasm"
 test -f "$out/include/opencascade/Standard_Version.hxx"

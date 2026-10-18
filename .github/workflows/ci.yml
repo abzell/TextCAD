@@ -229,24 +229,35 @@ jobs:
           toolchain: 1.97.0
           targets: wasm32-unknown-emscripten
       - uses: Swatinem/rust-cache@v2
-      - uses: mamba-org/setup-micromamba@v2
-        with:
-          environment-name: emsdk
-          create-args: emscripten=4.0.9 cmake ninja
-          cache-environment: true
-      - name: Cache OpenCASCADE for WebAssembly
+      # The official emsdk: its LLVM and binaryen are released together (conda-forge's emscripten
+      # 4.0.9 pairs with binaryen 117, which rejects the features that emcc passes to wasm-opt).
+      - name: Emscripten 4.0.9
+        run: |
+          git clone --depth 1 --branch 4.0.9 https://github.com/emscripten-core/emsdk "$RUNNER_TEMP/emsdk"
+          "$RUNNER_TEMP/emsdk/emsdk" install 4.0.9
+          "$RUNNER_TEMP/emsdk/emsdk" activate 4.0.9
+          sudo apt-get install -y ninja-build
+      - name: Restore OpenCASCADE for WebAssembly
         id: occt-wasm
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: occt-wasm
-          key: occt-wasm-8.0.1-emscripten-4.0.9-${{ hashFiles('tools/wasm/build-occt.sh') }}
+          key: occt-wasm-8.0.1-emsdk-4.0.9-${{ hashFiles('tools/wasm/build-occt.sh') }}
       - name: Build OpenCASCADE for WebAssembly
         if: steps.occt-wasm.outputs.cache-hit != 'true'
-        shell: bash -el {0}
-        run: tools/wasm/build-occt.sh occt-wasm
-      - name: Build the browser module
-        shell: bash -el {0}
         run: |
+          source "$RUNNER_TEMP/emsdk/emsdk_env.sh"
+          tools/wasm/build-occt.sh occt-wasm
+      - name: Save OpenCASCADE for WebAssembly
+        if: steps.occt-wasm.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: occt-wasm
+          key: ${{ steps.occt-wasm.outputs.cache-primary-key }}
+      - name: Build the browser module
+        run: |
+          source "$RUNNER_TEMP/emsdk/emsdk_env.sh"
+          tools/wasm/link-occt.sh occt-wasm
           export OCCT_INCLUDE_DIR="$PWD/occt-wasm/include/opencascade"
           export TCAD_OCCT_WASM="$PWD/occt-wasm/occt.wasm"
           cargo build --release -p tcad-web --features occt --target wasm32-unknown-emscripten

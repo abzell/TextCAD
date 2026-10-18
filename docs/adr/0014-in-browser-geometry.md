@@ -52,8 +52,9 @@ For linking OCCT into the module:
   ABI: build a part from source text and configuration and return the manifest (JSON), the canonical
   B-rep and the GLB, or the diagnostics. It runs in a Web Worker; the viewer gets an in-browser mode
   (edit the text, regenerate on each change) and keeps `tcad serve` as the native path.
-- **Emscripten pinned** (4.0.x, from conda-forge `emscripten` so the version is identical in CI and
-  locally); OCCT built with `emcmake`, only the toolkits we link (FoundationClasses, ModelingData,
+- **Emscripten pinned** to 4.0.9 from the official emsdk, whose LLVM and binaryen are released
+  together (conda-forge's `emscripten 4.0.9` pairs with binaryen 117, which rejects the wasm
+  features emcc asks for when it optimises the side module); OCCT built with `emcmake`, only the toolkits we link (FoundationClasses, ModelingData,
   ModelingAlgorithms, the STEP part of DataExchange), no threads, no visualization, cached in CI.
 - **Floating point**: OCCT and the shim are compiled with `-ffp-contract=off` on every clang build
   (Emscripten, Linux), matching MSVC's `/fp:precise`. The C library difference is measured first
