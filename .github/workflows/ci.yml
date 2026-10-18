@@ -238,6 +238,7 @@ jobs:
           $env:OCCT_INCLUDE_DIR = "$root\include\opencascade"
           $env:OCCT_LIB_DIR = "$root\lib"
           $env:PATH = "$root\bin;$env:PATH"
+          $env:TCAD_OCCT_TRACE = "1"
           cargo test -p tcad-occt --features occt --test io -- --test-threads=1 --nocapture
       - name: Test with OCCT
         shell: pwsh

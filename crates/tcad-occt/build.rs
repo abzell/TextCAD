@@ -99,6 +99,12 @@ fn main() {
             .include(".")
             .std("c++17")
             .warnings(false);
+        // MSVC runs destructors during exception unwinding only with /EHsc. Without it a C++
+        // exception thrown inside a `std::lock_guard` scope leaves the mutex locked (and leaks
+        // scratch files): the next STEP export then waits forever.
+        if std::env::var("CARGO_CFG_TARGET_ENV").as_deref() == Ok("msvc") {
+            build.flag("/EHsc");
+        }
         build.compile("tcad_occt_shim");
         println!("cargo:rustc-link-search=native={}", lib.display());
         for l in LIBS {

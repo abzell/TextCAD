@@ -44,6 +44,8 @@
 #include <filesystem>
 #include <fstream>
 #include <iterator>
+#include <cstdlib>
+#include <cstdio>
 #include <typeinfo>
 #include <mutex>
 #include <random>
@@ -1023,6 +1025,15 @@ void silence_messages() {
   });
 }
 
+// `TCAD_OCCT_TRACE=1` prints the stages of the STEP code to standard error (for hangs on CI).
+void trace(const char* what) {
+  static const bool on = std::getenv("TCAD_OCCT_TRACE") != nullptr;
+  if (on) {
+    std::fprintf(stderr, "occt: %s\n", what);
+    std::fflush(stderr);
+  }
+}
+
 struct Scratch {
   std::string path;
   explicit Scratch(const char* ext) : path(scratch_path(ext)) {}
@@ -1038,13 +1049,16 @@ rust::Vec<uint8_t> export_step(const Shape& sh, rust::Str name, rust::Str config
                                rust::Str material, double density_g_cm3) {
   return guarded("export_step", [&]() {
     std::lock_guard<std::mutex> lock(step_mutex());
+    trace("export: locked");
     silence_messages();
     Handle(XCAFApp_Application) app = XCAFApp_Application::GetApplication();
     Handle(TDocStd_Document) doc;
     app->NewDocument("MDTV-XCAF", doc);
+    trace("export: document");
     Handle(XCAFDoc_ShapeTool) st = XCAFDoc_DocumentTool::ShapeTool(doc->Main());
     // work on a copy: the writer may adjust tolerances, and the caller's shape must stay intact
     BRepBuilderAPI_Copy copy(sh.s);
+    trace("export: copied");
     TDF_Label label = st->AddShape(copy.Shape(), Standard_False);
     std::string part(name.data(), name.size());
     TDataStd_Name::Set(label, TCollection_ExtendedString(part.c_str()));
@@ -1057,12 +1071,16 @@ rust::Vec<uint8_t> export_step(const Shape& sh, rust::Str name, rust::Str config
                                     new TCollection_HAsciiString("g/cm^3"));
       mt->SetMaterial(label, m);
     }
+    trace("export: labels");
     Interface_Static::SetCVal("write.step.schema", "AP242DIS");
     Interface_Static::SetCVal("write.step.unit", "MM");
+    trace("export: parameters");
     STEPCAFControl_Writer writer;
     writer.SetNameMode(Standard_True);
     writer.SetMaterialMode(Standard_True);
+    trace("export: writer");
     if (!writer.Transfer(doc, STEPControl_AsIs)) throw std::runtime_error("STEP transfer failed");
+    trace("export: transferred");
     Handle(StepData_StepModel) model = writer.ChangeWriter().Model();
     if (!model.IsNull()) {
       APIHeaderSection_MakeHeader header(model);
@@ -1070,13 +1088,16 @@ rust::Vec<uint8_t> export_step(const Shape& sh, rust::Str name, rust::Str config
       if (configuration.size() > 0) desc += ", configuration " + std::string(configuration.data(), configuration.size());
       header.SetDescriptionValue(1, new TCollection_HAsciiString(desc.c_str()));
     }
+    trace("export: header");
     Scratch tmp(".step");
     if (writer.Write(tmp.path.c_str()) != IFSelect_RetDone) throw std::runtime_error("STEP write failed");
+    trace("export: written");
     std::ifstream in(tmp.path, std::ios::binary);
     std::string text((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
     rust::Vec<uint8_t> out;
     out.reserve(text.size());
     for (unsigned char ch : text) out.push_back(ch);
+    trace("export: read back");
     app->Close(doc);
     return out;
   });
