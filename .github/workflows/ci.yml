@@ -130,6 +130,15 @@ jobs:
           pip install build123d
           cargo build -p tcad-cli --features occt
           python3 corpus/tools/check_step_exports.py target/debug/tcad corpus
+      - name: Open the hydraulic STEP exports in FreeCAD
+        run: |
+          sudo apt-get install -y freecad
+          mkdir -p "$RUNNER_TEMP/step"
+          for d in corpus/hyd_*/; do
+            n=$(basename "$d")
+            target/debug/tcad export --to step --out "$RUNNER_TEMP/step/$n.step" "$d"
+          done
+          STEP_DIR="$RUNNER_TEMP/step" CORPUS_DIR="$PWD/corpus" xvfb-run -a freecadcmd corpus/tools/check_freecad.py
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -142,6 +151,26 @@ jobs:
           git diff --exit-code -- ../crates/tcad-cli/assets/viewer.js
           npx playwright-core install --with-deps chromium
           TCAD="$GITHUB_WORKSPACE/target/debug/tcad" npm test
+
+  # The non-geometry crates run on WebAssembly (WASI) and must reproduce the digests in
+  # corpus/determinism.txt bit for bit, as the Windows and Linux test jobs do.
+  wasm-run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.97.0
+          targets: wasm32-wasip1
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install wasmtime
+      - name: Test the non-geometry crates under WASI
+        env:
+          CARGO_TARGET_WASM32_WASIP1_RUNNER: python3 ${{ github.workspace }}/corpus/tools/wasi_run.py
+        run: cargo test --target wasm32-wasip1 -p tcad-diag -p tcad-syntax -p tcad-expr -p tcad-solver -p tcad-model
 
   # The VS Code / Theia extension must compile and bundle.
   editors:
