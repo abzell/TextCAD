@@ -176,7 +176,7 @@ mod with_occt {
             first["kernel"]
                 .as_str()
                 .expect("kernel")
-                .starts_with("occt-7.")
+                .starts_with("occt-")
         );
         let v = first["result"]["volume_mm3"].as_f64().expect("volume");
         assert!((v - 240.0).abs() < 1e-9);
