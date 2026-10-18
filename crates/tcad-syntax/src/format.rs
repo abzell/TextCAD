@@ -83,6 +83,7 @@ fn arg_order(head: &str, key: &str) -> Option<usize> {
         "linear_pattern" => &["of", "dir", "count", "spacing", "skip"],
         "circular_pattern" => &["of", "axis", "count", "angle", "skip"],
         "mirror" => &["of", "plane"],
+        "combine" => &["with", "at", "op"],
         "query" => &[
             "type",
             "normal",

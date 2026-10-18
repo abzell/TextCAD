@@ -147,7 +147,7 @@ impl Env for ParamEnv<'_> {
 fn enum_values(keyword: &str, key: &str) -> Option<&'static [&'static str]> {
     const BOOL_OPS: &[&str] = &["add", "subtract", "intersect"];
     match (keyword, key) {
-        ("extrude" | "revolve" | "sweep" | "loft", "op") => Some(BOOL_OPS),
+        ("extrude" | "revolve" | "sweep" | "loft" | "combine", "op") => Some(BOOL_OPS),
         ("hole", "type") => Some(&["simple", "counterbore", "countersink", "tapped"]),
         ("hole", "end") => Some(&["through_all", "blind"]),
         ("query", "type") => Some(&["plane", "cylinder", "cone", "torus", "bspline"]),

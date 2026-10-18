@@ -153,6 +153,33 @@ fn every_measured_corpus_part_matches() {
         if let Some(sweeps) = want.get("sweeps").and_then(Value::as_array) {
             sweep(&k, &name, &src, &built, sweeps);
         }
+        // round trip: export STEP, import it again as a dead solid, properties within T2
+        let step = k
+            .export_step(
+                shape,
+                &tcad_kernel::StepMeta {
+                    name: &name,
+                    ..Default::default()
+                },
+            )
+            .unwrap_or_else(|e| panic!("{name}: STEP export: {e}"));
+        let back = k
+            .import_step(&step)
+            .unwrap_or_else(|e| panic!("{name}: STEP import: {e}"));
+        let q = k.properties(&back).unwrap();
+        rel(q.volume, p.volume, "STEP round trip volume");
+        rel(q.area, p.area, "STEP round trip area");
+        for i in 0..3 {
+            assert!(
+                (q.center_of_mass[i] - p.center_of_mass[i]).abs() <= 1e-5,
+                "{name}: STEP round trip center of mass"
+            );
+            assert!(
+                (q.bbox_min[i] - p.bbox_min[i]).abs() <= 1e-5
+                    && (q.bbox_max[i] - p.bbox_max[i]).abs() <= 1e-5,
+                "{name}: STEP round trip box"
+            );
+        }
         // T1: building again gives the same canonical B-rep, byte for byte
         let again = build(&k, &model, None).unwrap().shape.unwrap();
         assert_eq!(

@@ -34,6 +34,9 @@ the format never encodes behavior specific to OpenCASCADE.
 | `transform` | shape, translate / rotate / mirror | A copy moved or reflected. | |
 | `topology` | shape | Every face (surface type, outward normal of planar faces, axis, radius, centroid, area, edges) and edge (curve type, ends, midpoint, length, radius, direction, adjacent faces), by index | |
 | `lineage` | shape | Where the faces of the result came from, as recorded when the operation ran: `inherited` (result face, operand, input face; a face may come from several inputs when merged and an input may produce several faces when split) and `created` (result face, role: cap start/end, side of profile loop `lp` segment `seg`, from an input edge, from an input face). Empty for shapes read back from the cache. | |
+| `export_step` | shape, part name, configuration, material (name, density) | STEP AP242 in millimetres (spec/io.md). Works on a copy: the shape is unchanged. | |
+| `import_step` | bytes | The solids of the file as one shape without history. | not a STEP file, or no solids |
+| `mesh` | shape, chordal and angular deflection | Triangles per face, tagged with the face index; counterclockwise from outside; normals per vertex. Works on a copy. | |
 | `properties` | shape | volume, area, center of mass, inertia tensor **about the center of mass** (axes parallel to the world axes, unit density), bounding box, counts of solids, faces, edges, vertices | |
 | `canonical_brep` / `from_brep` | shape / bytes | A serialization that is identical for identical shapes built by the same backend on the same platform. It is also the cache format. | malformed input |
 

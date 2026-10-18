@@ -19,6 +19,7 @@ pub const FEATURE_KW: &[&str] = &[
     "linear_pattern",
     "circular_pattern",
     "mirror",
+    "combine",
 ];
 
 /// Sketch entity statements (provisional list; see `spec/sketch.md`).

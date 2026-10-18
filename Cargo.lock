@@ -380,6 +380,7 @@ dependencies = [
  "tcad-build",
  "tcad-cache",
  "tcad-diag",
+ "tcad-io",
  "tcad-kernel",
  "tcad-model",
  "tcad-occt",
@@ -405,6 +406,10 @@ dependencies = [
 [[package]]
 name = "tcad-io"
 version = "0.0.1"
+dependencies = [
+ "serde_json",
+ "tcad-kernel",
+]
 
 [[package]]
 name = "tcad-kernel"

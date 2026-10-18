@@ -31,6 +31,7 @@ tcad-syntax = { path = "crates/tcad-syntax", version = "0.0.1" }
 tcad-expr = { path = "crates/tcad-expr", version = "0.0.1" }
 tcad-solver = { path = "crates/tcad-solver", version = "0.0.1" }
 tcad-kernel = { path = "crates/tcad-kernel", version = "0.0.1" }
+tcad-io = { path = "crates/tcad-io", version = "0.0.1" }
 tcad-naming = { path = "crates/tcad-naming", version = "0.0.1" }
 tcad-build = { path = "crates/tcad-build", version = "0.0.1" }
 tcad-cache = { path = "crates/tcad-cache", version = "0.0.1" }

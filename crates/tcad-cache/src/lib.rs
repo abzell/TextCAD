@@ -194,6 +194,10 @@ pub struct ResultEntry {
     pub bbox_min_mm: [f64; 3],
     /// Bounding box maximum (mm).
     pub bbox_max_mm: [f64; 3],
+    /// Inertia tensor about the center of mass for unit density (mm^5), axes parallel to the
+    /// world axes. Multiply by the density (kg/mm^3) for kg mm^2.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub inertia_mm5: Option<[[f64; 3]; 3]>,
 }
 
 /// `manifest.json`: what the cache holds and what it was built from.
@@ -217,6 +221,18 @@ pub struct Manifest {
     pub result: ResultEntry,
     /// SHA-256 of `brep.brep`.
     pub brep_sha256: String,
+}
+
+/// Name of the exact STEP result in the cache directory.
+pub const STEP_FILE: &str = "result.step";
+
+/// Name of the viewer mesh in the cache directory.
+pub const GLB_FILE: &str = "mesh.glb";
+
+/// Writes an additional derived file (STEP, mesh) next to the B-rep.
+pub fn write_extra(dir: &Path, name: &str, bytes: &[u8]) -> std::io::Result<()> {
+    std::fs::create_dir_all(dir)?;
+    std::fs::write(dir.join(name), bytes)
 }
 
 /// Reads a manifest, if there is a valid one.
@@ -283,6 +299,7 @@ mod tests {
                 center_of_mass_mm: [0.5; 3],
                 bbox_min_mm: [0.0; 3],
                 bbox_max_mm: [1.0; 3],
+                inertia_mm5: None,
             },
             brep_sha256: sha256_hex(brep),
         }

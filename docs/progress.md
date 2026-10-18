@@ -106,3 +106,18 @@ matched back to edges by midpoint; sweeping profile edges map cleanly through `G
 
 Deferred: variable-radius fillet direction follows the edge orientation (documented, tested for
 volume only); `rib` along arcs; vertex queries; loft guides.
+
+## M7: I/O, properties, verify, diff
+
+Done:
+- Kernel: `export_step` (XDE, AP242, name/material/configuration), `import_step`, `mesh`; all on copies.
+- `tcad-io`: binary STL, 3MF (stored ZIP, fixed date), GLB (one primitive per face with semantic IDs).
+- `import`/`combine` in the build crate; the import bytes are part of the source hash.
+- CLI: `export`, `verify`, `diff`; `props` prints mass and the inertia tensor in kg mm^2.
+- STEP round trip (own importer) and independent reader (build123d) over all 21 corpus parts.
+
+Finding: exporting or meshing the shape itself changed its canonical B-rep (tolerances, triangulation)
+and broke the T1 comparison; both now work on a copy.
+
+Deferred: the manual spot check in commercial CAD (docs/interop.md), STEP assemblies, GLB materials per
+face. The hydraulic parts and FreeCAD opening in CI belong to M8.

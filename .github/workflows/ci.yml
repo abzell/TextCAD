@@ -72,7 +72,7 @@ jobs:
         run: >
           cargo build --target wasm32-unknown-unknown
           -p tcad-diag -p tcad-syntax -p tcad-expr -p tcad-model -p tcad-solver
-          -p tcad-naming -p tcad-kernel -p tcad-cache
+          -p tcad-naming -p tcad-kernel -p tcad-cache -p tcad-io
 
   deny:
     runs-on: ubuntu-latest
@@ -119,9 +119,17 @@ jobs:
           toolchain: 1.97.0
       - uses: Swatinem/rust-cache@v2
       - name: Install OpenCASCADE
-        run: sudo apt-get update && sudo apt-get install -y libocct-foundation-dev libocct-modeling-data-dev libocct-modeling-algorithms-dev libocct-data-exchange-dev g++
+        run: sudo apt-get update && sudo apt-get install -y libocct-foundation-dev libocct-modeling-data-dev libocct-modeling-algorithms-dev libocct-data-exchange-dev libocct-ocaf-dev g++
       - name: Test with OCCT
         run: cargo test --workspace --features tcad-cli/occt,tcad-build/occt
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Read every corpus STEP export with an independent reader
+        run: |
+          pip install build123d
+          cargo build -p tcad-cli --features occt
+          python3 corpus/tools/check_step_exports.py target/debug/tcad corpus
 
   build123d-crosscheck:
     runs-on: ubuntu-latest

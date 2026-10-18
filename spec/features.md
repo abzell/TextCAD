@@ -103,8 +103,13 @@ instances of a pattern (instance 1 cannot be skipped).
 A pattern of a pattern repeats every instance of the first pattern. Sketches may lie on a planar
 face (`sketch s on boss.cap_end { ... }`), and `to=` accepts a planar face as well as a plane.
 
+## Import
+
+`import name = step("imports/x.step")` and `combine c with=name [at=(x, y, z)] [op=...]` bring a STEP
+solid into the part (spec/io.md).
+
 ## Not yet
 
-`import` is `E5003` until M7. Guided lofts need a kernel feature OpenCASCADE lacks and are tracked in
+Guided lofts need a kernel feature OpenCASCADE lacks and are tracked in
 `docs/progress.md`. Queries on vertices, ribs along arcs and circular patterns of several axes are
 not part of Phase 1.

@@ -17,12 +17,39 @@
 
 #include "tcad-occt/src/bridge.rs.h"
 
+#include <APIHeaderSection_MakeHeader.hxx>
+#include <BRepAdaptor_Curve.hxx>
+#include <BRepMesh_IncrementalMesh.hxx>
+#include <IFSelect_ReturnStatus.hxx>
+#include <Interface_Static.hxx>
+#include <Poly_Triangulation.hxx>
+#include <STEPCAFControl_Writer.hxx>
+#include <STEPControl_Reader.hxx>
+#include <STEPControl_StepModelType.hxx>
+#include <StepData_StepModel.hxx>
+#include <TCollection_AsciiString.hxx>
+#include <TCollection_ExtendedString.hxx>
+#include <TCollection_HAsciiString.hxx>
+#include <TDF_Label.hxx>
+#include <TDataStd_Name.hxx>
+#include <TDocStd_Document.hxx>
+#include <TopLoc_Location.hxx>
+#include <XCAFApp_Application.hxx>
+#include <XCAFDoc_DocumentTool.hxx>
+#include <XCAFDoc_MaterialTool.hxx>
+#include <XCAFDoc_ShapeTool.hxx>
+#include <filesystem>
+#include <fstream>
+#include <iterator>
+#include <random>
+#include <TopoDS_Compound.hxx>
 #include <BRepAdaptor_Curve.hxx>
 #include <BRepAdaptor_Surface.hxx>
 #include <BRepAlgoAPI_Common.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <BRepBndLib.hxx>
+#include <BRepBuilderAPI_Copy.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakeVertex.hxx>
 #include <BRepExtrema_DistShapeShape.hxx>
@@ -879,6 +906,142 @@ Props properties(const Shape& sh) {
     out.faces = count(s, TopAbs_FACE);
     out.edges = count(s, TopAbs_EDGE);
     out.vertices = count(s, TopAbs_VERTEX);
+    return out;
+  });
+}
+
+// ---- STEP and meshing ----
+
+namespace {
+
+// A scratch file name unique per call (OpenCASCADE's STEP writer works on files).
+std::string scratch_path(const char* ext) {
+  static unsigned counter = 0;
+  std::random_device rd;
+  std::filesystem::path dir = std::filesystem::temp_directory_path();
+  return (dir / ("tcad-" + std::to_string(rd()) + "-" + std::to_string(counter++) + ext)).string();
+}
+
+struct Scratch {
+  std::string path;
+  explicit Scratch(const char* ext) : path(scratch_path(ext)) {}
+  ~Scratch() {
+    std::error_code ec;
+    std::filesystem::remove(path, ec);
+  }
+};
+
+}  // namespace
+
+rust::Vec<uint8_t> export_step(const Shape& sh, rust::Str name, rust::Str configuration,
+                               rust::Str material, double density_g_cm3) {
+  return guarded("export_step", [&]() {
+    Handle(XCAFApp_Application) app = XCAFApp_Application::GetApplication();
+    Handle(TDocStd_Document) doc;
+    app->NewDocument("MDTV-XCAF", doc);
+    Handle(XCAFDoc_ShapeTool) st = XCAFDoc_DocumentTool::ShapeTool(doc->Main());
+    // work on a copy: the writer may adjust tolerances, and the caller's shape must stay intact
+    BRepBuilderAPI_Copy copy(sh.s);
+    TDF_Label label = st->AddShape(copy.Shape(), Standard_False);
+    std::string part(name.data(), name.size());
+    TDataStd_Name::Set(label, TCollection_ExtendedString(part.c_str()));
+    if (material.size() > 0) {
+      std::string mat(material.data(), material.size());
+      Handle(XCAFDoc_MaterialTool) mt = XCAFDoc_DocumentTool::MaterialTool(doc->Main());
+      TDF_Label m = mt->AddMaterial(new TCollection_HAsciiString(mat.c_str()),
+                                    new TCollection_HAsciiString(""), density_g_cm3,
+                                    new TCollection_HAsciiString("density"),
+                                    new TCollection_HAsciiString("g/cm^3"));
+      mt->SetMaterial(label, m);
+    }
+    Interface_Static::SetCVal("write.step.schema", "AP242DIS");
+    Interface_Static::SetCVal("write.step.unit", "MM");
+    STEPCAFControl_Writer writer;
+    writer.SetNameMode(Standard_True);
+    writer.SetMaterialMode(Standard_True);
+    if (!writer.Transfer(doc, STEPControl_AsIs)) throw std::runtime_error("STEP transfer failed");
+    Handle(StepData_StepModel) model = writer.ChangeWriter().Model();
+    if (!model.IsNull()) {
+      APIHeaderSection_MakeHeader header(model);
+      std::string desc = "TextCAD part " + part;
+      if (configuration.size() > 0) desc += ", configuration " + std::string(configuration.data(), configuration.size());
+      header.SetDescriptionValue(1, new TCollection_HAsciiString(desc.c_str()));
+    }
+    Scratch tmp(".step");
+    if (writer.Write(tmp.path.c_str()) != IFSelect_RetDone) throw std::runtime_error("STEP write failed");
+    std::ifstream in(tmp.path, std::ios::binary);
+    std::string text((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+    rust::Vec<uint8_t> out;
+    out.reserve(text.size());
+    for (unsigned char ch : text) out.push_back(ch);
+    app->Close(doc);
+    return out;
+  });
+}
+
+std::unique_ptr<Shape> import_step(rust::Slice<const uint8_t> bytes) {
+  return guarded("import_step", [&]() {
+    std::string text(reinterpret_cast<const char*>(bytes.data()), bytes.size());
+    std::istringstream is(text);
+    STEPControl_Reader reader;
+    if (reader.ReadStream("import.step", is) != IFSelect_RetDone) {
+      throw std::runtime_error("not a readable STEP file");
+    }
+    reader.TransferRoots();
+    TopoDS_Shape all = reader.OneShape();
+    if (all.IsNull()) throw std::runtime_error("the STEP file contains no shape");
+    TopTools_IndexedMapOfShape solids;
+    TopExp::MapShapes(all, TopAbs_SOLID, solids);
+    if (solids.Extent() == 0) throw std::runtime_error("the STEP file contains no solid");
+    if (solids.Extent() == 1) return wrap(solids(1));
+    BRep_Builder b;
+    TopoDS_Compound comp;
+    b.MakeCompound(comp);
+    for (int i = 1; i <= solids.Extent(); i++) b.Add(comp, solids(i));
+    return wrap(comp);
+  });
+}
+
+rust::Vec<MeshRec> mesh_of(const Shape& sh, double linear, double angular) {
+  return guarded("mesh", [&]() {
+    // mesh a copy: triangulations are attached to the shape, which must stay as it was built
+    BRepBuilderAPI_Copy copy(sh.s);
+    TopoDS_Shape work = copy.Shape();
+    BRepMesh_IncrementalMesh mesher(work, linear, Standard_False, angular, Standard_False);
+    TopTools_IndexedMapOfShape fm = face_map(work);
+    rust::Vec<MeshRec> out;
+    for (int i = 1; i <= fm.Extent(); i++) {
+      TopoDS_Face face = TopoDS::Face(fm(i));
+      TopLoc_Location loc;
+      Handle(Poly_Triangulation) tri = BRep_Tool::Triangulation(face, loc);
+      if (tri.IsNull() || tri->NbTriangles() == 0) continue;
+      if (!tri->HasNormals()) tri->ComputeNormals();
+      gp_Trsf t = loc.Transformation();
+      bool reversed = face.Orientation() == TopAbs_REVERSED;
+      MeshRec r;
+      r.face = (uint32_t)(i - 1);
+      for (int n = 1; n <= tri->NbNodes(); n++) {
+        gp_Pnt p = tri->Node(n).Transformed(t);
+        r.positions.push_back((float)p.X());
+        r.positions.push_back((float)p.Y());
+        r.positions.push_back((float)p.Z());
+        gp_Dir d = tri->Normal(n);
+        d.Transform(t);
+        if (reversed) d.Reverse();
+        r.normals.push_back((float)d.X());
+        r.normals.push_back((float)d.Y());
+        r.normals.push_back((float)d.Z());
+      }
+      for (int k = 1; k <= tri->NbTriangles(); k++) {
+        int a, b, c;
+        tri->Triangle(k).Get(a, b, c);
+        if (reversed) std::swap(b, c);
+        r.triangles.push_back((uint32_t)(a - 1));
+        r.triangles.push_back((uint32_t)(b - 1));
+        r.triangles.push_back((uint32_t)(c - 1));
+      }
+      out.push_back(std::move(r));
+    }
     return out;
   });
 }

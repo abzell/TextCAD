@@ -127,6 +127,37 @@ pub enum Transform {
     },
 }
 
+/// What a STEP export records about the part.
+#[derive(Clone, Copy, Debug, Default)]
+pub struct StepMeta<'a> {
+    /// Part name.
+    pub name: &'a str,
+    /// Configuration that was built, if any.
+    pub configuration: Option<&'a str>,
+    /// Material name and density (g/cm^3), if declared.
+    pub material: Option<(&'a str, Option<f64>)>,
+}
+
+/// The triangles of one face. Indices refer to the face's own vertices.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct MeshFace {
+    /// Index of the face in the shape's enumeration (see [`TopoInfo`]).
+    pub face: u32,
+    /// Vertex positions, x y z interleaved (mm).
+    pub positions: Vec<f32>,
+    /// Unit normals, x y z interleaved, one per vertex.
+    pub normals: Vec<f32>,
+    /// Triangle corner indices, counterclockwise seen from outside.
+    pub triangles: Vec<u32>,
+}
+
+/// A tessellated shape.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct Mesh {
+    /// One entry per face that has triangles.
+    pub faces: Vec<MeshFace>,
+}
+
 /// The operations a geometry kernel provides (requirements 8.1). Lengths are in millimetres and
 /// angles in radians. Every operation is a pure function of its inputs: no hidden state, no
 /// parallel reductions, fixed iteration orders.
@@ -208,6 +239,16 @@ pub trait Kernel {
     /// Where the faces of `shape` came from, as recorded when the operation that made it ran.
     /// Empty for shapes read from the cache.
     fn lineage(&self, shape: &Self::Shape) -> Lineage;
+
+    /// Writes the shape as STEP AP242 (millimetres), with the part name, material and configuration.
+    fn export_step(&self, shape: &Self::Shape, meta: &StepMeta<'_>) -> KResult<Vec<u8>>;
+
+    /// Reads the solids of a STEP file as one shape (a "dead" solid: no history).
+    fn import_step(&self, bytes: &[u8]) -> KResult<Self::Shape>;
+
+    /// Tessellates the shape. `linear` is the chordal deflection (mm), `angular` the angular
+    /// deflection (radians).
+    fn mesh(&self, shape: &Self::Shape, linear: f64, angular: f64) -> KResult<Mesh>;
 
     /// Measures a shape.
     fn properties(&self, shape: &Self::Shape) -> KResult<Properties>;

@@ -6,6 +6,7 @@
 
 mod detail;
 mod holes;
+mod imports;
 mod patterns;
 pub mod profile;
 mod select;
@@ -105,12 +106,25 @@ pub fn build<K: Kernel>(
 /// The outcome of a build and the references it resolved.
 pub type Traced<S> = (Result<Built<S>, Vec<Diagnostic>>, Vec<RefRecord>);
 
+/// Reads a bundle file (an imported STEP file) by its path in the source.
+pub type Loader<'a> = &'a dyn Fn(&str) -> Result<Vec<u8>, String>;
+
 /// Like [`build`], and also returns every face/edge reference that was resolved on the way, even
-/// when the build fails.
+/// when the build fails. Imports fail: use [`build_with`] to supply the files.
 pub fn build_traced<K: Kernel>(
     kernel: &K,
     model: &Model,
     config: Option<&str>,
+) -> Traced<K::Shape> {
+    build_with(kernel, model, config, None)
+}
+
+/// Like [`build_traced`] with a loader for imported files (paths are relative to the bundle).
+pub fn build_with<K: Kernel>(
+    kernel: &K,
+    model: &Model,
+    config: Option<&str>,
+    loader: Option<Loader<'_>>,
 ) -> Traced<K::Shape> {
     let config = config
         .map(str::to_string)
@@ -137,6 +151,8 @@ pub fn build_traced<K: Kernel>(
         names: Names::default(),
         tags: HashMap::new(),
         tools: HashMap::new(),
+        imports: HashMap::new(),
+        loader,
         rank: 0,
         current: String::new(),
         refs: Vec::new(),
@@ -216,6 +232,8 @@ pub(crate) struct Cx<'a, K: Kernel> {
     names: Names,
     tags: HashMap<String, Reference>,
     tools: HashMap<String, ToolRec<K::Shape>>,
+    imports: HashMap<String, Tool<K::Shape>>,
+    loader: Option<Loader<'a>>,
     rank: u32,
     current: String,
     refs: Vec<RefRecord>,
@@ -607,8 +625,9 @@ impl<K: Kernel> Cx<'_, K> {
                 self.tags.insert(item.name.clone(), target.clone());
                 Ok(())
             }
-            ItemKind::Import(_) => {
-                self.fail(codes::E5003, item.span, "STEP import is milestone M7")
+            ItemKind::Import(path) => {
+                self.rank += 1;
+                self.import_step(item, path)
             }
             ItemKind::RefGeom => match item.keyword.as_str() {
                 "plane" => self.plane_feature(item),
@@ -637,6 +656,7 @@ impl<K: Kernel> Cx<'_, K> {
                     "linear_pattern" => self.linear_pattern(item),
                     "circular_pattern" => self.circular_pattern(item),
                     "mirror" => self.mirror(item),
+                    "combine" => self.combine_import(item),
                     other => self.fail(
                         codes::E5003,
                         item.span,

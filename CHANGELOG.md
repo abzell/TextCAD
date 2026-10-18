@@ -32,6 +32,11 @@ All notable changes are recorded here. Format follows [Keep a Changelog](https:/
   `circular_pattern`, `mirror` (including patterns of patterns and skip lists), sketches and `to=` on
   planar faces, the topology map in the manifest, `tcad refs`, thirteen corpus parts (two with
   naming-robustness sweeps over 54 parameter sets), `spec/naming.md`, ADR 0010.
+- M7: STEP AP242 export (name, material, configuration) and import as a dead solid with
+  `import`/`combine`, binary STL, 3MF and GLB (per-face semantic IDs), `tcad export`, `tcad verify`
+  (T1/T2/T3), `tcad diff`, mass and inertia tensor in `tcad props`, `result.step` and `mesh.glb` in
+  the cache, `tcad-io`, STEP round trip and independent-reader checks over the corpus,
+  `spec/io.md`, `docs/interop.md`, ADR 0011.
 
 ### Changed
 - Replaced the MIT `LICENSE` with Apache-2.0 (locked decision, requirements section 2).

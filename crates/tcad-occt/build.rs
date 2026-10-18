@@ -26,6 +26,16 @@ const LIBS: &[&str] = &[
     "TKFillet",
     "TKFeat",
     "TKMesh",
+    "TKXSBase",
+    "TKSTEPBase",
+    "TKSTEPAttr",
+    "TKSTEP209",
+    "TKSTEP",
+    "TKLCAF",
+    "TKCDF",
+    "TKCAF",
+    "TKXCAF",
+    "TKXDESTEP",
 ];
 
 #[cfg_attr(not(feature = "occt"), allow(dead_code))]

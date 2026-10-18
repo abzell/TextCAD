@@ -1,7 +1,10 @@
 //! `tcad-cli`: the `tcad` command-line tool. All commands support `--json` and return a non-zero
 //! exit code on failure (1: the input is invalid or would change, 2: usage or I/O error).
 
+mod diff;
+mod export;
 mod geom;
+mod verify;
 
 use serde_json::{Value, json};
 use std::io::Write;
@@ -28,6 +31,9 @@ Commands:
           the `occt` feature)
   props   Mass properties, bounding box and topology counts of the result
   refs    Every face/edge reference of the part and the persistent name it resolves to
+  export  Write STEP, STL, 3MF or GLB (--to step|stl|3mf|glb [--out FILE])
+  verify  Regenerate and compare with the cache: T1 identical, T2 equivalent, T3 failed
+  diff    Semantic difference between two versions of a part (two paths)
 
 Options:
   --json     Machine-readable output
@@ -35,6 +41,11 @@ Options:
   --solve    (fmt) also write solved sketch coordinates as @hint(...)
   --config NAME  (build, props) build a configuration instead of the default one
   --force    (build, props) rebuild even if the cache is up to date
+  --to FMT   (export) step, stl, 3mf or glb
+  --out FILE (export) output file (default: <part>.<format> in the current directory)
+  --linear MM    (export stl/3mf/glb) chordal tolerance, default 0.05
+  --angular DEG  (export stl/3mf/glb) angular tolerance, default 10
+  --no-geometry  (diff) compare the text only
   --help     Show this help
   --version  Show the version
 
@@ -49,6 +60,12 @@ pub fn run(args: &[String], out: &mut dyn Write, err: &mut dyn Write) -> i32 {
     let mut force = false;
     let mut config: Option<&str> = None;
     let mut want_config = false;
+    let mut pending: Option<&str> = None;
+    let mut to: Option<&str> = None;
+    let mut out_file: Option<&str> = None;
+    let mut linear: Option<&str> = None;
+    let mut angular: Option<&str> = None;
+    let mut no_geometry = false;
     let mut command: Option<&str> = None;
     let mut paths: Vec<&str> = Vec::new();
     for a in args {
@@ -57,8 +74,22 @@ pub fn run(args: &[String], out: &mut dyn Write, err: &mut dyn Write) -> i32 {
             want_config = false;
             continue;
         }
+        if let Some(opt) = pending.take() {
+            match opt {
+                "--to" => to = Some(a.as_str()),
+                "--out" => out_file = Some(a.as_str()),
+                "--linear" => linear = Some(a.as_str()),
+                _ => angular = Some(a.as_str()),
+            }
+            continue;
+        }
         match a.as_str() {
             "--config" => want_config = true,
+            "--to" => pending = Some("--to"),
+            "--out" => pending = Some("--out"),
+            "--linear" => pending = Some("--linear"),
+            "--angular" => pending = Some("--angular"),
+            "--no-geometry" => no_geometry = true,
             "--force" => force = true,
             "--json" => json = true,
             "--check" => check_only = true,
@@ -87,7 +118,14 @@ pub fn run(args: &[String], out: &mut dyn Write, err: &mut dyn Write) -> i32 {
         let _ = writeln!(err, "tcad: --config needs a name");
         return 2;
     }
-    if !matches!(command, "check" | "fmt" | "build" | "props" | "refs") {
+    if let Some(opt) = pending {
+        let _ = writeln!(err, "tcad: {opt} needs a value");
+        return 2;
+    }
+    if !matches!(
+        command,
+        "check" | "fmt" | "build" | "props" | "refs" | "export" | "verify" | "diff"
+    ) {
         let _ = writeln!(err, "tcad: unknown command `{command}`\n\n{USAGE}");
         return 2;
     }
@@ -95,11 +133,20 @@ pub fn run(args: &[String], out: &mut dyn Write, err: &mut dyn Write) -> i32 {
         let _ = writeln!(err, "tcad: --check only applies to `fmt`");
         return 2;
     }
-    if matches!(command, "build" | "props" | "refs") {
-        if paths.len() != 1 {
+    if matches!(
+        command,
+        "build" | "props" | "refs" | "export" | "verify" | "diff"
+    ) {
+        let want = if command == "diff" { 2 } else { 1 };
+        if paths.len() != want {
             let _ = writeln!(
                 err,
-                "tcad {command}: expected exactly one bundle or part path"
+                "tcad {command}: expected {}",
+                if want == 2 {
+                    "two bundle or part paths (old and new)"
+                } else {
+                    "exactly one bundle or part path"
+                }
             );
             return 2;
         }
@@ -109,12 +156,56 @@ pub fn run(args: &[String], out: &mut dyn Write, err: &mut dyn Write) -> i32 {
             force,
             json,
         };
-        return run_geometry(command, &o, out, err);
+        let num = |v: Option<&str>, default: f64, name: &str| -> Result<f64, String> {
+            match v {
+                None => Ok(default),
+                Some(t) => t
+                    .parse::<f64>()
+                    .ok()
+                    .filter(|x| *x > 0.0)
+                    .ok_or_else(|| format!("{name} needs a positive number, not `{t}`")),
+            }
+        };
+        let req = match command {
+            "build" | "props" | "refs" => Request::Simple(command, o),
+            "verify" => Request::Verify(o),
+            "diff" => Request::Diff(diff::DiffOptions {
+                a: paths[0],
+                b: paths[1],
+                config,
+                no_geometry,
+                json,
+            }),
+            _ => {
+                let Some(to) = to else {
+                    let _ = writeln!(err, "tcad export: --to step|stl|3mf|glb is required");
+                    return 2;
+                };
+                let (lin, ang) = match (
+                    num(linear, geom::LINEAR_DEFLECTION_MM, "--linear"),
+                    num(angular, 10.0, "--angular"),
+                ) {
+                    (Ok(l), Ok(a)) => (l, a),
+                    (Err(m), _) | (_, Err(m)) => {
+                        let _ = writeln!(err, "tcad export: {m}");
+                        return 2;
+                    }
+                };
+                Request::Export(export::ExportOptions {
+                    base: o,
+                    to,
+                    out: out_file,
+                    linear: lin,
+                    angular_deg: ang,
+                })
+            }
+        };
+        return run_geometry(&req, out, err);
     }
     if (config.is_some() || force) && !matches!(command, "build" | "props" | "refs") {
         let _ = writeln!(
             err,
-            "tcad: --config and --force apply to `build` and `props`"
+            "tcad: --config and --force apply to `build`, `props`, `refs`, `export` and `verify`"
         );
         return 2;
     }
@@ -184,28 +275,44 @@ pub fn run(args: &[String], out: &mut dyn Write, err: &mut dyn Write) -> i32 {
     if io_error { 2 } else { i32::from(failed) }
 }
 
-#[cfg(feature = "occt")]
-fn run_geometry(
-    command: &str,
-    o: &geom::Options<'_>,
+/// A command that needs a geometry kernel.
+enum Request<'a> {
+    /// `build`, `props` or `refs`.
+    Simple(&'a str, geom::Options<'a>),
+    Export(export::ExportOptions<'a>),
+    Verify(geom::Options<'a>),
+    Diff(diff::DiffOptions<'a>),
+}
+
+fn dispatch<K: tcad_kernel::Kernel>(
+    k: &K,
+    req: &Request<'_>,
     out: &mut dyn Write,
     err: &mut dyn Write,
 ) -> i32 {
-    let k = tcad_occt::OcctKernel::new();
-    match command {
-        "build" => geom::build_command(&k, o, out, err),
-        "refs" => geom::refs_command(&k, o, out, err),
-        _ => geom::props_command(&k, o, out, err),
+    match req {
+        Request::Simple("build", o) => geom::build_command(k, o, out, err),
+        Request::Simple("refs", o) => geom::refs_command(k, o, out, err),
+        Request::Simple(_, o) => geom::props_command(k, o, out, err),
+        Request::Export(o) => export::export_command(k, o, out, err),
+        Request::Verify(o) => verify::verify_command(k, o, out, err),
+        Request::Diff(o) => diff::diff_command(k, o, out, err),
     }
 }
 
+#[cfg(feature = "occt")]
+fn run_geometry(req: &Request<'_>, out: &mut dyn Write, err: &mut dyn Write) -> i32 {
+    dispatch(&tcad_occt::OcctKernel::new(), req, out, err)
+}
+
 #[cfg(not(feature = "occt"))]
-fn run_geometry(
-    command: &str,
-    _: &geom::Options<'_>,
-    _: &mut dyn Write,
-    err: &mut dyn Write,
-) -> i32 {
+fn run_geometry(req: &Request<'_>, _: &mut dyn Write, err: &mut dyn Write) -> i32 {
+    let command = match req {
+        Request::Simple(c, _) => c,
+        Request::Export(_) => "export",
+        Request::Verify(_) => "verify",
+        Request::Diff(_) => "diff",
+    };
     let _ = writeln!(
         err,
         "tcad {command}: this build of tcad has no geometry kernel; rebuild with `--features occt` \
@@ -214,7 +321,7 @@ fn run_geometry(
     2
 }
 
-/// Runs `build` or `props` with a given kernel (used by the tests with the mock kernel).
+/// Runs a geometry command with a given kernel (used by the tests with the mock kernel).
 pub fn run_with_kernel<K: tcad_kernel::Kernel>(
     k: &K,
     command: &str,
@@ -230,11 +337,18 @@ pub fn run_with_kernel<K: tcad_kernel::Kernel>(
         force: false,
         json,
     };
-    match command {
-        "build" => geom::build_command(k, &o, out, err),
-        "refs" => geom::refs_command(k, &o, out, err),
-        _ => geom::props_command(k, &o, out, err),
-    }
+    let req = match command {
+        "verify" => Request::Verify(o),
+        c => Request::Simple(
+            if c == "build" || c == "refs" {
+                c
+            } else {
+                "props"
+            },
+            o,
+        ),
+    };
+    dispatch(k, &req, out, err)
 }
 
 fn check_file(src: &str) -> (&'static str, Vec<Diagnostic>) {

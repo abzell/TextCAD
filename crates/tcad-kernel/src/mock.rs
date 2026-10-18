@@ -9,6 +9,7 @@ use crate::{
     BoolOp, ChamferEdge, FilletEdge, KResult, Kernel, KernelError, Lineage, Path, Properties,
     TopoInfo, Topology, Transform,
 };
+use crate::{Mesh, StepMeta};
 use std::f64::consts::PI;
 
 /// The mock backend.
@@ -96,6 +97,18 @@ impl Kernel for MockKernel {
 
     fn transform(&self, _: &MockShape, _: &Transform) -> KResult<MockShape> {
         unsupported("transform")
+    }
+
+    fn export_step(&self, _: &MockShape, _: &StepMeta<'_>) -> KResult<Vec<u8>> {
+        unsupported("STEP export")
+    }
+
+    fn import_step(&self, _: &[u8]) -> KResult<MockShape> {
+        unsupported("STEP import")
+    }
+
+    fn mesh(&self, _: &MockShape, _: f64, _: f64) -> KResult<Mesh> {
+        unsupported("meshing")
     }
 
     fn topology(&self, _: &MockShape) -> KResult<TopoInfo> {

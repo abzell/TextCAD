@@ -19,6 +19,7 @@ tcad-model.workspace = true
 tcad-build.workspace = true
 tcad-kernel.workspace = true
 tcad-cache.workspace = true
+tcad-io.workspace = true
 tcad-occt = { workspace = true, optional = true }
 serde_json = "1"
 

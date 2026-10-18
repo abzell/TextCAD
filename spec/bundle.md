@@ -15,7 +15,8 @@ rod_clevis/                 bundle directory
     rod_clevis/
       brep.brep             the result in the kernel's canonical serialization
       manifest.json         hashes, kernel id and version, per-feature topology
-      result.step, mesh.glb added by milestone M7
+      result.step           the exact result as STEP AP242 (spec/io.md)
+      mesh.glb              the viewer mesh, one primitive per face with its semantic ID
 ```
 
 ## `bundle.toml`

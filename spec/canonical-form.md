@@ -73,4 +73,5 @@ chapters [sketch.md](sketch.md) and [features.md](features.md) as those are writ
 | linear_pattern | of, dir, count, spacing, skip |
 | circular_pattern | of, axis, count, angle, skip |
 | mirror | of, plane |
+| combine | with, at, op |
 | query | type, normal, parallel_to, axis, radius, created_by, adjacent_to, nearest |

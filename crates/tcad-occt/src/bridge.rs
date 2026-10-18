@@ -96,6 +96,15 @@ pub mod ffi {
         faces: Vec<u32>,
     }
 
+    /// The triangles of one face.
+    #[derive(Clone, Debug, Default)]
+    struct MeshRec {
+        face: u32,
+        positions: Vec<f32>,
+        normals: Vec<f32>,
+        triangles: Vec<u32>,
+    }
+
     unsafe extern "C++" {
         include!("cpp/shim.h");
 
@@ -152,6 +161,15 @@ pub mod ffi {
         fn edges_of(s: &Shape) -> Result<Vec<EdgeRec>>;
         fn lineage_inherited(s: &Shape) -> Vec<u32>;
         fn lineage_created(s: &Shape) -> Vec<u32>;
+        fn export_step(
+            s: &Shape,
+            name: &str,
+            configuration: &str,
+            material: &str,
+            density_g_cm3: f64,
+        ) -> Result<Vec<u8>>;
+        fn import_step(bytes: &[u8]) -> Result<UniquePtr<Shape>>;
+        fn mesh_of(s: &Shape, linear: f64, angular: f64) -> Result<Vec<MeshRec>>;
         fn properties(s: &Shape) -> Result<Props>;
         fn write_brep(s: &Shape) -> Result<Vec<u8>>;
         fn read_brep(bytes: &[u8]) -> Result<UniquePtr<Shape>>;

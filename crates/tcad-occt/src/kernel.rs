@@ -5,7 +5,8 @@ use cxx::UniquePtr;
 use tcad_kernel::geometry::{Frame, Path, Profile, Segment, V3};
 use tcad_kernel::{
     BoolOp, ChamferEdge, CurveKind, EdgeInfo, FaceInfo, FilletEdge, KResult, Kernel, KernelError,
-    Lineage, Properties, Role, SurfaceKind, TopoInfo, Topology, Transform,
+    Lineage, Mesh, MeshFace, Properties, Role, StepMeta, SurfaceKind, TopoInfo, Topology,
+    Transform,
 };
 
 /// The OpenCASCADE backend.
@@ -294,6 +295,37 @@ impl Kernel for OcctKernel {
             })
             .collect();
         Lineage { inherited, created }
+    }
+
+    fn export_step(&self, s: &OcctShape, meta: &StepMeta<'_>) -> KResult<Vec<u8>> {
+        let (material, density) = meta.material.unwrap_or(("", None));
+        ffi::export_step(
+            &s.0,
+            meta.name,
+            meta.configuration.unwrap_or(""),
+            material,
+            density.unwrap_or(0.0),
+        )
+        .map_err(err)
+    }
+
+    fn import_step(&self, bytes: &[u8]) -> KResult<OcctShape> {
+        shape(ffi::import_step(bytes))
+    }
+
+    fn mesh(&self, s: &OcctShape, linear: f64, angular: f64) -> KResult<Mesh> {
+        let faces = ffi::mesh_of(&s.0, linear, angular).map_err(err)?;
+        Ok(Mesh {
+            faces: faces
+                .into_iter()
+                .map(|f| MeshFace {
+                    face: f.face,
+                    positions: f.positions,
+                    normals: f.normals,
+                    triangles: f.triangles,
+                })
+                .collect(),
+        })
     }
 
     fn properties(&self, s: &OcctShape) -> KResult<Properties> {

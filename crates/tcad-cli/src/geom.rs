@@ -4,11 +4,12 @@ use serde_json::{Value, json};
 use std::io::Write;
 use std::path::PathBuf;
 use tcad_cache::{
-    FeatureEntry, Manifest, ResultEntry, TopologyEntry, cache_dir, is_fresh, load_bundle,
-    sha256_hex, source_hash, write_cache,
+    FeatureEntry, GLB_FILE, Manifest, ResultEntry, STEP_FILE, TopologyEntry, cache_dir, is_fresh,
+    load_bundle, sha256_hex, source_hash, write_cache, write_extra,
 };
 use tcad_diag::{Diagnostic, render_json, render_text};
-use tcad_kernel::Kernel;
+use tcad_io::{FaceLabel, ModelInfo};
+use tcad_kernel::{Kernel, StepMeta};
 
 /// Options of `build` and `props`.
 pub struct Options<'a> {
@@ -22,22 +23,94 @@ pub struct Options<'a> {
     pub json: bool,
 }
 
-struct Produced {
-    manifest: Manifest,
-    fresh: bool,
-    dir: PathBuf,
-    density: Option<f64>,
-    material: Option<String>,
+pub(crate) struct Produced {
+    pub(crate) manifest: Manifest,
+    pub(crate) fresh: bool,
+    pub(crate) dir: PathBuf,
+    pub(crate) density: Option<f64>,
+    pub(crate) material: Option<String>,
 }
 
-enum Failure {
+pub(crate) enum Failure {
     /// Diagnostics for a source text.
     Diagnostics(String, String, Vec<Diagnostic>),
     /// Anything else (I/O, missing bundle), exit code 2.
     Other(String),
 }
 
-fn produce<K: Kernel>(k: &K, o: &Options<'_>) -> Result<Produced, Failure> {
+/// Default tessellation for the cached viewer mesh and for exports.
+pub const LINEAR_DEFLECTION_MM: f64 = 0.05;
+/// Default angular deflection (radians, about 10 degrees).
+pub const ANGULAR_DEFLECTION_RAD: f64 = 0.1745;
+
+/// The files named by `import` statements, read from the bundle (`..` and absolute paths are not
+/// allowed).
+fn read_imports(
+    root: &std::path::Path,
+    model: &tcad_model::Model,
+) -> Result<Vec<(String, Vec<u8>)>, Failure> {
+    let mut out = Vec::new();
+    for item in &model.part.items {
+        if let tcad_model::ItemKind::Import(path) = &item.kind {
+            let rel = std::path::Path::new(path);
+            let escapes = rel.is_absolute()
+                || rel
+                    .components()
+                    .any(|c| matches!(c, std::path::Component::ParentDir));
+            if escapes {
+                return Err(Failure::Other(format!(
+                    "import `{path}` must be a path inside the bundle"
+                )));
+            }
+            let bytes = std::fs::read(root.join(rel))
+                .map_err(|e| Failure::Other(format!("cannot read import `{path}`: {e}")))?;
+            out.push((path.clone(), bytes));
+        }
+    }
+    Ok(out)
+}
+
+/// The persistent name of every face of the result, by face index.
+pub fn face_labels(features: &[FeatureEntry]) -> Vec<FaceLabel> {
+    features
+        .last()
+        .map(|f| {
+            f.topology
+                .iter()
+                .filter(|t| t.kind == "face")
+                .map(|t| FaceLabel {
+                    id: t.id.clone(),
+                    aliases: t.aliases.clone(),
+                })
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+/// A part read from disk, analyzed, with everything that identifies its cache entry.
+pub(crate) struct Source {
+    pub(crate) name: String,
+    pub(crate) src: String,
+    pub(crate) model: tcad_model::Model,
+    pub(crate) config: Option<String>,
+    pub(crate) hash: String,
+    pub(crate) dir: PathBuf,
+    pub(crate) imports: Vec<(String, Vec<u8>)>,
+    pub(crate) density: Option<f64>,
+    pub(crate) material: Option<String>,
+}
+
+/// The outcome of a regeneration, before anything is written.
+pub(crate) struct Fresh {
+    pub(crate) manifest: Manifest,
+    pub(crate) brep: Vec<u8>,
+    pub(crate) step: Option<Vec<u8>>,
+    pub(crate) glb: Option<Vec<u8>>,
+    /// Every face/edge reference that was resolved, in order.
+    pub(crate) refs: Vec<tcad_build::RefRecord>,
+}
+
+pub(crate) fn prepare(o: &Options<'_>) -> Result<Source, Failure> {
     let bundle = load_bundle(std::path::Path::new(o.path)).map_err(Failure::Other)?;
     let name = bundle.entry.display().to_string();
     let src = std::fs::read_to_string(&bundle.entry)
@@ -59,23 +132,36 @@ fn produce<K: Kernel>(k: &K, o: &Options<'_>) -> Result<Produced, Failure> {
         )));
     }
     let canonical = tcad_syntax::format_source(&src).unwrap_or_else(|_| src.clone());
-    let hash = source_hash(&canonical, config.as_deref(), &[]);
+    let imports = read_imports(&bundle.root, &model)?;
+    let hash = source_hash(&canonical, config.as_deref(), &imports);
     let dir = cache_dir(&bundle.root, &model.part.name);
     let density = model.part.material.as_ref().and_then(|m| m.density);
     let material = model.part.material.as_ref().map(|m| m.name.clone());
-    if !o.force
-        && let Some(manifest) = is_fresh(&dir, &hash, &k.id())
-    {
-        return Ok(Produced {
-            manifest,
-            fresh: true,
-            dir,
-            density,
-            material,
-        });
-    }
-    let built = tcad_build::build(k, &model, config.as_deref())
-        .map_err(|d| Failure::Diagnostics(name.clone(), src.clone(), d))?;
+    Ok(Source {
+        name,
+        src,
+        model,
+        config,
+        hash,
+        dir,
+        imports,
+        density,
+        material,
+    })
+}
+
+/// Regenerates the part (never touching the cache).
+pub(crate) fn regenerate<K: Kernel>(k: &K, s: &Source) -> Result<Fresh, Failure> {
+    let model = &s.model;
+    let loader = |p: &str| -> Result<Vec<u8>, String> {
+        s.imports
+            .iter()
+            .find(|(n, _)| n == p)
+            .map(|(_, b)| b.clone())
+            .ok_or_else(|| format!("`{p}` is not an import of this part"))
+    };
+    let (built, refs) = tcad_build::build_with(k, model, s.config.as_deref(), Some(&loader));
+    let built = built.map_err(|d| Failure::Diagnostics(s.name.clone(), s.src.clone(), d))?;
     let Some(shape) = &built.shape else {
         return Err(Failure::Other("the part has no solid feature".into()));
     };
@@ -90,7 +176,7 @@ fn produce<K: Kernel>(k: &K, o: &Options<'_>) -> Result<Produced, Failure> {
         format: "0.1".into(),
         part: model.part.name.clone(),
         config: built.config.clone(),
-        source_hash: hash,
+        source_hash: s.hash.clone(),
         kernel: k.id(),
         tolerance_mm: built.tolerance,
         features: built
@@ -129,21 +215,77 @@ fn produce<K: Kernel>(k: &K, o: &Options<'_>) -> Result<Produced, Failure> {
             center_of_mass_mm: props.center_of_mass,
             bbox_min_mm: props.bbox_min,
             bbox_max_mm: props.bbox_max,
+            inertia_mm5: props.inertia_com,
         },
         brep_sha256: sha256_hex(&brep),
     };
-    write_cache(&dir, &manifest, &brep)
-        .map_err(|e| Failure::Other(format!("cannot write the cache {}: {e}", dir.display())))?;
-    Ok(Produced {
+    // the exact result and the viewer mesh; a kernel that cannot produce them (the mock) skips them
+    let meta = StepMeta {
+        name: &model.part.name,
+        configuration: built.config.as_deref(),
+        material: built
+            .material
+            .as_ref()
+            .map(|(n, d)| (n.as_str(), d.map(|d| d * 1e6))),
+    };
+    let step = k.export_step(shape, &meta).ok();
+    let glb = k
+        .mesh(shape, LINEAR_DEFLECTION_MM, ANGULAR_DEFLECTION_RAD)
+        .ok()
+        .map(|mesh| {
+            let info = ModelInfo {
+                name: &model.part.name,
+                configuration: built.config.as_deref(),
+                material: built.material.as_ref().map(|(n, _)| n.as_str()),
+            };
+            tcad_io::glb(&mesh, &face_labels(&manifest.features), &info)
+        });
+    Ok(Fresh {
         manifest,
-        fresh: false,
-        dir,
-        density,
-        material,
+        brep,
+        step,
+        glb,
+        refs,
     })
 }
 
-fn report_failure(f: Failure, json: bool, out: &mut dyn Write, err: &mut dyn Write) -> i32 {
+pub(crate) fn produce<K: Kernel>(k: &K, o: &Options<'_>) -> Result<Produced, Failure> {
+    let s = prepare(o)?;
+    if !o.force
+        && let Some(manifest) = is_fresh(&s.dir, &s.hash, &k.id())
+    {
+        return Ok(Produced {
+            manifest,
+            fresh: true,
+            dir: s.dir,
+            density: s.density,
+            material: s.material,
+        });
+    }
+    let f = regenerate(k, &s)?;
+    write_cache(&s.dir, &f.manifest, &f.brep)
+        .map_err(|e| Failure::Other(format!("cannot write the cache {}: {e}", s.dir.display())))?;
+    if let Some(step) = &f.step {
+        let _ = write_extra(&s.dir, STEP_FILE, step);
+    }
+    if let Some(glb) = &f.glb {
+        let _ = write_extra(&s.dir, GLB_FILE, glb);
+    }
+    Ok(Produced {
+        manifest: f.manifest,
+        fresh: false,
+        dir: s.dir,
+        density: s.density,
+        material: s.material,
+    })
+}
+
+pub(crate) fn report_failure(
+    f: Failure,
+    json: bool,
+    out: &mut dyn Write,
+    err: &mut dyn Write,
+) -> i32 {
     match f {
         Failure::Diagnostics(name, src, diags) => {
             if json {
@@ -174,8 +316,14 @@ fn result_json(m: &Manifest, density: Option<f64>) -> Value {
         "center_of_mass_mm": r.center_of_mass_mm,
         "bbox_min_mm": r.bbox_min_mm, "bbox_max_mm": r.bbox_max_mm,
     });
+    if let Some(i) = r.inertia_mm5 {
+        v["inertia_unit_density_mm5"] = json!(i);
+    }
     if let Some(d) = density {
         v["mass_kg"] = json!(r.volume_mm3 * d);
+        if let Some(i) = r.inertia_mm5 {
+            v["inertia_kg_mm2"] = json!(i.map(|row| row.map(|x| x * d)));
+        }
     }
     v
 }
@@ -277,6 +425,18 @@ pub fn props_command<K: Kernel>(
     }
     let c = r.center_of_mass_mm;
     let _ = writeln!(out, "center    ({:.6}, {:.6}, {:.6}) mm", c[0], c[1], c[2]);
+    if let (Some(i), Some(d)) = (r.inertia_mm5, p.density) {
+        let _ = writeln!(out, "inertia   about the center of mass, kg mm^2:");
+        for row in i {
+            let _ = writeln!(
+                out,
+                "          [{:.9}, {:.9}, {:.9}]",
+                row[0] * d,
+                row[1] * d,
+                row[2] * d
+            );
+        }
+    }
     let (lo, hi) = (r.bbox_min_mm, r.bbox_max_mm);
     let _ = writeln!(
         out,
