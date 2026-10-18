@@ -38,6 +38,7 @@ fn block(k: &OcctKernel) -> <OcctKernel as Kernel>::Shape {
 fn step_round_trip_keeps_the_geometry() {
     let k = OcctKernel::new();
     let a = block(&k);
+    eprintln!("step_round_trip: block built");
     let bytes = k
         .export_step(
             &a,
@@ -48,6 +49,7 @@ fn step_round_trip_keeps_the_geometry() {
             },
         )
         .unwrap();
+    eprintln!("step_round_trip: exported {} bytes", bytes.len());
     let text = String::from_utf8_lossy(&bytes).to_string();
     assert!(
         text.starts_with("ISO-10303-21"),
@@ -59,6 +61,7 @@ fn step_round_trip_keeps_the_geometry() {
     assert!(text.contains("AISI 1045"), "material");
     assert!(text.contains("configuration heavy"), "configuration");
     let b = k.import_step(&bytes).unwrap();
+    eprintln!("step_round_trip: imported");
     let (pa, pb) = (k.properties(&a).unwrap(), k.properties(&b).unwrap());
     assert!((pa.volume - pb.volume).abs() <= 1e-6 * pa.volume);
     assert!((pa.area - pb.area).abs() <= 1e-6 * pa.area);

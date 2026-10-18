@@ -231,7 +231,7 @@ jobs:
           key: occt-vcpkg-x64-windows-v1
       - name: STEP round trip alone (diagnostic)
         shell: pwsh
-        timeout-minutes: 10
+        timeout-minutes: 7
         continue-on-error: true
         run: |
           $root = "$env:GITHUB_WORKSPACE\vcpkg_installed\x64-windows"
