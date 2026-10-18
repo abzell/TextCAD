@@ -5,7 +5,7 @@
 //! (`occt.wasm`) loaded at start-up. Without the feature the mock kernel is used, which keeps the
 //! crate testable everywhere.
 //!
-//! JavaScript calls [`tcad_build`] with the source text and a configuration name and receives JSON
+//! JavaScript calls [`tcad_build()`] with the source text and a configuration name and receives JSON
 //! (see [`regenerate`]); the GLB of the last successful build is read with [`tcad_glb_ptr`] and
 //! [`tcad_glb_len`].
 
@@ -176,10 +176,10 @@ pub unsafe extern "C" fn tcad_build(
         .into_raw()
 }
 
-/// Releases a string returned by [`tcad_build`].
+/// Releases a string returned by [`tcad_build()`].
 ///
 /// # Safety
-/// `p` must come from [`tcad_build`] and not have been released yet.
+/// `p` must come from [`tcad_build()`] and not have been released yet.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn tcad_free(p: *mut c_char) {
     if !p.is_null() {
