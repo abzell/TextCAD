@@ -1,0 +1,8 @@
+tcad 0.21
+
+part rod_clevis2"Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  mah=36 mm
+
+  fillet ange default standard { }
+}

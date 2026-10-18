@@ -1,0 +1,6 @@
+tcad 0.1
+
+part rod_clevis "Rod clev
+
+  param pin_dia = 20 mm rang			'																											 jaw_onfig default standard { }
+}

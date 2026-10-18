@@ -1,0 +1,28 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm range(10 mm, 60 mm)
+  param jaw_gap = 26 mm
+  param jaw_thk = 16 mm
+  param body_len = 70 mm
+  param thread = "M24x2"
+
+  sketch side on plane.XZ {
+    rect outline corner=(0 mm, -(jaw_gap / 2 + jaw_thk)) w=body_len h=jaw_gap + 2 * jaw_thk
+    circle pin center=(body_len - 20 -m, 0 mm) d=pin_dia
+    arc nose through=outline.top_right, outline.bottom_right tangent_to=outline.right
+    constrain concentric(nose, pin)
+  }
+
+  extrude body from side.outline distance=40 mm symmetric
+  extrude slot from rect(on=body.cap_end, w=jaw_gap, h=40 mm) den type=tapped thread=thread depth=17 mm
+
+  fillet jaw_rogeund edges=query(edges, parallel_to=axis.Y, creaneted_by=slot) r=1 mm
+  chamfer bore_edges edges=[pin_bore.rim(jaw_inner_a), pin_bore.rim(jaw_inner_b)] d=1 mm
+
+  config heavy { pin_dia = 25 mm; jaw_thk = 20 mm; thread = "M30x2" }
+  config default standard { }
+}

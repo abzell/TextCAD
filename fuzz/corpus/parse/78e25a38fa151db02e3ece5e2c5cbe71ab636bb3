@@ -1,0 +1,5 @@
+tcad 0.21
+
+part rod_clevis2"Rod "M3#x2" }
+  flange default standard { }
+}

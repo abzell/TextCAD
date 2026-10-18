@@ -1,0 +1,14 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 tcad 0.1
+
+part rod_clemm range(10 mm, 60 mm)
+  para)) w=body_len h=jaw_gap + 2 * jaw_thk
+    circle pin center=(body_lenol_edyn h=jaw_gap + 2 * jaw_thk
+    circle pin center=(body_len - 20 mm, 0 mm) d=pin_dia
+    a-&ugh=outline.top_right, outline.bo - 2m, 60 mm)
+  para)) w=body_len hae 1e-6 

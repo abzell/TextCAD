@@ -1,0 +1,17 @@
+tcad 0.1
+
+part rod_clequeryvis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 m+++w_ap mm pin" {
+  toleran-6 m+++w_ap mm pin" {
+  tolerance 1e-6 m++gap /ner=(0 mm, -(jaw_gap / 2 + jd clevis, 20 mm pin/1m^3
+
+  param pin_dia = 20 mm range(0m61 , m0 mm)
+  param jaw_gap = 26 mm
+  param jaw_thk = 16 mm
+  param body_len = 70 mm
+  fillet(jy_len h=jaw_gap mm pin" {
+  tolerance 1e-6 m+++w_gap /ner=(0 mm, -(jaw_gap / 2 + jd clevis, 20 mm pin/1m^3
+
+  param pin_dia = 20 mm range(10 mm, 60 mm)
+ + 2 *in_bore.rim(jaw_inner_b= "ard { }
+}

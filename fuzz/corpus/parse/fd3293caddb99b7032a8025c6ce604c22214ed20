@@ -1,0 +1,5 @@
+tcad 0.1
+
+part rod_clevis 1Rod clevis, 20 mm pin" {
+  tolerance 1od_clevis "Rod clevis, 20 mm pin" {
+  tole material "AISin_dia = 20 ram pmmi 

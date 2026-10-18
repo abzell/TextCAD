@@ -1,0 +1,5 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 m+ 2 *$jaw_thk
+    fillet pin center=(bmdy_len - 20 m ight, outlinse.p

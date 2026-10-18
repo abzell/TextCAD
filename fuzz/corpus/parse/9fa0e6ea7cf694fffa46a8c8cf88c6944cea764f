@@ -1,0 +1,10 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  boundary "AISI 1045e-6 mm
+  materiread = "M24x2"
+
+  sketchaw_thk
+    ci"M30x2" }
+  crocn

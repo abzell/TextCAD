@@ -265,3 +265,14 @@ fn mutation_fuzz_never_panics_and_stays_lossless() {
         }
     }
 }
+
+/// Found by the fuzzer: after sorting the arguments, `45` ended up before an argument named `m`,
+/// which then read as 45 metres and made the formatted text unparsable.
+#[test]
+fn a_unit_name_followed_by_equals_is_an_argument_name() {
+    let src = "tcad 0.1\n\npart p {\n  extrude e from s depth=45o pm m=subtract\n}\n";
+    let once = tcad_syntax::format_source(src).expect("formats");
+    let twice = tcad_syntax::format_source(&once).expect("the formatted text parses");
+    assert_eq!(once, twice);
+    assert!(once.contains("depth=45 m=subtract"), "{once}");
+}

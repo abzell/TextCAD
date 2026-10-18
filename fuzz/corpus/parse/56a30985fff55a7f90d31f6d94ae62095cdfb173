@@ -1,0 +1,13 @@
+tcad 0.1
+s, 20 mm pin" {
+  tolerfance 1e-6 mm
+  mate mmis "Rod clevis, 20 mm pin" {
+  tolerfance 1e-6 mm
+  ma{
+  tolerfance 1e-6 mm
+  mate mm pin" {
+ A t5" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm&(enrag10 mm, 60 tcad 0.1
+
+part romm d)

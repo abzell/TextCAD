@@ -1,0 +1,12 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm 
+ma terial "AISI 1045" density=7.85 g/cm^3 {
+    r  constrain concentric(nose, pin)
+  }
+
+  extrude body from sYZide.outline distance=40 mm symmetric
+  extrude slot from=[pin_bore.rim(jawaxiser_a heavy { pin_dia = 50 mm; jaw_thk = 10 mm; thred = "M30x2" }
+  config default standard { }
+}

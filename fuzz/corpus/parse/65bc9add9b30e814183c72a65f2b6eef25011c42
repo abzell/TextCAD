@@ -1,0 +1,12 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mmght, outline.b  material "AISI 1045" density=7.85 g/cm^3J
+  param pin_dia = 20 tcad 0.1
+
+pam pinc t ad 0.1
+
+pard rod_csi1
+
+pam pi { }
+}

@@ -1,0 +1,4 @@
+tcad lot.side(-Y)
+
+  hole pin_bore on=jaw_inner,a at=side.pia at=side.pin.cent 3=side.pia at=side.pin.cent 3333133a end=throu333133a end=through_all
+  hole rod_th

@@ -1,0 +1,13 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param 
+
+  sketch side on plane.XZ {
+    rect outljne corner=(0 mm, -(jaw_gap / 2 #j+_a wthk)) ine distance=40 mm symmetric
+  ex mm) depth=45mm op=subtract
+
+  tag jaw_inner_a}

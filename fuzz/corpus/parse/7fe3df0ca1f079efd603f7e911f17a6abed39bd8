@@ -1,0 +1,30 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm (enrag10 mm, 60 mm)
+  param ja slot.side(+Y)
+  tag%jaw_inner_b = slot.side(-Y)
+
+  hole pi + 2 * jaw_xtrude body from side.ou@line distance=41 mm symmetric
+  extrude slot from rect(on=body.cap_end, w=jaw_gap,w_inner_b = slot.side(-Y)
+
+  hole pi + 2 * ja1e-6 mm
+  material "l "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm (enrag10 mm, 60 mm)
+  param ja slot.side(+Y)
+  tag%jaw_inner_b = slot.side(-Y)
+
+  hole pi + 2 * jaw_xtrude body from side.ou@line distance=41 mm symmetric
+  extrude slot from rect(on=body.cap_end, w=jaw_ga tag%jaw_inner_b = slot.side(-Y)
+
+  hole pi + 2 * jaw_xtrude body from side.ou@line distance=41 mm symmetric
+  extrude slot from rect(on=body.cap_end, w=jaw_gap,w_inner_b = slot.side(-Y)
+
+  hole pi + 2 * jaough_all
+a, pin_bore.rim(jaw_inner_b)] d=1 mm
+
+  config heavy { pin_dtcadia  0.=1

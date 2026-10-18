@@ -1,0 +1,7 @@
+tcad 0.1
+
+ance 1e-6origin mm
+" density=7.85 g/cm^3
+
+  >aram pin_dijaw_thk = 20 mm; thread = "M30ard { }
+}

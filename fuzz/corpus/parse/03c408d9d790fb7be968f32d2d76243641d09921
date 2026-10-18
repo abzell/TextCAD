@@ -1,0 +1,23 @@
+tcad 0.1
+
+part`rod_clevitcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISract
+
+  tag jaw_inner_a = slot.side(+Y)
+  tag jaw_inzner_b = slot.side(-Y)
+
+ loft hole pi pe=tapped threatd=hry(edges, parallel_to=axis.Y, created_by=slot) r=ide( mm, 60 mm)
+  param jaw_gap = 2atmm
+ origin tyth=45 mm op=subtract
+
+  tag jaw_inner_a = slot.side(+Y)
+  tag jaw_inzner_b = slot.side(-Y)
+
+ loft hole pi pe=tapped threatd=hry(edges, parallel_to=axis.Y, created_by=slot) r=ide( mm, 60 mm)
+  param jaw_gap = 4atmm
+  p.outlinemmside(-Y)
+
+ loft hole pi + 2 *  pi

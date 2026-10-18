@@ -990,7 +990,10 @@ impl Parser {
         let t = self.peek().clone();
         match t.kind {
             K::Number => {
-                let unit_follows = self.look(1).kind == K::Ident && kw::is_unit(&self.look(1).text);
+                // `45 m=x` is the number 45 followed by an argument named `m`, not 45 metres
+                let unit_follows = self.look(1).kind == K::Ident
+                    && kw::is_unit(&self.look(1).text)
+                    && self.look(2).kind != K::Eq;
                 if unit_follows {
                     self.start(NodeKind::Quantity);
                     self.bump();

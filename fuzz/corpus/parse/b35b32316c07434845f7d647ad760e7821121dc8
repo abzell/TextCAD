@@ -1,0 +1,20 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 2e-6`mm
+  m created_by=slot) r=2 mm
+  chamfer bore_edges edges=[pin_bore.rim(jaw_inis.Y, created_by=slot) r=2 mm
+  chamfer bore_e  chamfer bore_edges edges=[pin_bore.rim(jaw_inis.Y, created_by=slot) r=2 mm
+  chamfer mm pin" {
+  tolerance 2e-6`mm
+  m created_by=slot) r=2 mm
+  chamfer bore_edges edges=[pin_bore.rim(jaw_inis.Y, created_by=slot) r=2 mm
+  chamfer bore_e  chamfer bore_edges edges=[pin_bore.rim(jaw_inis.Y, created_by=slot) r=2 mm
+  chamfer bore_edges edges=[pin_bore.rim(jry(edges, paralin_bore.rim(jry(edges, parallel_to=axis.Y, created_by=slot) r=2 mm
+  chamfer bore_edges edges=[pin_bore.rim(jaw_inis.Y, created_by=slot) r=2 mm
+  chamfer bore_edges edges=[pin_bore.rim(jaw_inner_a),[pin_bore.rim(jaw_inner_b)] d=1 mm1
+s, 20 mm pin" {
+  tolerfance 1e-6 mm
+  mate mm&is "Rod clevis, 20 mmx2" }
+  config default standard { }
+}

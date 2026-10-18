@@ -1,0 +1,13 @@
+tcad 0.1
+
+part rod_clevis "Rod c3333333levis, 20 mm pin" {
+  tolerance 1e-6 mm
+  materia= "M24x2"
+
+  sketch sidtcad 0.1
+
+part rojaw_gap = 26 mm  param jaw_thk = 16 mmm body_len = 70 mm
+  param thread = "M24x2"
+
+  sketch side on plane.XZ {
+    rect outline corner=(0 mm, -(jawd_clevis "Rod clevis, 20 mm pin concentric(neo se,

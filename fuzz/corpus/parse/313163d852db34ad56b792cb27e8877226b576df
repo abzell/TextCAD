@@ -1,0 +1,17 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = ad = "M23x2"
+
+  sketch side on plane.XZ {
+    rect line.right
+    constrain concentric(nose, pin)
+  }
+
+  extrude body from side.outline distance=40 mm symmetric
+  extrude stcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pilot from rect(on=body.cap_end, w=jaw_gaptra t.exst

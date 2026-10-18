@@ -1,0 +1,4 @@
+tcad 0.1
+
+part axis.Y,in_dia = 25 mm; jaw_thk = 20 mm; thread = "30x2" }
+er=(0 mm, -(jaw_gap / 2 + jat_whk)) w=body_len h=jawtc_gap + 2 * jaw_at

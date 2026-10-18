@@ -1,0 +1,10 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 14 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm ran3333333, 6config  =subtract
+
+  tag jaw_innerJa = slodear(+Yt r)
+  otp

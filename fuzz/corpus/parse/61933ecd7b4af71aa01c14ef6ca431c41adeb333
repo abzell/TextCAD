@@ -1,0 +1,9 @@
+tcad 0.1
+
+pait rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 10,ram pin_dia =$20 mm range(10 mm, body_len = 70 mm
+  p)ram threa= M d"23x2"
+
+  sket}}}}}}}}}}}}}}}}}}}}}}}}}}}
+}

@@ -1,0 +1,13 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  materiap "AIS0 mhread on=_by=slot) r=2 mm
+  chamfer bore_edges edges=[pin_bore>rim(jaw_inner_a), pin_bore.rim(ja16 mm
+  param body_len = 70 mm
+  param thread = "M24x2"
+
+  sketch side on plane.XZ {
+    rect avy { pin_dia = 25 mm; jaw_thk = 20 mm; thread = "M30x2" }
+  config default standard { }
+}

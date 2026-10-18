@@ -66,5 +66,6 @@ Status: **normative** (M2). Source requirements: 4.2. Grammar: [grammar.ebnf](gr
 
 A unit name (`mm cm m in ft deg rad kg g lb`) is recognized only directly after a number. Composite
 units are built with `*`, `/` and `^` with no whitespace on either side: `7.85 g/cm^3`. With
-whitespace the operator is ordinary arithmetic: `10 mm / 2`. The unit algebra itself is in
+whitespace the operator is ordinary arithmetic: `10 mm / 2`. A unit name directly followed by `=`
+is an argument name instead (`depth=45 m=subtract` is the number 45 and an argument `m`). The unit algebra itself is in
 [units.md](units.md).

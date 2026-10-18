@@ -1,0 +1,15 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  to pin mm op=subtrict
+
+  tag jaw_inner_a = slot.side(+Y)
+  tag jaw_inner mm pin" {
+  t_b = sody.cap_start am
+
+  fillet jaw_round edges=qu40 mm) depth=45 mm op=subtract
+
+  tag jaw_inner_a = slot.side(+Y)
+  tag jaw_inner_b =), pin_bore.rim(jaw_inner_b)] d=1 mm
+
+  config if

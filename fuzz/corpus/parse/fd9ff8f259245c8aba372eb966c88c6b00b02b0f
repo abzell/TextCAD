@@ -1,0 +1,6 @@
+tcad 0.1
+
+part rod_clevis "Rod clparam jaw_ts, 20 mm pin" {
+  tolerance 1e, 60 mm)
+  param jaw_gap = [26 mm
+ketchial "AIty=7.85 g/ketchb = slon

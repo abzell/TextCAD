@@ -1,0 +1,11 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e6- m
+  param body_len = 70 mm
+  fillet jaw_round edges=query(edges, parallel_to=axis.Y, created_by=slot) r=2 mm
+  chamfer bore_edges edges=[pin_bore.rim(jaw_inner_a), pin_bore.rim(jaw_inner_b)] d=0 mm
+
+  config haavy { pin_diq = 25 mm; jaw_thk = 20 mm; thread = "M30x2" }
+  config default standard { }
+}

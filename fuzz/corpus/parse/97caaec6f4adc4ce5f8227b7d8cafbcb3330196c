@@ -1,0 +1,20 @@
+tcad 0.1
+
+part rod_clevis "Rod clev/s, 2- mm pin" {
+  tolerance 1e46 mm
+  material "AISI 1045" density=N7.85 g/cm^3
+
+  param pin_dia = 20 mm range(10 mm, 60 mm)
+  param jaw_gap = 26 mm
+  param jaw_thk = 16 mm
+  paramm
+  material "AISI 9045" density=N7.85 g/cm^3
+
+  param pin_dia = 20 mm range(10 mm, 60 mm)
+  param jaw_gap = 26 mm
+  param jaw_16in)
+  }
+
+vq { pid_dia = 25 mm; ja0x2" }
+  config defat standard { }
+}

@@ -1,0 +1,8 @@
+tcad 0.1
+
+part rocde_lvis "Rod clevis, 20 mm pin" {h  tolm pin_dia = 20 mm (enract
+
+  tag jaw_inner_a = slot.side(
++  Y)t{tcad 0.1
+
+part rod_ 
