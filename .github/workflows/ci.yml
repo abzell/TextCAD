@@ -41,6 +41,9 @@ jobs:
 
   fuzz-smoke:
     runs-on: ubuntu-latest
+    env:
+      # The workflow-wide -D warnings must not reach the instrumented fuzz build.
+      RUSTFLAGS: ""
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@nightly
@@ -50,7 +53,8 @@ jobs:
       - run: cargo install cargo-fuzz --locked
       - name: Fuzz the parser for 5 minutes
         working-directory: fuzz
-        run: cargo fuzz run parse -- -max_total_time=300
+        # rust-toolchain.toml pins stable, so nightly must be selected explicitly.
+        run: cargo +nightly fuzz run parse -- -max_total_time=300
 
   wasm:
     runs-on: ubuntu-latest
