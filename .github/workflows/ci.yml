@@ -140,3 +140,32 @@ jobs:
           python-version: "3.12"
       - run: pip install build123d
       - run: python3 corpus/tools/compare_reference.py corpus
+
+  # The same tests as occt-linux, on Windows with OpenCASCADE from vcpkg (cached). Windows is the
+  # primary platform: every corpus part must build here and match expected.json.
+  occt-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.97.0
+      - uses: Swatinem/rust-cache@v2
+      - name: Cache OpenCASCADE
+        id: occt-cache
+        uses: actions/cache@v4
+        with:
+          path: vcpkg_installed
+          key: occt-vcpkg-x64-windows-v1
+      - name: Install OpenCASCADE
+        if: steps.occt-cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: vcpkg install "opencascade[core]:x64-windows" --x-install-root="$env:GITHUB_WORKSPACE\vcpkg_installed"
+      - name: Test with OCCT
+        shell: pwsh
+        run: |
+          $root = "$env:GITHUB_WORKSPACE\vcpkg_installed\x64-windows"
+          $env:OCCT_INCLUDE_DIR = "$root\include\opencascade"
+          $env:OCCT_LIB_DIR = "$root\lib"
+          $env:PATH = "$root\bin;$env:PATH"
+          cargo test --workspace --features tcad-cli/occt,tcad-build/occt
