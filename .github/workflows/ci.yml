@@ -232,6 +232,8 @@ jobs:
         shell: pwsh
         run: |
           $root = "$env:GITHUB_WORKSPACE\vcpkg_installed\x64-windows"
+          Get-ChildItem "$root\lib" -Filter "TK*STEP*.lib" | ForEach-Object { $_.Name }
+          Get-ChildItem "$root\lib" -Filter "TK*DE*.lib" | ForEach-Object { $_.Name }
           $env:OCCT_INCLUDE_DIR = "$root\include\opencascade"
           $env:OCCT_LIB_DIR = "$root\lib"
           $env:PATH = "$root\bin;$env:PATH"

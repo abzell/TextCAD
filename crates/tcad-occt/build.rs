@@ -27,16 +27,31 @@ const LIBS: &[&str] = &[
     "TKFeat",
     "TKMesh",
     "TKXSBase",
-    "TKSTEPBase",
-    "TKSTEPAttr",
-    "TKSTEP209",
-    "TKSTEP",
     "TKLCAF",
     "TKCDF",
     "TKCAF",
     "TKXCAF",
+];
+
+/// The STEP toolkits: OpenCASCADE up to 7.x splits them into five libraries, 8.0 merges them into
+/// `TKDESTEP` (and drops `TKXDESTEP`).
+#[cfg_attr(not(feature = "occt"), allow(dead_code))]
+const STEP_LEGACY: &[&str] = &[
+    "TKSTEPBase",
+    "TKSTEPAttr",
+    "TKSTEP209",
+    "TKSTEP",
     "TKXDESTEP",
 ];
+
+#[cfg_attr(not(feature = "occt"), allow(dead_code))]
+fn has_lib(dir: &Path, name: &str) -> bool {
+    ["", "lib"].iter().any(|prefix| {
+        ["lib", "so", "dylib", "a"]
+            .iter()
+            .any(|ext| dir.join(format!("{prefix}{name}.{ext}")).is_file())
+    })
+}
 
 #[cfg_attr(not(feature = "occt"), allow(dead_code))]
 fn locate() -> (PathBuf, PathBuf) {
@@ -87,6 +102,16 @@ fn main() {
         build.compile("tcad_occt_shim");
         println!("cargo:rustc-link-search=native={}", lib.display());
         for l in LIBS {
+            println!("cargo:rustc-link-lib=dylib={l}");
+        }
+        let step: Vec<&str> = if STEP_LEGACY.iter().all(|l| has_lib(&lib, l)) {
+            STEP_LEGACY.to_vec()
+        } else if has_lib(&lib, "TKDESTEP") {
+            vec!["TKDESTEP"]
+        } else {
+            STEP_LEGACY.to_vec()
+        };
+        for l in step {
             println!("cargo:rustc-link-lib=dylib={l}");
         }
     }
