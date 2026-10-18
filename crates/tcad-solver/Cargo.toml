@@ -1,0 +1,16 @@
+[package]
+name = "tcad-solver"
+description = "In-house 2D sketch constraint solver."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+# Pure-Rust math so results are bit-identical on every target (determinism tier T1).
+libm = "0.2"
+
+[lints]
+workspace = true

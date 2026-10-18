@@ -1,0 +1,25 @@
+tcad 0.1
+
+part manifold_4port "Four-port manifold block with cross-drilled galleries" {
+  tolerance 1e-6 mm
+  material "6061-T6" density=2.7 g/cm^3
+
+  param len = 120 mm range(110 mm, 160 mm)
+  param wid = 60 mm range(50 mm, 80 mm)
+  param ht = 40 mm range(36 mm, 60 mm)
+
+  sketch plan on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=len h=wid
+  }
+  extrude block from plan.r distance=ht
+
+  hole gallery on=block.side(plan.r.left) at=(-(wid / 2), ht / 2) d=12 mm depth=len - 10 mm
+  hole cross on=block.side(plan.r.bottom) at=(len / 2, ht / 2) d=8 mm depth=wid - 10 mm
+
+  hole port on=block.cap_end at=(20 mm, wid / 2) thread="M18x1.5" depth=ht - 14 mm
+  linear_pattern ports of=port dir=+X count=4 spacing=(len - 40 mm) / 3
+
+  hole mount on=block.cap_end at=(8 mm, 8 mm) d=9 mm end=through_all
+  linear_pattern mount_row of=mount dir=+X count=2 spacing=len - 16 mm
+  linear_pattern mount_grid of=mount_row dir=+Y count=2 spacing=wid - 16 mm
+}

@@ -1,0 +1,8 @@
+tcad 0.1
+
+part rod_clevis "Rod 0x2" }
+  con
+  tolerance#1e-6 mm
+  materi
+  material "AISI 1045" densd { }
+}

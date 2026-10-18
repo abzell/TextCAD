@@ -1,0 +1,8 @@
+tcad 0s.Y, created_by=slot) r11 mm
+  chamfer bore_edges edges=[pin_bore.rim(jaw_inner_a), pin_bore.rim(jaw##############m) deinner_a), pin_bore.rim(jaw##############m) depth=45 mm op=subtract
+
+  t_inner_b)] d=1 mm
+
+  config heavy { pin_dia = 25 mm; jaw_thk = 20 mm; thread = "M30x2" }
+  config default standard { }
+}

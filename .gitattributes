@@ -1,0 +1,5 @@
+* text=auto
+*.tcad text eol=lf
+*.tcadz binary
+*.md text eol=lf
+*.ebnf text eol=lf

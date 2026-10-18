@@ -1,0 +1,10 @@
+tcos = 20 mm range(10 mm,  0 mm)
+  param jaw_gap mm, -(jaw_gap /*2 + jaw_thk)) w=body_len h=jaw_gap + 2 * jaw_thk
+    ccm^3
+
+  param pin_dia = 20 mm range(10 mm, 0 mm)
+  param jaw_gap mm, -(jaw70 mm
+  param thread = "Mx2"
+
+  sketch sid { }
+}

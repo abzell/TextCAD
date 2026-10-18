@@ -1,0 +1,18 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 2tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 2e-6`mm
+  materiity=7.70 g/cm^3
+
+  param pin_dia = 20 mm rarude body from side.outline distct(ongap = 26 mm
+  param jaw_thk = 15 mm
+  param body_len = 70 mfilletram thread = "M24x2"
+
+  sketch   constrain concentric(nose, 0p
+
+art rod_clevis "Rod clevis, 20 pin)
+  }
+
+mbody fro

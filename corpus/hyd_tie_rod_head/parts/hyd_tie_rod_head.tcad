@@ -1,0 +1,28 @@
+tcad 0.1
+
+part tie_rod_head "Tie-rod cylinder head" {
+  tolerance 1e-6 mm
+  material "EN-GJS-400" density=7.1 g/cm^3
+
+  param head = 100 mm range(90 mm, 140 mm)
+  param thick = 40 mm range(30 mm, 60 mm)
+  param bore = 50 mm range(32 mm, 70 mm)
+
+  sketch plan on plane.XY {
+    rect r center=(0 mm, 0 mm) w=head h=head
+  }
+  extrude block from plan.r distance=thick
+  fillet corners edges=query(edges, parallel_to=+Z) r=8 mm
+
+  hole rod_bore on=block.cap_end at=(0 mm, 0 mm) d=bore end=through_all
+  hole tie on=block.cap_end at=(36 mm, 36 mm) d=14 mm end=through_all
+  mirror tie_x of=tie plane=plane.YZ
+  mirror tie_y of=tie_x plane=plane.XZ
+
+  sketch groove_sk on plane.XZ {
+    rect r corner=(bore / 2 - 0.5 mm, thick / 2 - 3 mm) w=3 mm h=6 mm
+  }
+  revolve seal_groove from groove_sk.r axis=axis.Z op=subtract
+
+  hole port on=block.side(plan.r.right) at=(0 mm, thick / 2) thread="M18x1.5" depth=head / 2
+}

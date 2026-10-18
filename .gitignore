@@ -16,7 +16,6 @@ eggs/
 .eggs/
 lib/
 lib64/
-parts/
 sdist/
 var/
 wheels/
@@ -218,3 +217,15 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# TextCAD derived cache
+.cache/
+
+# cargo-fuzz
+/fuzz/target/
+/fuzz/artifacts/
+/fuzz/Cargo.lock
+
+# A bundle keeps its sources in parts/ (spec/bundle.md); never ignore it.
+
+node_modules/

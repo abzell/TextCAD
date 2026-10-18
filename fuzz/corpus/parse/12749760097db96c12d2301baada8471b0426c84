@@ -1,0 +1,20 @@
+tcad 0.1
+
+part rod_clevis "Rof clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 2499"cap_start at=orkgin type=tapped htread=thread depth=90 morm
+
+  fillet jaw_round edges=query(edges, parallel_ead = "M24x2"
+
+  sketch side jaw_thk
+    circle pin cen.center type=simple d=pin_dia end=through_all
+  hole rod_thread on=body.cap_start at=orkgin type=tapped htread=thread depth=90 mm
+
+  fillet jaw_round edges=query(edges, parallel_ead = "M24x2"
+
+  sket.Y, created_by=slot) r=2 mm
+  chrfmae bore_edlt s 1od_cltcad 0.1
+
+part rod_clevis "Rod clevis, 20 m[  #}
+
+ sm0mm

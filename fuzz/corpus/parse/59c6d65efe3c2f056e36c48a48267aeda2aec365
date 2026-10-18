@@ -1,0 +1,16 @@
+tcad 0.is, 20 mm pin" {
+mm
+  param thread = "M24x2"
+
+  skeom_right tangent_to=outline.right
+    constrain concentric(nose, pin)
+  }
+
+  extrude body from side.ou_all
+  hole rod_thread on=body.cap_start at=origin typ//////////////////////////////////////////////////////////////////////////////////////e=tapped thread=thread depth=11 mm
+
+  fillet jaw_round edges=query(edges, pre.rim(jaw_inner_b)] d=1 mm
+
+  config heavy { pin_dia = 25 mm; jaw_thk = 20 mm; thread= "M30x2" }
+  config default standard { }
+}

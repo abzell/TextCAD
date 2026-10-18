@@ -1,0 +1,9 @@
+tcad 0.1
+
+par d=pin_dia
+    _to=outline.right
+    constrain concentric(nose, pin)
+  }
+
+vy { pin_dia = 90 mm;																					i																																							}
+}

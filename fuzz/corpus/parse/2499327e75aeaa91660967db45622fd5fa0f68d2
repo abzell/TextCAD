@@ -1,0 +1,11 @@
+tcad 0.1
+
+part rod_clevis "Rod clevhs, 20mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^ 26 mm
+e through=outline.top_right, iutline.bottomead=thread depth=74 mm
+
+  fillet jaw_round edges=query(edges, parallel_to=axis.Y, created_by=slot) r=2 mm
+  chamfer bore_edges edges=[pin_bore.rim(jaw_inner_ { pin20 mm; thrjad = "M30x2" }
+  config default standard { }
+}

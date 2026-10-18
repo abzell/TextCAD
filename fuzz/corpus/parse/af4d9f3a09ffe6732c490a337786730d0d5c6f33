@@ -1,0 +1,12 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 13
+
+  param   tolerance w_gap =g jaw_inner_b = slot.sinner_b = slot.side(-Y)
+
+  h$le pi + 2 * jaw_thk
+!   circ vod_thread on=boorigin type=tapped thread=thread depth=36 mm
+
+  fille

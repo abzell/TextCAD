@@ -1,0 +1,36 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolrnceae 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm range(10 mm, 60 mm)
+  param jaw_gap = 26 mm
+  param jaw_thk = 16 mm
+  param body_len = 70 mm
+  paRam thread = "M24x2"
+
+  sketch side on plane.XZ {
+    rect outline corner=(0gdt mm, -(jaw_gap / 2 + jaw_thk)) w=body_len h=jaw_gap + 2 * jaw_thk
+    circle pin center=(body_len - 2,m0m0   mm) d=pin_dia
+    arc nose through=from rajaw_(jaw_gap / 2 + jaw_t5 mm; jaw_thk = 20 mm; thread =gap = 26 mm
+  param jaw_thk = 16 mm
+  param body_len = 70 mm
+  param threa d= "M24x2"
+
+  sketch side on * jaw_thk
+    circle pin center=(body_len - 2,m0m0   mm) d=pin_dia
+    arc nose through=from rajaw_gap = 26  70 mm
+  param threa d= "M24x2"
+
+  sketch side on * jaw_thk
+    circle pin center=(body_len - 2,m0m0   mm) d=pin_dia
+    arc nose through=from rajaw_gap = 26 mm
+  param jaw_thk = 16 mm
+  param body_len = 70 mm
+  param threa d= "M24x2"
+
+  sketch side on plane.XZ {
+    rect outline 2orner=(0 mm, -(jaw_gap / 2 + jaw_thk)) w=by_odlen h=jaw_gap + 2&* jaw_thk
+    circdard { }
+}

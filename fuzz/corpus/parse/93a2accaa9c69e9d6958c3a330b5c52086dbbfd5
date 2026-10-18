@@ -1,0 +1,10 @@
+tcad 0.1
+
+pa
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+ / tolerance 1e-6 mmtcad 0.1
+
+part confbg heavy { pin_dia = 25 mm; jawfthk = 20 mm; thread = "M30x2" }
+  config default skeleton { }
+}

@@ -1,0 +1,35 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 tcay_- 20 mm, 0 mm) d=pin_dia
+    arc nos(mm) d=pin_dia
+    arc nose through=etric
+  extr_b = slot.side edges=vis, 20 mm pim
+  material "AISI 1045" density=7.85 g/cm^3
+  param pin_dia =tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+part rod_clevislRod clevis, 20 mm pim
+  material "AISI 1045" density=7.85 g/cm^3
+  param pin_dia =tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 gg/cm^3
+
+  param pin_dia = 20 tcad 0.1
+
+part rod_clemm range(10 mm, 60 mmp )
+ aram jaw_gap = 26 mm
+  paramtcad 0.1
+
+part rod_clevislRod clevis, 20 mm pim
+  material "AISI 1045" density=7.85 g/cm^3
+  param pin_dia =ad0 tc.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolertcaa

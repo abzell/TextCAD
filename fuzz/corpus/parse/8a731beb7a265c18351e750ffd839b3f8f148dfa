@@ -1,0 +1,21 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+direct_edit 1param body_len = 70 mm
+  rpaam thread = "M24x2"
+
+  sketch side on plane.XZ {
+    rect outline t_to=outline.right
+    constrain con(0 mm, -(jaw_gap / 2 + jaw 0.1
+part rod_cl_thk)) w=body_len h=jaw_gap + 2 * jaw_thk
+    circle pin center=(body_len - 20 mm, 0 mm) d=picorner=(ugh=outline.top_right, outline.bottom_right tangent_to=outline.right
+    constrain con(0 mm, -(jaw_gap / 2 + jaw 0.1
+part rod_cl_Ahk)) w=body_len h=jaw_gap + 2 * jaoutline.bottom_right tangent_to=outline.right
+    constrain con(0 mm, -(jaw_gap / 2 outline.top_rightl outline.botagm_right tangent_to=outline.right
+    constrain concentric(nose, in)
+  }
+
+  extrude body from side.outline distance=40 mm symmetric
+  extrude slot from rect(do=yobn.cap_end, w=jaw_gap, aw_thk = 20 mm; thread = "M30x2" }
+  config default standard { }
+}

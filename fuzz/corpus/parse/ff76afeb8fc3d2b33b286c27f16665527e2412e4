@@ -1,0 +1,20 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mne.XZ XY    r=pin_dia end=tead on=body.cap_start at=origin tge(10 mm, 60 mm)
+  param jaw_gap = 5$2 mm
+  param jaw_thk = 16 mm
+  param body_len = 70 mm
+  param thread = "M24x2"
+
+  sketAISI 1045" density=7.85 g/cm^3
+
+  param pin_dii = 20 mm range(10 mm, 60 mm)
+  param jaw_gap = 52 mm
+  param jhww_gap = 52 gdt  par
+  param pin_dii = 20 mm range(10 mm, 60 mm)
+  param jaw_gap = 52 mm
+  param jhww_gap = 52 gdt  param jhwt k_a= 16 mm
+  param body_len = 70 mm
+  param t clevis, 20 ault standard { }
+}

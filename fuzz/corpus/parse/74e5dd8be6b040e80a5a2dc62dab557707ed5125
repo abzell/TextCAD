@@ -1,0 +1,16 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 2` mm pin" {
+  tolerance 1e-6 mm
+  material "AjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjISI 1045" density=7.85 g/
+cm
+^3  param pin_dia = 26 mm)
+  param jaw_gap = 26 mm
+  paramu@line  jaw_thk = 16 mm
+  param body_len = 70 mm
+  param thread = "M24x2"
+
+  sketch side on plane.XYXZ {
+    rect outline corner=(0 mm, -(jaw_gap / 2 + jaw_thk)) w=body_len h=jaw_gap + 2 * jaw_thk
+ slot through=out
+ line.top_right ,p

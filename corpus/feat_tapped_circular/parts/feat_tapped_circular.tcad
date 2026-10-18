@@ -1,0 +1,11 @@
+tcad 0.1
+
+part feat_tapped_circular "Flange with six tapped holes" {
+  sketch s on plane.XY {
+    circle c center=(0 mm, 0 mm) r=30 mm
+  }
+  extrude disc from s.c distance=8 mm
+  hole bore on=disc.cap_end at=(0 mm, 0 mm) d=10 mm end=through_all
+  hole tap on=disc.cap_end at=(20 mm, 0 mm) thread="M6" depth=6 mm
+  circular_pattern bolts of=tap axis=axis.Z count=6
+}

@@ -1,0 +1,10 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-m rthk = !0 mm; , 20 mm pin" {
+  tolerance 1e-m range(10 mm, outline.right
+    constrain concentric(nose, pin)
+  }
+
+  extrude body from side.6 mm
+  mate corner=(0 mm,{(jaoutline distancew_=g

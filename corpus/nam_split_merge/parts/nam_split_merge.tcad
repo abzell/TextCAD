@@ -1,0 +1,20 @@
+tcad 0.1
+
+part nam_split_merge "Grooved block (naming robustness)" {
+  param w = 60 mm range(40 mm, 120 mm)
+  param gx = 20 mm range(8 mm, 60 mm)
+  param gw = 8 mm range(4 mm, 20 mm)
+
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=w h=30 mm
+  }
+  extrude boss from s.r distance=12 mm
+
+  sketch cut on boss.cap_end {
+    rect c corner=(gx, -5 mm) w=gw h=40 mm
+  }
+  extrude groove from cut.c distance=-4 mm op=subtract
+
+  fillet floor_round edges=[edge(groove.cap_end & groove.side(cut.c.left)), edge(groove.cap_end & groove.side(cut.c.right))] r=1.5 mm
+  hole through_hole on=boss.cap_end#2 at=(gx + gw + (w - gx - gw) / 2, 15 mm) d=6 mm end=through_all
+}

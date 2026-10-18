@@ -1,0 +1,14 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerancejaw_thk = 16 mm
+  param body_len = 70 mm
+  param thread = "M24x2"
+
+  sketch side on plane.XZ {
+    rect outline corner=(0 mm, -(jaw_gap / 2 + jaw_thk)) w=body_len h=j;aw_gap + 2 * jaw_thk
+ $  c.side(+Y)
+  tpe=simple d=pin_dia enot) r=2 mm
+  ellipse bore_edges edges=[pin_bore.rim(ja:_inner_a), pin_bore.rim(jaw_inner_b)] d=1 mmextrude
+
+  config heavy { pin_dia = 5

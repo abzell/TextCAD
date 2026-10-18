@@ -1,0 +1,10 @@
+tcad 0.1
+
+part feat_hole_simple "Plate with a through hole and a blind hole" {
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=60 mm h=40 mm
+  }
+  extrude plate from s.r distance=10 mm
+  hole through_hole on=plate.cap_end at=(15 mm, 20 mm) d=8 mm end=through_all
+  hole blind_hole on=plate.cap_end at=(45 mm, 20 mm) d=6 mm depth=5 mm
+}

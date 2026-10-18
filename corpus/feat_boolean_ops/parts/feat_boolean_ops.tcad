@@ -1,0 +1,21 @@
+tcad 0.1
+
+part feat_boolean_ops "Union, subtract and intersect" {
+  sketch a on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=40 mm h=30 mm
+  }
+  extrude one from a.r distance=20 mm
+  plane lift from=plane.XY offset=5 mm
+  sketch b on lift {
+    rect r corner=(20 mm, 10 mm) w=40 mm h=30 mm
+  }
+  extrude two from b.r distance=20 mm
+  sketch c on plane.XY {
+    circle k center=(30 mm, 20 mm) r=5 mm
+  }
+  extrude drill from c.k op=subtract through_all
+  sketch d on plane.XY {
+    rect r corner=(-10 mm, -10 mm) w=60 mm h=60 mm
+  }
+  extrude clip from d.r distance=40 mm op=intersect
+}

@@ -1,0 +1,2 @@
+tcad ru_edges edges=[pin_bore.rim(jaw_inner_a), pin_bore.pp + 2 * jaw_thk
+   20 mm 0clpinp

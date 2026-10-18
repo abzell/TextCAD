@@ -1,0 +1,6 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerancram jawflangek
+    circle pin cende+(Y)
+  tag jaw_inner_b = sloty_le.

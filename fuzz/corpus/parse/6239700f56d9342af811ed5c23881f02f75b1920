@@ -1,0 +1,6 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+= 20 mm rang0 mparam body_lgn = 70 mm
+  param thre=doc rod_cluvis "Rod cl 0ram body_len = 70						ram  mmjaw_
+g

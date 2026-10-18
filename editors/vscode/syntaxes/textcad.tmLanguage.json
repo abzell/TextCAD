@@ -1,0 +1,30 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "TextCAD",
+  "scopeName": "source.textcad",
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#string" },
+    { "include": "#annotation" },
+    { "include": "#declaration" },
+    { "include": "#feature" },
+    { "include": "#sketch" },
+    { "include": "#builtin" },
+    { "include": "#number" }
+  ],
+  "repository": {
+    "comment": {
+      "patterns": [
+        { "name": "comment.line.number-sign.textcad", "match": "#.*$" },
+        { "name": "comment.block.textcad", "begin": "/\\*", "end": "\\*/" }
+      ]
+    },
+    "string": { "name": "string.quoted.double.textcad", "begin": "\"", "end": "\"", "patterns": [{ "match": "\\\\.", "name": "constant.character.escape.textcad" }] },
+    "annotation": { "name": "storage.type.annotation.textcad", "match": "@[a-z_]+" },
+    "declaration": { "name": "keyword.other.declaration.textcad", "match": "\\b(tcad|part|assembly|param|tolerance|material|import|tag|config|default|unit)\\b" },
+    "feature": { "name": "keyword.control.feature.textcad", "match": "\\b(extrude|revolve|sweep|loft|hole|fillet|chamfer|shell|draft|rib|linear_pattern|circular_pattern|mirror|combine)\\b" },
+    "sketch": { "name": "keyword.other.sketch.textcad", "match": "\\b(sketch|constrain|line|arc|circle|ellipse|rect|slot|polygon|spline|plane|axis|point|csys|construction)\\b" },
+    "builtin": { "name": "support.function.textcad", "match": "\\b(min|max|abs|sqrt|sin|cos|tan|asin|acos|atan|atan2|floor|ceil|round|edge|face|body|side)\\b|\\b(XY|YZ|XZ|X|Y|Z)\\b" },
+    "number": { "name": "constant.numeric.textcad", "match": "\\b[0-9]+(\\.[0-9]+)?([eE][+-]?[0-9]+)?\\b" }
+  }
+}

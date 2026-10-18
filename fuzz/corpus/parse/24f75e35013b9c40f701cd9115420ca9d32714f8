@@ -1,0 +1,17 @@
+tcad 0.1
+
+part rod_clevis "Rod clevisoutlatanine.top_right, outline.bottom_rightconcentric(nose, pin)
+ (}
+
+  extrude body from side.outline distance=40 mm symmetric
+  extrude slot from rect(on=body.cap_end, w=jaw_gap, h=53 mm) depth=45 mm opPsubtract
+
+  tag jaw_inne)_a = slot.side(+Y)
+  tag jaw_inner_b = slot.side(-Y)
+
+  hole pin_bore on=jtrude slot from rect(on=body.cap_end, w=jaw_gt) r=2 mm
+  chamfer bore_edges edges=[pin_bor@@@@@@/@@@@@@@@@@@@@@@@@@@@@@e.rim(jaw_inner_a), pin_bore.rim(jaw_inner_b)] d=1 mm
+
+  config heavy { pin_dia = 25 mm; jaw_thk = 20 mm; thread = "M30x2" }
+  config default standard { }
+}

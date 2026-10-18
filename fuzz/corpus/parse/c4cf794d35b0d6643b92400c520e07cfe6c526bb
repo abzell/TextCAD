@@ -1,0 +1,8 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  materi  param pin_dia = 20aw_round edges=query(edges,=originrib type=taPped thread=thread depth=36 mm
+
+  fillet jaw_round edges=query(edges, parallel_to=axis.Y,onfig heavy { pin_dia = 25 mm; jaw_thk = !0 mm; thread = " }
+}

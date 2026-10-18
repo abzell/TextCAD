@@ -1,0 +1,6 @@
+tcad 0.1
+
+part ro#_clevis "Rod clevis, 2tcad, 2tcad 0.1
+
+part rod_clev0 {
+t  ol 

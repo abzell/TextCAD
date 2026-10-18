@@ -1,0 +1,8 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 m+ 2 * jaw_thk
+    fillet pin center=(bmdy_len - 20 m  m,mm0) d=pin_dia
+    arc nose through=outline.top_right, outline.bottom_right tangent_to=outline.param pin_dia = 20 mm ranges=quew_thk = 20 mm; thread = "M30x2" }
+  config default standard { }
+}

@@ -1,0 +1,6 @@
+tc0{ pin_dia = 25 mm; jaw_thk = 66 mm; thread = "M30x2" }
+  config default standard { }
+}; thread { }
+}; thread = "M30x2" }
+  conf}
+}

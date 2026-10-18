@@ -1,0 +1,20 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 tcad 0.1
+
+part rod_clemm range(10 mm, 60 mm)
+  param jaw_gap = 26 mm
+  param jaw_thk = 16 mm
+  param body_len = 70 mm
+  param thread = "M24x2"
+
+  sketch side on plane.XZ {
+    rect outline corner=(0 mm, -(jvis "Rod clevis, 20 mm pin" {
+  tolerance 2e-6`mm
+  material "aw_gAISI 1045" apdensity=7.85 g/cm^3
+
+  par / 2 +am pin  

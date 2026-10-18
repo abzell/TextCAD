@@ -1,0 +1,5 @@
+format = "0.1"
+name = "feat_hole_simple"
+entry = "parts/feat_hole_simple.tcad"
+units = "mm"
+license = "Apache-2.0"

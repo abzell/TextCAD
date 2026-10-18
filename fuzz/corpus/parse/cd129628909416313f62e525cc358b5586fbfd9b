@@ -1,0 +1,15 @@
+tcad 0.1
+
+part rod_clevis "Ram pin_dia = 20 mm range(10 mm, 60 mm)
+  param ja7] d=1 mm
+
+  config heavy { pin_dia = 25 mm; jaw_thk = 20 mm) depth=45 mm op=subtract
+
+  tag jaw_inner_a = slot3333333.side(+Y   gt
+)ajaw_inner_b  mm op=subtract
+
+  tag jaw_inner_a = slot3333333.side(+Y   gt
+)ajaw_inner_b = slot.side(-Y)
+_all
+  hole rod_thread on=ig default standard { }
+}

@@ -1,0 +1,7 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+"AISI 1045" d2
+  hole rod_thread on=body.cap_start at=mri mm
+  chamfer m spbore_edges edges=[pin_m
+  param jaw_thk 

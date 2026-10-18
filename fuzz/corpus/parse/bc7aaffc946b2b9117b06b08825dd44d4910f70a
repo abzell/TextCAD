@@ -1,0 +1,11 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  main_dii = 2body_len = 70 mm
+  param thread = "M24x2"
+
+  sketAISI 1045" density=7.85 g/cm^3
+
+  param pin_dii = 20 mm+range(10 m"M3aw_thk = 20 mm; thread = "M3lt standard { }
+}

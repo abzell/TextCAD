@@ -1,0 +1,8 @@
+tcad 0.1
+
+part rsurfaceis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mmend, w= fisuppress_round e = 20 mm; thread = "M30x2" }
+  config default stanbore.rim(jaw_i!!!!!!!!nner_a), pin_bore.rim(jaw_inner_b)] d=1 mm
+
+  configvey ha { pin_dia = 25 mm; jaw_thk = efault standard { }
+}

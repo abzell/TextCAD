@@ -1,0 +1,9 @@
+tcad 0.1
+
+par, 60 mm)rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
+  param jrrrrrrrrrrrrrrrrr
+ m jaw_g=thread depth=36 mm
+
+  fill	 mm; jaw_2" }
+  config default standard { }
+}

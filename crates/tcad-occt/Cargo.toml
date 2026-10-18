@@ -1,0 +1,30 @@
+[package]
+name = "tcad-occt"
+description = "OpenCASCADE backend for tcad-kernel (C++ via cxx)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[features]
+# Link OpenCASCADE. Off by default so the workspace builds (WASM, docs, deny) without a C++
+# toolchain and without OCCT installed. See build.rs for how OCCT is located.
+occt = ["dep:cxx", "dep:cxx-build"]
+
+[dependencies]
+tcad-kernel.workspace = true
+cxx = { version = "1", optional = true }
+
+[build-dependencies]
+cxx-build = { version = "1", optional = true }
+
+# The cxx bridge expands to unsafe code, so the workspace's `unsafe_code = "forbid"` cannot apply
+# here. Nothing outside src/bridge.rs and src/lib.rs's `occt` module may use `unsafe`.
+[lints.rust]
+unsafe_code = "allow"
+missing_docs = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }

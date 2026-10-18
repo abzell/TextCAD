@@ -1,0 +1,13 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  materia 60 mm)
+  param suppress= 52 mm
+  pararam thread = "M24x2"
+
+  sketch side ok = 16 mm
+  param body_len = pin" {
+  =7.85ane.XZ {
+    rect outline corner=(0 mm, -(jaw_gap / 2 + jaw_t5 mm; jaw_thk = 20 mm; thread = "M30x2" }
+  config d

@@ -1,0 +1,7 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis_, 20 mm pin" {
+  tole:rance 1e-6 mm
+  mater*a, "AISI 1045am jaw_gap = 26 
+len - 20 mm, 0 mm) d=piN_dia
+;   arc nose throug, :out

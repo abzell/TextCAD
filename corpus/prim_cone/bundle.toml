@@ -1,0 +1,5 @@
+format = "0.1"
+name = "prim_cone"
+entry = "parts/prim_cone.tcad"
+units = "mm"
+license = "Apache-2.0"

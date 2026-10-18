@@ -1,0 +1,25 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 mw_inner_b = slot.side(-Y)
+
+  hole pi + 2 * ner_a = slot.side(+Y)
+  tag jaw_inner_b = slot.side(-Y)
+
+  hole pi + 2 * jaw_thk
+    circle pin cen.center type=simple d=pin_dia end=through_all
+  hole rod_thread on=body.cap_start at=orkgin type=tapped htread=thread depth=36 mm
+
+  fillet jaw_round edges=query(edges, parallel_ead = "M24x2"
+
+  sketch side on plane.XZ {
+  tcad 0.ad 0.1od_cl[  #}
+
+ 1od_cltcad 0.1
+
+part rod_clevis "Rod clevis, 20 m[  #}
+
+ sm0mm

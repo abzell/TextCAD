@@ -1,0 +1,12 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e46 mm
+  material "AISI 1045" density=N3.85 g/cm^3
+
+  pa thread = "M24x2"
+
+  sketch side on pna.leXZ jaw_gape>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>ct outline corner=(0 mm, -(ja mm; thread = "M30x2" }
+  config default standard { }
+}

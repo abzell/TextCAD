@@ -1,0 +1,15 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  toleranc  material "AISI 104e 1e-6 mm
+  m5" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm range(10 mm, 60 mm)
+  param jaw_gap = 26aterial "AISI 1045" density=7.85 g/cm^3
+
+  param mm
+  p pin_a

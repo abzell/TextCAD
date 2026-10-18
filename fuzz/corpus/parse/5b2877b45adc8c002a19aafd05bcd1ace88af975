@@ -1,0 +1,8 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 0 2mm pin" {
+  tolrance 1e-6 mm
+  material "AISI 1045" h side on pltes=query(edges, dges=query(edges, parallel_to==[pin_bor_b)] d=1 mm
+
+  config heavy { pin_dia = 50 mm; jaw_thk = 20 mm; thread = "M30x2" }
+  config default standar}

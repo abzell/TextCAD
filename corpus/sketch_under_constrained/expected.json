@@ -1,0 +1,16 @@
+{
+  "codes": [],
+  "dof": 5,
+  "entities": {
+    "a": {
+      "dof": 3
+    },
+    "c": {
+      "dof": 2
+    }
+  },
+  "note": "Under-constrained sketches are accepted; the degrees of freedom are reported per entity as information.",
+  "info": [
+    "I4201"
+  ]
+}

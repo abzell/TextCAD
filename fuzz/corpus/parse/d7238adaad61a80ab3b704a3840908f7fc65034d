@@ -1,0 +1,5 @@
+tc!!!!!tcad = 20 mm range(10 mm, 60 mm)
+  param plane.X2 {
+    rect outline corner=(0 mm, -(jaw_gap /*2 + jaw_thk)) 0w=body_len h=jaw_gap + 2 * jadiah!!!k
+    circle pin center=(bod {
+ corner=(0 mm, -(?aw_gap /!t*1

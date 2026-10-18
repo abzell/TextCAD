@@ -1,0 +1,3 @@
+tcad E1001re_edges edges=[pin_b)] d=1tcad 0.1
+
+part rod_clevistcad 0. 1

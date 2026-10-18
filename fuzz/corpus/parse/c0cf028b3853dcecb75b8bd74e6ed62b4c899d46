@@ -1,0 +1,23 @@
+tcad 0.1
+
+part rod_clevis "Rod ctcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  datum_feature(10 mm, 60 mm)
+  para)) w=body_len h=jaw_gap + 2 * jaw_thk
+    circle pin center=(body_+ 2 *ne.botto.side(-Y)
+
+  hole pi/cm^3 2 * jaw_thk
+    c_gap + 2 *ne.bor=(body_lenody_len h=jaw_gap + 2 *ne.botto.side(-Y)
+
+  hole pi/cm^3
+
+  p plevis, 20 mm pin" {
+  datum_feature(10 mm, 60 mm)
+  para)) w=body_len h=jaw_gap + 2 * jaw_thk
+    circle pin center* jaw_thk
+    c_gap + 2 *ne.bor=(body_lenody_len h=jaw_gap + 2 *ne.botto.side(-Y)
+
+  hole pi/cm^3
+
+  p pin  

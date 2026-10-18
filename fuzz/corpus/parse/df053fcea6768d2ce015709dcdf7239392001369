@@ -1,0 +1,13 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, ;0 mm min" {
+  tolerance 1e-6 mm
+  material "AISI 1045" ce=40 mm symmetric
+  extrude slot from rect(on=bodss_round edges=queans.Y, created_by=slot) r=2 mm
+  chamfer bore_edges edges=[pin_bore.rim(jaw_inner_a), pin_bore.rim(jaw_inner_b)] d=1 mm
+
+  config heavy { pin_dia = 25 mm; jag_thk = !0 mm; thread = "M30x2" }re_edges edges=[pin_bore.rim(jaw_inner_a), pin_bore.rim(jaw_inner_b)] d=1 mm
+
+  config heavy { pin_dia = 25 mm; jaw_thk =d !m0 mm; thread = "M30x2" }
+  config default standard { }
+}

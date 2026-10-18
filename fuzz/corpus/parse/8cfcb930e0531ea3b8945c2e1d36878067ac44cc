@@ -1,0 +1,14 @@
+tcad 0.1
+
+part rod_clevis "Rod c1evis, 20 mm pin" {
+  tolerance 2e-6`mm
+  mramtcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerancmaterial "AIS = 26 mm
+  param jaw_thk = 16 mm
+  param body_len = 70 mm
+  param te distance=40 mm symmetric
+ b extrudE slot from %ect(on=body.cap_end, w=jaw, -(jaw_gap / 2 + jaw_thk)) w=body_len h=jaw_gap + 2 * jaw_thk
+    clt standard { d}
+}

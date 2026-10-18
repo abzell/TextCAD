@@ -1,0 +1,38 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  mraap pin_dii = 20 mm ran = 70 mm
+  param thread = "M24x2"
+
+  sketAISI 1045" density=7.85 g/cm^3
+
+  param pin_d_gap = 52 mm
+  param jaw_thk = 16 mm
+  param body_len = 70 mm
+  pwt k_a= 16 mm
+  param body_len = 70 mm
+  param t clevis, 20 mm pin" {
+  tolerance 1e-6 mmarage(10 mm, 60 mm)
+  param jaw_gap = 52 mm
+  param jaw_thk = 16 mm
+  param body_len = 70 mm
+  param thread = "M24x2"
+
+  sketAISI 1045" density=7.85 g/cm^3
+
+  param pin_d_gap = 52 mm
+  param jaw_thmm
+  param body_len = 70 mm
+  pwt k_a= 16 mm
+  param body_len = 70 mm
+  param t clevis, 20 mm pin" {
+  tolerance 1e-6 mmaram jaw_gap = 52 mm
+  param jaw_thk = 16 mm
+  param body_len = 70 mm
+  param thread = "M24x2"
+
+  sketAISI 1045" density=7}
+}

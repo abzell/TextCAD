@@ -1,0 +1,19 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "A.ISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm range(10 mm, 60 mm)
+  param jaw_gap = 26 m@@@@@@@@@m
+  param jaw_thk0 mm pin" {
+  to = 16 mm
+  param body_chamfer0 mm
+  param threadlen - 20 mm, 0 mm) d=pin_dia
+    arc nosetr huohg=outline.top_right,ner_b)] d6 m@@@@@@@@@m
+  param jaw_thk = 16 mm
+  param body_chamfer0 mm
+  param threadlen - 20 mm, 0 mm) d=pin_dia
+    arc onfig heavy { pin_dia = 25 mm; jaw_thk = 20 mm; thread = "M30x2" }
+  config default standard { }
+}

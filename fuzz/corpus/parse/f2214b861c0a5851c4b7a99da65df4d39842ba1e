@@ -1,0 +1,11 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  materialm^3
+
+  param pin_dia = 20 mm (enrag10 mm, 
+
+  sketch side on plane.X8 {
+    rect outody_len = corner=(0 cmmm, 70 mm -(jaw_gap / 2 + 
+  pj

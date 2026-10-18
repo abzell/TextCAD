@@ -1,0 +1,14 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm n" {
+  tolerance 1e-6 mm
+  material "AISI 1045" de= n = 70 lm
+  param thread = "M24x2"
+
+  sketch side on plane.XZ {
+    rect outline corner=(0 mm, -(jaw_gap / e slot from rect(on=body.cap_end, w=jaw_gap, h=20 mm) depth=45 mm tcad 0.2
+
+pop=subtract
+
+  tag kaw_inner_a = slotdear(+Yt r)
+  otp

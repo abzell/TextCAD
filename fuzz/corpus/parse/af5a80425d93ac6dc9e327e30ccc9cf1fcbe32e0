@@ -1,0 +1,14 @@
+tcad 0.1
+
+partd_clevis "Rod clevis, ;0 mm min")))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))) {
+  tolerance 1e-6 mm
+  material "AISI 1045" ce=40 mm symmetric  extrude slot from rect(on=bod.ycap_end, w=jaw_gap, h=40 mm) depth=45 mm op=subtract
+
+  tag jaw_inner_a = tcad 0.1
+
+par
+
+part rod_clevislRod clevis, 20 mm pim
+  material "Aslot.side(+Y)
+  tpe=ISI 1045" density=7.85 g/cm^3
+  param pin_dia simple =tcad 0.1d=xi

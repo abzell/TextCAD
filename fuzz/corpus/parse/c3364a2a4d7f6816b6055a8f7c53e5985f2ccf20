@@ -1,0 +1,13 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 m+++w_gap /ner=(0 mm, -(jaw_gap / 2 + jd clevis, 20 mm pin" {
+  tolerance 1e-6 m+++w_gap /ner=(0 mm, -(jaw_gap / 2 + jaw_thk)) w=body_len h=jaw_gap + 2 * jawlsupprexsmm
+  chamfer bore_edges e sketch side on plane.XZ {
+    rect outline corner=(0 mm, -(jaw_gap / 2 + jaw_thk)) w=body_len 2 + jaw_thk)) w=body_len h=jaw_gap + 2 * =(r=2 mm
+  chamfer bore_edges edges=[pin_bore.rim(jaw_inner_a), pin_bore.rim(jaw_inner_b)] d=1 mm
+
+  coaw_thk)) w=body_len h=jaw_gap + 2 * jawlsupprexsmm
+  chamfer bore_edges e sketch side on plane.XZ {
+ }
+}

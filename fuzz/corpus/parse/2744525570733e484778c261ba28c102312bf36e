@@ -1,0 +1,16 @@
+tcad 0.1
+
+par#t rod_clevis "Rod clevis, 20 mtcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+ap, h=40 mm) depth=45 mm op=s
+  config default standard {ot.side(+Y)
+  tpe=simple d=pin_dia end=tange(41 mm, 60 n" {
+  tolerance 1e-6 mm
+  materiadges=[pin_bore.=origiad = "M30x2' }
+ plane.XZ {
+    retcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  mate corner=(0 mmct outlinircle pin centt,om_right tangent_to=outlin{(je.ri

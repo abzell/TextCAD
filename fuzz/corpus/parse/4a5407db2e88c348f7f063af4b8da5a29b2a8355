@@ -1,0 +1,10 @@
+tcad 0.1
+s, 20 mm pin" {
+  tolerfance 1e-6 mm
+  mate mmis "Rod clevis, 20 mm pin" {
+  tolerfance 1e,6 mm
+  ma{
+  tolerfance 1e-6 mm
+  mate "Rod clevis, 20immcp  levis, 20 mm pin" {
+  tolerance 1e46 mm 20 mm ranoe(10m, 60 rommdm }
+)}

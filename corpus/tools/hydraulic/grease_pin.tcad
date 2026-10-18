@@ -1,0 +1,23 @@
+tcad 0.1
+
+part grease_pin "Pin with a grease groove and cross hole" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin_d = 40 mm range(30 mm, 60 mm)
+  param pin_len = 120 mm range(100 mm, 200 mm)
+
+  sketch pin_sk on plane.XY {
+    circle c center=(0 mm, 0 mm) r=pin_d / 2
+  }
+  extrude pin from pin_sk.c distance=pin_len
+
+  hole axial on=pin.cap_start at=(0 mm, 0 mm) d=8 mm depth=pin_len / 2
+  sketch groove_sk on plane.XZ {
+    rect r corner=(pin_d / 2 - 1.5 mm, pin_len / 2 - 4 mm) w=3 mm h=8 mm
+  }
+  revolve groove from groove_sk.r axis=axis.Z op=subtract
+  hole cross on=plane.XZ at=(0 mm, pin_len / 2) d=6 mm depth=pin_d / 2 + 2 mm
+
+  chamfer ends edges=[edge(pin.cap_end & pin.side(pin_sk.c)#2), edge(pin.cap_start & pin.side(pin_sk.c)#1)] d=2 mm
+}

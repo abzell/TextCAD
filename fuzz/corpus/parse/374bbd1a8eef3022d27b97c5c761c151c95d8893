@@ -1,0 +1,21 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+m, -(jaw_gap / 2 + jaw mm
+
+  fillet jaw_round edges=query(ednd ed(= 70 mm
+  param
+  sketch side on plane.XZ(0 mm, -(jaw_gap / 2 + jaw mm
+
+  fillet jaw_round edges=query(ednd edges=query(edggs, paralle0 mm range(= 70 mm
+  param thread = "M24x2"
+
+  sketch side on plane.XZ(0 mm, -(jaw_gap / 2 + ja= 70 mm
+  param thread = "M24x2"
+
+  sketch side on plane.XZ(0 mm, -(jaw_gap / 2 + jaw mm
+
+  fillet jaw_round edges=query(ednd edges
+}ia = 25 mm; jaw_thk = 20 m thread = "M30x2" }
+  config default standard { }
+}

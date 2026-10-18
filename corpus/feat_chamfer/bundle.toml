@@ -1,0 +1,5 @@
+format = "0.1"
+name = "feat_chamfer"
+entry = "parts/feat_chamfer.tcad"
+units = "mm"
+license = "Apache-2.0"

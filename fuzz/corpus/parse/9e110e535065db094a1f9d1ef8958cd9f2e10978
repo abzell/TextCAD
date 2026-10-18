@@ -1,0 +1,10 @@
+tcad 0.1
+
+part roXd_clevis " range(05 mm, 60 mm)
+  param jaw_gap = 26 mm
+  param jaw_thk =ap + 2 * jaw_thktcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AIS
+    circle pI

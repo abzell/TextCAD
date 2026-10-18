@@ -1,0 +1,23 @@
+tcad 0.1
+
+part rod_clevis "Rod clevs, 20 mm pin" {
+  tole tolerance 1e-6 mm= "M24x2 range(10 mm, 60 mm)
+ body_len = 70 mm
+  param cos * jaw_thk
+    c0x2" }
+  config defau  param jaw_gap = 26 mm
+  param jaw_thk = 16 mm
+  param body_len = 70 mm
+  param cos * jaw_thk
+    c0x2" }
+  config default standarance 1e-6 mm= "M24x2 range(10 mm, 60 mm)
+ body_len = 70 mm
+  param cos * jaw_thk
+    c0x2" }
+  config defau  param jaw_gap = 26 mm
+  param jaw_thk = 16 mm
+  param body_len = 70 mm
+  param cos * jaw_thk
+    c0x2" }
+  config default standard { }
+}

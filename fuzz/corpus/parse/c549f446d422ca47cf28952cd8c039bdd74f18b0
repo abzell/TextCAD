@@ -1,0 +1,19 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  toldrance 1e-6 mm
+  material "AISI 10is "Rod clevis, 20 mm pin" {
+  toldrance 1e-6 mm
+  material "AISI 1045"  = 26 mm
+  param jaw_thk = 16 mm
+  param weldment B 70 ml
+  pa
+  n1e.top_ricm^3
+
+  par 45"  = 26 mm
+  param jaw_thk = 16 mm
+  param weldment B 70 ml
+  pa
+  n1e.top_ricm^3
+
+  par / 2 +&am pin  

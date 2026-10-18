@@ -1,0 +1,28 @@
+[package]
+name = "tcad-build"
+description = "Turns a checked model into kernel operations: profiles, reference geometry, features."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+tcad-diag.workspace = true
+tcad-expr.workspace = true
+tcad-model.workspace = true
+tcad-kernel.workspace = true
+tcad-naming.workspace = true
+libm = "0.2"
+# Only used by the tests, which run against OpenCASCADE when the `occt` feature is on.
+tcad-occt = { workspace = true, optional = true }
+
+[dev-dependencies]
+serde_json = "1"
+
+[features]
+occt = ["dep:tcad-occt", "tcad-occt/occt"]
+
+[lints]
+workspace = true

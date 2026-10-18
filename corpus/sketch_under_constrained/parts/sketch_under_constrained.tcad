@@ -1,0 +1,9 @@
+tcad 0.1
+
+part sketch_under_constrained "sketch under constrained" {
+  sketch s on plane.XY {
+    line a start=(0 mm, 0 mm) end=(10 mm, 5 mm)
+    circle c center=(20 mm, 0 mm) r=3 mm
+    constrain horizontal(a)
+  }
+}

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Windows installer for the TextCAD command-line tools (WiX 5). Built by .github/workflows/release.yml:
+     wix build packaging/windows/tcad.wxs -d Version=0.0.1 -d StageDir=stage -arch x64 -->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package Name="TextCAD" Manufacturer="TextCAD contributors" Version="$(Version)"
+           UpgradeCode="6f1a1c52-3d0e-4d7c-9a77-5b3f6ad0c0b1" Scope="perMachine">
+    <MajorUpgrade DowngradeErrorMessage="A newer version of TextCAD is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="TextCAD">
+        <Component Id="PathEntry" Guid="b2a5c0de-6c0b-4a0e-8a52-2f4f5c63d1aa">
+          <Environment Id="TextCadPath" Name="PATH" Value="[INSTALLFOLDER]" Permanent="no" Part="last"
+                       Action="set" System="yes" />
+        </Component>
+        <!-- every file of the staged distribution: executables, OpenCASCADE DLLs, examples -->
+        <Files Include="$(StageDir)\**" />
+      </Directory>
+    </StandardDirectory>
+  </Package>
+</Wix>

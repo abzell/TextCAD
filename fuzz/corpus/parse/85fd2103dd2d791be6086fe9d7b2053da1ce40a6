@@ -1,0 +1,13 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis,(20 mm pi*n" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^ag jaw_inner_a = s
+  material "AISI 1045" density=7.85 g/cm^ag jaw_inner_a = slot.lot.side(+Y)
+  tag jaw_inner_b = slot.side(-Y)
+
+  hole pin_bore on=jaw_inner_a at=side.pin.center type6simple de=tapped thread=thread depth=36 mm
+
+  fillet jaw_round edges=query(edges, parallel_to=axis.Y, created_by=slot) r=2 mm
+  config default standard { }
+}

@@ -1,0 +1,27 @@
+{
+  "note": "M6 tap drill is 5 mm; the six holes are a circular pattern of the first.",
+  "volume_mm3": 21284.290228070848,
+  "area_mm2": 7822.565707438583,
+  "center_of_mass_mm": [
+    -3.3516969514082773e-16,
+    -2.0590903183552045e-15,
+    3.9667896678966805
+  ],
+  "bbox_min_mm": [
+    -30,
+    -30,
+    0
+  ],
+  "bbox_max_mm": [
+    30,
+    30,
+    8
+  ],
+  "topology": {
+    "solids": 1
+  },
+  "baseline": [
+    "area_mm2",
+    "center_of_mass_mm"
+  ]
+}

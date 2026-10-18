@@ -1,0 +1,31 @@
+tcad 0.1
+
+part nam_bracket "L bracket (naming robustness)" {
+  param w = 40 mm range(20 mm, 100 mm)
+  param t = 6 mm range(4 mm, 10 mm)
+  param h = 50 mm range(30 mm, 100 mm)
+  param l = 60 mm range(40 mm, 100 mm)
+
+  sketch prof on plane.XZ {
+    line l0 start=(0 mm, 0 mm) end=(l, 0 mm)
+    line l1 start=(l, 0 mm) end=(l, t)
+    line l2 start=(l, t) end=(t, t)
+    line l3 start=(t, t) end=(t, h)
+    line l4 start=(t, h) end=(0 mm, h)
+    line l5 start=(0 mm, h) end=(0 mm, 0 mm)
+    constrain horizontal(l0)
+    constrain vertical(l1)
+    constrain horizontal(l2)
+    constrain vertical(l3)
+    constrain horizontal(l4)
+    constrain vertical(l5)
+  }
+  extrude body from prof distance=w symmetric
+
+  tag deck = body.side(prof.l2)
+  tag wall = body.side(prof.l3)
+
+  hole deck_hole on=deck at=(l - 15 mm, 0 mm) d=6 mm end=through_all
+  hole wall_hole on=wall at=(0 mm, h - 12 mm) d=6 mm end=through_all
+  fillet inner_corner edges=[edge(deck & wall)] r=3 mm
+}

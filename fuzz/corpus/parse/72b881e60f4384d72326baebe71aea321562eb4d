@@ -1,0 +1,10 @@
+tcad 0 0.1
+
+nsity=7.85 g/cm^3
+
+  param in)
+  }
+
+  exhk  mm; thread = "M30x2" }
+  config default standard }
+}

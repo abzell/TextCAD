@@ -1,0 +1,605 @@
+tcad 0.1
+
+part sketch_200_entities "sketch 200 entities" {
+  sketch s on plane.XY {
+    rect r0 corner=(0.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain fix(r0.bottom_left)
+    circle c0 center=(8.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c0.center, r0.bottom)
+    constrain hdistance(r0.bottom_left, c0.center) = 9 mm
+    arc a0 center=r0.top_left start=(12.3 mm, 11 mm) end=(6.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a0.center, a0.start) = 1.8 mm
+    constrain vertical(a0.center, a0.end)
+    line s0 start=r0.top_left end=(4.3 mm, 3 mm)
+    constrain distance(s0) = 5 mm
+    constrain angle(r0.bottom, s0) = 50 deg
+    rect r1 corner=(21.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r0.bottom_right, r1.bottom_left) = 2 mm
+    constrain horizontal(r0.bottom_right, r1.bottom_left)
+    circle c1 center=(29.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c1.center, r1.bottom)
+    constrain hdistance(r1.bottom_left, c1.center) = 9 mm
+    arc a1 center=r1.top_left start=(33.3 mm, 11 mm) end=(27.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a1.center, a1.start) = 1.8 mm
+    constrain vertical(a1.center, a1.end)
+    line s1 start=r1.top_left end=(25.3 mm, 3 mm)
+    constrain distance(s1) = 5 mm
+    constrain angle(r1.bottom, s1) = 50 deg
+    rect r2 corner=(42.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r1.bottom_right, r2.bottom_left) = 2 mm
+    constrain horizontal(r1.bottom_right, r2.bottom_left)
+    circle c2 center=(50.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c2.center, r2.bottom)
+    constrain hdistance(r2.bottom_left, c2.center) = 9 mm
+    arc a2 center=r2.top_left start=(54.3 mm, 11 mm) end=(48.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a2.center, a2.start) = 1.8 mm
+    constrain vertical(a2.center, a2.end)
+    line s2 start=r2.top_left end=(46.3 mm, 3 mm)
+    constrain distance(s2) = 5 mm
+    constrain angle(r2.bottom, s2) = 50 deg
+    rect r3 corner=(63.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r2.bottom_right, r3.bottom_left) = 2 mm
+    constrain horizontal(r2.bottom_right, r3.bottom_left)
+    circle c3 center=(71.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c3.center, r3.bottom)
+    constrain hdistance(r3.bottom_left, c3.center) = 9 mm
+    arc a3 center=r3.top_left start=(75.3 mm, 11 mm) end=(69.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a3.center, a3.start) = 1.8 mm
+    constrain vertical(a3.center, a3.end)
+    line s3 start=r3.top_left end=(67.3 mm, 3 mm)
+    constrain distance(s3) = 5 mm
+    constrain angle(r3.bottom, s3) = 50 deg
+    rect r4 corner=(84.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r3.bottom_right, r4.bottom_left) = 2 mm
+    constrain horizontal(r3.bottom_right, r4.bottom_left)
+    circle c4 center=(92.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c4.center, r4.bottom)
+    constrain hdistance(r4.bottom_left, c4.center) = 9 mm
+    arc a4 center=r4.top_left start=(96.3 mm, 11 mm) end=(90.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a4.center, a4.start) = 1.8 mm
+    constrain vertical(a4.center, a4.end)
+    line s4 start=r4.top_left end=(88.3 mm, 3 mm)
+    constrain distance(s4) = 5 mm
+    constrain angle(r4.bottom, s4) = 50 deg
+    rect r5 corner=(105.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r4.bottom_right, r5.bottom_left) = 2 mm
+    constrain horizontal(r4.bottom_right, r5.bottom_left)
+    circle c5 center=(113.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c5.center, r5.bottom)
+    constrain hdistance(r5.bottom_left, c5.center) = 9 mm
+    arc a5 center=r5.top_left start=(117.3 mm, 11 mm) end=(111.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a5.center, a5.start) = 1.8 mm
+    constrain vertical(a5.center, a5.end)
+    line s5 start=r5.top_left end=(109.3 mm, 3 mm)
+    constrain distance(s5) = 5 mm
+    constrain angle(r5.bottom, s5) = 50 deg
+    rect r6 corner=(126.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r5.bottom_right, r6.bottom_left) = 2 mm
+    constrain horizontal(r5.bottom_right, r6.bottom_left)
+    circle c6 center=(134.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c6.center, r6.bottom)
+    constrain hdistance(r6.bottom_left, c6.center) = 9 mm
+    arc a6 center=r6.top_left start=(138.3 mm, 11 mm) end=(132.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a6.center, a6.start) = 1.8 mm
+    constrain vertical(a6.center, a6.end)
+    line s6 start=r6.top_left end=(130.3 mm, 3 mm)
+    constrain distance(s6) = 5 mm
+    constrain angle(r6.bottom, s6) = 50 deg
+    rect r7 corner=(147.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r6.bottom_right, r7.bottom_left) = 2 mm
+    constrain horizontal(r6.bottom_right, r7.bottom_left)
+    circle c7 center=(155.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c7.center, r7.bottom)
+    constrain hdistance(r7.bottom_left, c7.center) = 9 mm
+    arc a7 center=r7.top_left start=(159.3 mm, 11 mm) end=(153.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a7.center, a7.start) = 1.8 mm
+    constrain vertical(a7.center, a7.end)
+    line s7 start=r7.top_left end=(151.3 mm, 3 mm)
+    constrain distance(s7) = 5 mm
+    constrain angle(r7.bottom, s7) = 50 deg
+    rect r8 corner=(168.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r7.bottom_right, r8.bottom_left) = 2 mm
+    constrain horizontal(r7.bottom_right, r8.bottom_left)
+    circle c8 center=(176.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c8.center, r8.bottom)
+    constrain hdistance(r8.bottom_left, c8.center) = 9 mm
+    arc a8 center=r8.top_left start=(180.3 mm, 11 mm) end=(174.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a8.center, a8.start) = 1.8 mm
+    constrain vertical(a8.center, a8.end)
+    line s8 start=r8.top_left end=(172.3 mm, 3 mm)
+    constrain distance(s8) = 5 mm
+    constrain angle(r8.bottom, s8) = 50 deg
+    rect r9 corner=(189.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r8.bottom_right, r9.bottom_left) = 2 mm
+    constrain horizontal(r8.bottom_right, r9.bottom_left)
+    circle c9 center=(197.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c9.center, r9.bottom)
+    constrain hdistance(r9.bottom_left, c9.center) = 9 mm
+    arc a9 center=r9.top_left start=(201.3 mm, 11 mm) end=(195.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a9.center, a9.start) = 1.8 mm
+    constrain vertical(a9.center, a9.end)
+    line s9 start=r9.top_left end=(193.3 mm, 3 mm)
+    constrain distance(s9) = 5 mm
+    constrain angle(r9.bottom, s9) = 50 deg
+    rect r10 corner=(210.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r9.bottom_right, r10.bottom_left) = 2 mm
+    constrain horizontal(r9.bottom_right, r10.bottom_left)
+    circle c10 center=(218.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c10.center, r10.bottom)
+    constrain hdistance(r10.bottom_left, c10.center) = 9 mm
+    arc a10 center=r10.top_left start=(222.3 mm, 11 mm) end=(216.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a10.center, a10.start) = 1.8 mm
+    constrain vertical(a10.center, a10.end)
+    line s10 start=r10.top_left end=(214.3 mm, 3 mm)
+    constrain distance(s10) = 5 mm
+    constrain angle(r10.bottom, s10) = 50 deg
+    rect r11 corner=(231.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r10.bottom_right, r11.bottom_left) = 2 mm
+    constrain horizontal(r10.bottom_right, r11.bottom_left)
+    circle c11 center=(239.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c11.center, r11.bottom)
+    constrain hdistance(r11.bottom_left, c11.center) = 9 mm
+    arc a11 center=r11.top_left start=(243.3 mm, 11 mm) end=(237.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a11.center, a11.start) = 1.8 mm
+    constrain vertical(a11.center, a11.end)
+    line s11 start=r11.top_left end=(235.3 mm, 3 mm)
+    constrain distance(s11) = 5 mm
+    constrain angle(r11.bottom, s11) = 50 deg
+    rect r12 corner=(252.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r11.bottom_right, r12.bottom_left) = 2 mm
+    constrain horizontal(r11.bottom_right, r12.bottom_left)
+    circle c12 center=(260.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c12.center, r12.bottom)
+    constrain hdistance(r12.bottom_left, c12.center) = 9 mm
+    arc a12 center=r12.top_left start=(264.3 mm, 11 mm) end=(258.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a12.center, a12.start) = 1.8 mm
+    constrain vertical(a12.center, a12.end)
+    line s12 start=r12.top_left end=(256.3 mm, 3 mm)
+    constrain distance(s12) = 5 mm
+    constrain angle(r12.bottom, s12) = 50 deg
+    rect r13 corner=(273.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r12.bottom_right, r13.bottom_left) = 2 mm
+    constrain horizontal(r12.bottom_right, r13.bottom_left)
+    circle c13 center=(281.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c13.center, r13.bottom)
+    constrain hdistance(r13.bottom_left, c13.center) = 9 mm
+    arc a13 center=r13.top_left start=(285.3 mm, 11 mm) end=(279.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a13.center, a13.start) = 1.8 mm
+    constrain vertical(a13.center, a13.end)
+    line s13 start=r13.top_left end=(277.3 mm, 3 mm)
+    constrain distance(s13) = 5 mm
+    constrain angle(r13.bottom, s13) = 50 deg
+    rect r14 corner=(294.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r13.bottom_right, r14.bottom_left) = 2 mm
+    constrain horizontal(r13.bottom_right, r14.bottom_left)
+    circle c14 center=(302.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c14.center, r14.bottom)
+    constrain hdistance(r14.bottom_left, c14.center) = 9 mm
+    arc a14 center=r14.top_left start=(306.3 mm, 11 mm) end=(300.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a14.center, a14.start) = 1.8 mm
+    constrain vertical(a14.center, a14.end)
+    line s14 start=r14.top_left end=(298.3 mm, 3 mm)
+    constrain distance(s14) = 5 mm
+    constrain angle(r14.bottom, s14) = 50 deg
+    rect r15 corner=(315.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r14.bottom_right, r15.bottom_left) = 2 mm
+    constrain horizontal(r14.bottom_right, r15.bottom_left)
+    circle c15 center=(323.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c15.center, r15.bottom)
+    constrain hdistance(r15.bottom_left, c15.center) = 9 mm
+    arc a15 center=r15.top_left start=(327.3 mm, 11 mm) end=(321.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a15.center, a15.start) = 1.8 mm
+    constrain vertical(a15.center, a15.end)
+    line s15 start=r15.top_left end=(319.3 mm, 3 mm)
+    constrain distance(s15) = 5 mm
+    constrain angle(r15.bottom, s15) = 50 deg
+    rect r16 corner=(336.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r15.bottom_right, r16.bottom_left) = 2 mm
+    constrain horizontal(r15.bottom_right, r16.bottom_left)
+    circle c16 center=(344.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c16.center, r16.bottom)
+    constrain hdistance(r16.bottom_left, c16.center) = 9 mm
+    arc a16 center=r16.top_left start=(348.3 mm, 11 mm) end=(342.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a16.center, a16.start) = 1.8 mm
+    constrain vertical(a16.center, a16.end)
+    line s16 start=r16.top_left end=(340.3 mm, 3 mm)
+    constrain distance(s16) = 5 mm
+    constrain angle(r16.bottom, s16) = 50 deg
+    rect r17 corner=(357.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r16.bottom_right, r17.bottom_left) = 2 mm
+    constrain horizontal(r16.bottom_right, r17.bottom_left)
+    circle c17 center=(365.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c17.center, r17.bottom)
+    constrain hdistance(r17.bottom_left, c17.center) = 9 mm
+    arc a17 center=r17.top_left start=(369.3 mm, 11 mm) end=(363.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a17.center, a17.start) = 1.8 mm
+    constrain vertical(a17.center, a17.end)
+    line s17 start=r17.top_left end=(361.3 mm, 3 mm)
+    constrain distance(s17) = 5 mm
+    constrain angle(r17.bottom, s17) = 50 deg
+    rect r18 corner=(378.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r17.bottom_right, r18.bottom_left) = 2 mm
+    constrain horizontal(r17.bottom_right, r18.bottom_left)
+    circle c18 center=(386.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c18.center, r18.bottom)
+    constrain hdistance(r18.bottom_left, c18.center) = 9 mm
+    arc a18 center=r18.top_left start=(390.3 mm, 11 mm) end=(384.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a18.center, a18.start) = 1.8 mm
+    constrain vertical(a18.center, a18.end)
+    line s18 start=r18.top_left end=(382.3 mm, 3 mm)
+    constrain distance(s18) = 5 mm
+    constrain angle(r18.bottom, s18) = 50 deg
+    rect r19 corner=(399.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r18.bottom_right, r19.bottom_left) = 2 mm
+    constrain horizontal(r18.bottom_right, r19.bottom_left)
+    circle c19 center=(407.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c19.center, r19.bottom)
+    constrain hdistance(r19.bottom_left, c19.center) = 9 mm
+    arc a19 center=r19.top_left start=(411.3 mm, 11 mm) end=(405.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a19.center, a19.start) = 1.8 mm
+    constrain vertical(a19.center, a19.end)
+    line s19 start=r19.top_left end=(403.3 mm, 3 mm)
+    constrain distance(s19) = 5 mm
+    constrain angle(r19.bottom, s19) = 50 deg
+    rect r20 corner=(420.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r19.bottom_right, r20.bottom_left) = 2 mm
+    constrain horizontal(r19.bottom_right, r20.bottom_left)
+    circle c20 center=(428.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c20.center, r20.bottom)
+    constrain hdistance(r20.bottom_left, c20.center) = 9 mm
+    arc a20 center=r20.top_left start=(432.3 mm, 11 mm) end=(426.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a20.center, a20.start) = 1.8 mm
+    constrain vertical(a20.center, a20.end)
+    line s20 start=r20.top_left end=(424.3 mm, 3 mm)
+    constrain distance(s20) = 5 mm
+    constrain angle(r20.bottom, s20) = 50 deg
+    rect r21 corner=(441.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r20.bottom_right, r21.bottom_left) = 2 mm
+    constrain horizontal(r20.bottom_right, r21.bottom_left)
+    circle c21 center=(449.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c21.center, r21.bottom)
+    constrain hdistance(r21.bottom_left, c21.center) = 9 mm
+    arc a21 center=r21.top_left start=(453.3 mm, 11 mm) end=(447.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a21.center, a21.start) = 1.8 mm
+    constrain vertical(a21.center, a21.end)
+    line s21 start=r21.top_left end=(445.3 mm, 3 mm)
+    constrain distance(s21) = 5 mm
+    constrain angle(r21.bottom, s21) = 50 deg
+    rect r22 corner=(462.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r21.bottom_right, r22.bottom_left) = 2 mm
+    constrain horizontal(r21.bottom_right, r22.bottom_left)
+    circle c22 center=(470.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c22.center, r22.bottom)
+    constrain hdistance(r22.bottom_left, c22.center) = 9 mm
+    arc a22 center=r22.top_left start=(474.3 mm, 11 mm) end=(468.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a22.center, a22.start) = 1.8 mm
+    constrain vertical(a22.center, a22.end)
+    line s22 start=r22.top_left end=(466.3 mm, 3 mm)
+    constrain distance(s22) = 5 mm
+    constrain angle(r22.bottom, s22) = 50 deg
+    rect r23 corner=(483.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r22.bottom_right, r23.bottom_left) = 2 mm
+    constrain horizontal(r22.bottom_right, r23.bottom_left)
+    circle c23 center=(491.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c23.center, r23.bottom)
+    constrain hdistance(r23.bottom_left, c23.center) = 9 mm
+    arc a23 center=r23.top_left start=(495.3 mm, 11 mm) end=(489.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a23.center, a23.start) = 1.8 mm
+    constrain vertical(a23.center, a23.end)
+    line s23 start=r23.top_left end=(487.3 mm, 3 mm)
+    constrain distance(s23) = 5 mm
+    constrain angle(r23.bottom, s23) = 50 deg
+    rect r24 corner=(504.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r23.bottom_right, r24.bottom_left) = 2 mm
+    constrain horizontal(r23.bottom_right, r24.bottom_left)
+    circle c24 center=(512.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c24.center, r24.bottom)
+    constrain hdistance(r24.bottom_left, c24.center) = 9 mm
+    arc a24 center=r24.top_left start=(516.3 mm, 11 mm) end=(510.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a24.center, a24.start) = 1.8 mm
+    constrain vertical(a24.center, a24.end)
+    line s24 start=r24.top_left end=(508.3 mm, 3 mm)
+    constrain distance(s24) = 5 mm
+    constrain angle(r24.bottom, s24) = 50 deg
+    rect r25 corner=(525.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r24.bottom_right, r25.bottom_left) = 2 mm
+    constrain horizontal(r24.bottom_right, r25.bottom_left)
+    circle c25 center=(533.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c25.center, r25.bottom)
+    constrain hdistance(r25.bottom_left, c25.center) = 9 mm
+    arc a25 center=r25.top_left start=(537.3 mm, 11 mm) end=(531.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a25.center, a25.start) = 1.8 mm
+    constrain vertical(a25.center, a25.end)
+    line s25 start=r25.top_left end=(529.3 mm, 3 mm)
+    constrain distance(s25) = 5 mm
+    constrain angle(r25.bottom, s25) = 50 deg
+    rect r26 corner=(546.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r25.bottom_right, r26.bottom_left) = 2 mm
+    constrain horizontal(r25.bottom_right, r26.bottom_left)
+    circle c26 center=(554.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c26.center, r26.bottom)
+    constrain hdistance(r26.bottom_left, c26.center) = 9 mm
+    arc a26 center=r26.top_left start=(558.3 mm, 11 mm) end=(552.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a26.center, a26.start) = 1.8 mm
+    constrain vertical(a26.center, a26.end)
+    line s26 start=r26.top_left end=(550.3 mm, 3 mm)
+    constrain distance(s26) = 5 mm
+    constrain angle(r26.bottom, s26) = 50 deg
+    rect r27 corner=(567.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r26.bottom_right, r27.bottom_left) = 2 mm
+    constrain horizontal(r26.bottom_right, r27.bottom_left)
+    circle c27 center=(575.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c27.center, r27.bottom)
+    constrain hdistance(r27.bottom_left, c27.center) = 9 mm
+    arc a27 center=r27.top_left start=(579.3 mm, 11 mm) end=(573.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a27.center, a27.start) = 1.8 mm
+    constrain vertical(a27.center, a27.end)
+    line s27 start=r27.top_left end=(571.3 mm, 3 mm)
+    constrain distance(s27) = 5 mm
+    constrain angle(r27.bottom, s27) = 50 deg
+    rect r28 corner=(588.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r27.bottom_right, r28.bottom_left) = 2 mm
+    constrain horizontal(r27.bottom_right, r28.bottom_left)
+    circle c28 center=(596.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c28.center, r28.bottom)
+    constrain hdistance(r28.bottom_left, c28.center) = 9 mm
+    arc a28 center=r28.top_left start=(600.3 mm, 11 mm) end=(594.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a28.center, a28.start) = 1.8 mm
+    constrain vertical(a28.center, a28.end)
+    line s28 start=r28.top_left end=(592.3 mm, 3 mm)
+    constrain distance(s28) = 5 mm
+    constrain angle(r28.bottom, s28) = 50 deg
+    rect r29 corner=(609.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r28.bottom_right, r29.bottom_left) = 2 mm
+    constrain horizontal(r28.bottom_right, r29.bottom_left)
+    circle c29 center=(617.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c29.center, r29.bottom)
+    constrain hdistance(r29.bottom_left, c29.center) = 9 mm
+    arc a29 center=r29.top_left start=(621.3 mm, 11 mm) end=(615.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a29.center, a29.start) = 1.8 mm
+    constrain vertical(a29.center, a29.end)
+    line s29 start=r29.top_left end=(613.3 mm, 3 mm)
+    constrain distance(s29) = 5 mm
+    constrain angle(r29.bottom, s29) = 50 deg
+    rect r30 corner=(630.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r29.bottom_right, r30.bottom_left) = 2 mm
+    constrain horizontal(r29.bottom_right, r30.bottom_left)
+    circle c30 center=(638.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c30.center, r30.bottom)
+    constrain hdistance(r30.bottom_left, c30.center) = 9 mm
+    arc a30 center=r30.top_left start=(642.3 mm, 11 mm) end=(636.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a30.center, a30.start) = 1.8 mm
+    constrain vertical(a30.center, a30.end)
+    line s30 start=r30.top_left end=(634.3 mm, 3 mm)
+    constrain distance(s30) = 5 mm
+    constrain angle(r30.bottom, s30) = 50 deg
+    rect r31 corner=(651.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r30.bottom_right, r31.bottom_left) = 2 mm
+    constrain horizontal(r30.bottom_right, r31.bottom_left)
+    circle c31 center=(659.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c31.center, r31.bottom)
+    constrain hdistance(r31.bottom_left, c31.center) = 9 mm
+    arc a31 center=r31.top_left start=(663.3 mm, 11 mm) end=(657.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a31.center, a31.start) = 1.8 mm
+    constrain vertical(a31.center, a31.end)
+    line s31 start=r31.top_left end=(655.3 mm, 3 mm)
+    constrain distance(s31) = 5 mm
+    constrain angle(r31.bottom, s31) = 50 deg
+    rect r32 corner=(672.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r31.bottom_right, r32.bottom_left) = 2 mm
+    constrain horizontal(r31.bottom_right, r32.bottom_left)
+    circle c32 center=(680.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c32.center, r32.bottom)
+    constrain hdistance(r32.bottom_left, c32.center) = 9 mm
+    arc a32 center=r32.top_left start=(684.3 mm, 11 mm) end=(678.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a32.center, a32.start) = 1.8 mm
+    constrain vertical(a32.center, a32.end)
+    line s32 start=r32.top_left end=(676.3 mm, 3 mm)
+    constrain distance(s32) = 5 mm
+    constrain angle(r32.bottom, s32) = 50 deg
+    rect r33 corner=(693.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r32.bottom_right, r33.bottom_left) = 2 mm
+    constrain horizontal(r32.bottom_right, r33.bottom_left)
+    circle c33 center=(701.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c33.center, r33.bottom)
+    constrain hdistance(r33.bottom_left, c33.center) = 9 mm
+    arc a33 center=r33.top_left start=(705.3 mm, 11 mm) end=(699.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a33.center, a33.start) = 1.8 mm
+    constrain vertical(a33.center, a33.end)
+    line s33 start=r33.top_left end=(697.3 mm, 3 mm)
+    constrain distance(s33) = 5 mm
+    constrain angle(r33.bottom, s33) = 50 deg
+    rect r34 corner=(714.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r33.bottom_right, r34.bottom_left) = 2 mm
+    constrain horizontal(r33.bottom_right, r34.bottom_left)
+    circle c34 center=(722.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c34.center, r34.bottom)
+    constrain hdistance(r34.bottom_left, c34.center) = 9 mm
+    arc a34 center=r34.top_left start=(726.3 mm, 11 mm) end=(720.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a34.center, a34.start) = 1.8 mm
+    constrain vertical(a34.center, a34.end)
+    line s34 start=r34.top_left end=(718.3 mm, 3 mm)
+    constrain distance(s34) = 5 mm
+    constrain angle(r34.bottom, s34) = 50 deg
+    rect r35 corner=(735.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r34.bottom_right, r35.bottom_left) = 2 mm
+    constrain horizontal(r34.bottom_right, r35.bottom_left)
+    circle c35 center=(743.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c35.center, r35.bottom)
+    constrain hdistance(r35.bottom_left, c35.center) = 9 mm
+    arc a35 center=r35.top_left start=(747.3 mm, 11 mm) end=(741.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a35.center, a35.start) = 1.8 mm
+    constrain vertical(a35.center, a35.end)
+    line s35 start=r35.top_left end=(739.3 mm, 3 mm)
+    constrain distance(s35) = 5 mm
+    constrain angle(r35.bottom, s35) = 50 deg
+    rect r36 corner=(756.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r35.bottom_right, r36.bottom_left) = 2 mm
+    constrain horizontal(r35.bottom_right, r36.bottom_left)
+    circle c36 center=(764.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c36.center, r36.bottom)
+    constrain hdistance(r36.bottom_left, c36.center) = 9 mm
+    arc a36 center=r36.top_left start=(768.3 mm, 11 mm) end=(762.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a36.center, a36.start) = 1.8 mm
+    constrain vertical(a36.center, a36.end)
+    line s36 start=r36.top_left end=(760.3 mm, 3 mm)
+    constrain distance(s36) = 5 mm
+    constrain angle(r36.bottom, s36) = 50 deg
+    rect r37 corner=(777.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r36.bottom_right, r37.bottom_left) = 2 mm
+    constrain horizontal(r36.bottom_right, r37.bottom_left)
+    circle c37 center=(785.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c37.center, r37.bottom)
+    constrain hdistance(r37.bottom_left, c37.center) = 9 mm
+    arc a37 center=r37.top_left start=(789.3 mm, 11 mm) end=(783.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a37.center, a37.start) = 1.8 mm
+    constrain vertical(a37.center, a37.end)
+    line s37 start=r37.top_left end=(781.3 mm, 3 mm)
+    constrain distance(s37) = 5 mm
+    constrain angle(r37.bottom, s37) = 50 deg
+    rect r38 corner=(798.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r37.bottom_right, r38.bottom_left) = 2 mm
+    constrain horizontal(r37.bottom_right, r38.bottom_left)
+    circle c38 center=(806.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c38.center, r38.bottom)
+    constrain hdistance(r38.bottom_left, c38.center) = 9 mm
+    arc a38 center=r38.top_left start=(810.3 mm, 11 mm) end=(804.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a38.center, a38.start) = 1.8 mm
+    constrain vertical(a38.center, a38.end)
+    line s38 start=r38.top_left end=(802.3 mm, 3 mm)
+    constrain distance(s38) = 5 mm
+    constrain angle(r38.bottom, s38) = 50 deg
+    rect r39 corner=(819.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r38.bottom_right, r39.bottom_left) = 2 mm
+    constrain horizontal(r38.bottom_right, r39.bottom_left)
+    circle c39 center=(827.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c39.center, r39.bottom)
+    constrain hdistance(r39.bottom_left, c39.center) = 9 mm
+    arc a39 center=r39.top_left start=(831.3 mm, 11 mm) end=(825.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a39.center, a39.start) = 1.8 mm
+    constrain vertical(a39.center, a39.end)
+    line s39 start=r39.top_left end=(823.3 mm, 3 mm)
+    constrain distance(s39) = 5 mm
+    constrain angle(r39.bottom, s39) = 50 deg
+    rect r40 corner=(840.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r39.bottom_right, r40.bottom_left) = 2 mm
+    constrain horizontal(r39.bottom_right, r40.bottom_left)
+    circle c40 center=(848.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c40.center, r40.bottom)
+    constrain hdistance(r40.bottom_left, c40.center) = 9 mm
+    arc a40 center=r40.top_left start=(852.3 mm, 11 mm) end=(846.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a40.center, a40.start) = 1.8 mm
+    constrain vertical(a40.center, a40.end)
+    line s40 start=r40.top_left end=(844.3 mm, 3 mm)
+    constrain distance(s40) = 5 mm
+    constrain angle(r40.bottom, s40) = 50 deg
+    rect r41 corner=(861.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r40.bottom_right, r41.bottom_left) = 2 mm
+    constrain horizontal(r40.bottom_right, r41.bottom_left)
+    circle c41 center=(869.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c41.center, r41.bottom)
+    constrain hdistance(r41.bottom_left, c41.center) = 9 mm
+    arc a41 center=r41.top_left start=(873.3 mm, 11 mm) end=(867.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a41.center, a41.start) = 1.8 mm
+    constrain vertical(a41.center, a41.end)
+    line s41 start=r41.top_left end=(865.3 mm, 3 mm)
+    constrain distance(s41) = 5 mm
+    constrain angle(r41.bottom, s41) = 50 deg
+    rect r42 corner=(882.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r41.bottom_right, r42.bottom_left) = 2 mm
+    constrain horizontal(r41.bottom_right, r42.bottom_left)
+    circle c42 center=(890.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c42.center, r42.bottom)
+    constrain hdistance(r42.bottom_left, c42.center) = 9 mm
+    arc a42 center=r42.top_left start=(894.3 mm, 11 mm) end=(888.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a42.center, a42.start) = 1.8 mm
+    constrain vertical(a42.center, a42.end)
+    line s42 start=r42.top_left end=(886.3 mm, 3 mm)
+    constrain distance(s42) = 5 mm
+    constrain angle(r42.bottom, s42) = 50 deg
+    rect r43 corner=(903.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r42.bottom_right, r43.bottom_left) = 2 mm
+    constrain horizontal(r42.bottom_right, r43.bottom_left)
+    circle c43 center=(911.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c43.center, r43.bottom)
+    constrain hdistance(r43.bottom_left, c43.center) = 9 mm
+    arc a43 center=r43.top_left start=(915.3 mm, 11 mm) end=(909.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a43.center, a43.start) = 1.8 mm
+    constrain vertical(a43.center, a43.end)
+    line s43 start=r43.top_left end=(907.3 mm, 3 mm)
+    constrain distance(s43) = 5 mm
+    constrain angle(r43.bottom, s43) = 50 deg
+    rect r44 corner=(924.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r43.bottom_right, r44.bottom_left) = 2 mm
+    constrain horizontal(r43.bottom_right, r44.bottom_left)
+    circle c44 center=(932.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c44.center, r44.bottom)
+    constrain hdistance(r44.bottom_left, c44.center) = 9 mm
+    arc a44 center=r44.top_left start=(936.3 mm, 11 mm) end=(930.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a44.center, a44.start) = 1.8 mm
+    constrain vertical(a44.center, a44.end)
+    line s44 start=r44.top_left end=(928.3 mm, 3 mm)
+    constrain distance(s44) = 5 mm
+    constrain angle(r44.bottom, s44) = 50 deg
+    rect r45 corner=(945.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r44.bottom_right, r45.bottom_left) = 2 mm
+    constrain horizontal(r44.bottom_right, r45.bottom_left)
+    circle c45 center=(953.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c45.center, r45.bottom)
+    constrain hdistance(r45.bottom_left, c45.center) = 9 mm
+    arc a45 center=r45.top_left start=(957.3 mm, 11 mm) end=(951.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a45.center, a45.start) = 1.8 mm
+    constrain vertical(a45.center, a45.end)
+    line s45 start=r45.top_left end=(949.3 mm, 3 mm)
+    constrain distance(s45) = 5 mm
+    constrain angle(r45.bottom, s45) = 50 deg
+    rect r46 corner=(966.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r45.bottom_right, r46.bottom_left) = 2 mm
+    constrain horizontal(r45.bottom_right, r46.bottom_left)
+    circle c46 center=(974.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c46.center, r46.bottom)
+    constrain hdistance(r46.bottom_left, c46.center) = 9 mm
+    arc a46 center=r46.top_left start=(978.3 mm, 11 mm) end=(972.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a46.center, a46.start) = 1.8 mm
+    constrain vertical(a46.center, a46.end)
+    line s46 start=r46.top_left end=(970.3 mm, 3 mm)
+    constrain distance(s46) = 5 mm
+    constrain angle(r46.bottom, s46) = 50 deg
+    rect r47 corner=(987.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r46.bottom_right, r47.bottom_left) = 2 mm
+    constrain horizontal(r46.bottom_right, r47.bottom_left)
+    circle c47 center=(995.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c47.center, r47.bottom)
+    constrain hdistance(r47.bottom_left, c47.center) = 9 mm
+    arc a47 center=r47.top_left start=(999.3 mm, 11 mm) end=(993.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a47.center, a47.start) = 1.8 mm
+    constrain vertical(a47.center, a47.end)
+    line s47 start=r47.top_left end=(991.3 mm, 3 mm)
+    constrain distance(s47) = 5 mm
+    constrain angle(r47.bottom, s47) = 50 deg
+    rect r48 corner=(1008.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r47.bottom_right, r48.bottom_left) = 2 mm
+    constrain horizontal(r47.bottom_right, r48.bottom_left)
+    circle c48 center=(1016.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c48.center, r48.bottom)
+    constrain hdistance(r48.bottom_left, c48.center) = 9 mm
+    arc a48 center=r48.top_left start=(1020.3 mm, 11 mm) end=(1014.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a48.center, a48.start) = 1.8 mm
+    constrain vertical(a48.center, a48.end)
+    line s48 start=r48.top_left end=(1012.3 mm, 3 mm)
+    constrain distance(s48) = 5 mm
+    constrain angle(r48.bottom, s48) = 50 deg
+    rect r49 corner=(1029.3 mm, 0.2 mm) w=19 mm h=10 mm
+    constrain hdistance(r48.bottom_right, r49.bottom_left) = 2 mm
+    constrain horizontal(r48.bottom_right, r49.bottom_left)
+    circle c49 center=(1037.3 mm, 1 mm) r=2 mm
+    constrain on_curve(c49.center, r49.bottom)
+    constrain hdistance(r49.bottom_left, c49.center) = 9 mm
+    arc a49 center=r49.top_left start=(1041.3 mm, 11 mm) end=(1035.3 mm, 11 mm) r=3 mm
+    constrain hdistance(a49.center, a49.start) = 1.8 mm
+    constrain vertical(a49.center, a49.end)
+    line s49 start=r49.top_left end=(1033.3 mm, 3 mm)
+    constrain distance(s49) = 5 mm
+    constrain angle(r49.bottom, s49) = 50 deg
+  }
+}

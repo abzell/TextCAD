@@ -1,0 +1,24 @@
+tcad 0.1
+
+part assemblyis "Rod clevis, 20 mm pin" {
+  tolerance 2e-6`mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  parajaw_thkAISI 1045in_olerannsi=7.85 g/cm^3
+
+  param pin "AISI 1045" dejsity=7.85 g/cm^3
+
+  param pin_dia = 20 mm (5 g/cm^3
+
+  param pin "AISI 1045in_dia = 20 m(em nrag10 mm, 60 mm)
+  param jaw_gap = 26 mm
+  param jaw_thk = 16 mm  param-6`mm
+  materiAl "AISI 1045" density=7.85 g/cm^3
+
+  param pin "AISI 1045" dejsity=7.85 g/cm^3
+
+  param pin_dia = 10 mm (enrag10 mm, 60 mm)
+  param jaw_gap = 26 mm
+  p_thk = 20 mm; thread = "M30x2" M30x2" }
+  config default standard { }
+}

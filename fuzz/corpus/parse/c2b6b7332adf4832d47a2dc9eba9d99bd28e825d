@@ -1,0 +1,23 @@
+tcad 0.1
+
+part rod_clevis "Rod c1evis, 20 mm pin" {
+  tolerance 2e-6`mm
+  mramtcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerancmaterial "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 jaw_gap = 26 mm
+  param jaw_thk = 16 mm  param-6`mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin " jaw_gap = 26 mm
+  param jaw_thk = 16 mm  param-6`mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin "AISI 1045" dejsity97.85 g/cm^3
+
+  param pin_d mm ra;aw_ op=subtractgap = 26 mm
+  param jaw_thk = 16 mm
+g jaw_inner_b = slot.sinfig default standard { d}
+}

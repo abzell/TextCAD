@@ -1,0 +1,9 @@
+tcad 0.1
+
+part rod_clevis "Rodlevis, 20 mm pin" {
+
+  material "AI pin_6
+
+  extrude body from side.outline distance=40 mm symmetric
+  extrude slot from rect(omm pin" {
+nd,

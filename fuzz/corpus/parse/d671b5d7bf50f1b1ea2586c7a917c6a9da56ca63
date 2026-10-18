@@ -1,0 +1,31 @@
+tcad 0.1
+
+parw_thk
+   circle pin center=(body_len - 20 mm, 0 mm) d=pin_dia
+    arc nose through=outline.top_right, outline.bottom_right tangent_to=outline.right
+    constrain concentric(nose, pin)
+  }
+
+  extrude body from side.outline distance=40 mm symmetric
+  extrude slot from rect(on=body.cap_end, w=jaw_gap, h=40 mm) depth=45 mm op=subtract
+
+  tag jaw_inner_a = slot.side(+Y)
+  tag jaw_inner_b = slot.side(-Y)
+
+  hole pi + 2 * jaw_thk
+through=outline.top_right, outline.bottom_right tangent_to=outline.right
+    constrain concentric(nose, pin)
+  }
+
+  extrude body from side.outline distance=40 mm symmetric
+  extrude slot from rect(on=body.cap_end, w=jaw_gap, h=40 mm) depth=45 mpth=45 mm op=subtract
+
+ )tag jaw_inslot.side(+Y)
+  tag jaw_inner_b = slot.side(-Y)
+
+  hole pin_bore on=jaw_inner_a ael_to=axis.Y, created_by=slot) r=2 mm
+  chamfer bore_edges edges=[pin_bore.rim(jaw_inner_a), pin_bore.rim(jawody_len - 20 mm, 0 mm) d=pin_dia
+    arconcentric(nose, pin)
+  }
+
+  extrude body from side.outline distance=40 mm symmet

@@ -1,0 +1,10 @@
+= slot.side(-Y)
+
+  holrude slot from rect(on=body.cap_end, w=jaw_gap, h=39p_end, w=jaw_gap, h=39 mm) depth=45 mm or=subtract
+
+  pmi jaw_inner_a = slot.side(+Y)
+  tag ja=jaw_gap, h=39p_end, w=jaw_gap, h=39 mm) depth=45 mm or=subtract
+
+  pmi jaw_innplmei sd=pin_dia end=through_all
+  hole rod_thread on=body.cap_start at=origin
+}

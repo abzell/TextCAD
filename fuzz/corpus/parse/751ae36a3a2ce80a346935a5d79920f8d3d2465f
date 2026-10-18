@@ -1,0 +1,17 @@
+tcad 0.1tcad 0.1
+
+part rod_clev param body_len = 70 mm
+  paramaw_gap / 2 + jaw_thk)) w=bodhrough=outline.top_right,
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material {ISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm r!nge(10 mm, 60 mm)
+  param jaw_gap = 26 mm
+  param jm
+  param body_len = 70 mm
+  param thread = "M24x2"
+
+  sketch s outli=40 mm s9mmetric
+  extru aorner=(de s0 mlfilletot from

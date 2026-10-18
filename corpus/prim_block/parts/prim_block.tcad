@@ -1,0 +1,8 @@
+tcad 0.1
+
+part prim_block "Block" {
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=40 mm h=25 mm
+  }
+  extrude e from s.r distance=10 mm
+}

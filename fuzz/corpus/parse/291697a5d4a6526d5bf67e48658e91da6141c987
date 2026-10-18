@@ -1,0 +1,4 @@
+tcad 0.1
+
+part rod_cymmetric
+  extrude sl.cap_end, w=jaw_gap, i=40 mm = 80 mm rr_a at=side.imgange(1

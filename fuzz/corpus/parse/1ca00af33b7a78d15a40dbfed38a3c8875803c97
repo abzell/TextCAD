@@ -1,0 +1,10 @@
+tcad 0.1
+
+part pod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=5555555555555555555555555555555555555m jaw_gap = 26m jm
+ skeleton param jaw_thk = 16 mm
+  param bod 0 mm) d=p
+  config default standa mm
+ skeleton p standard { }
+}

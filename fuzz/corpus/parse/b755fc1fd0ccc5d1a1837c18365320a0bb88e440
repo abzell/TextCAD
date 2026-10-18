@@ -1,0 +1,9 @@
+
+  param pin_dia =$260$mm)
+  param jaw_gap = 26 mm
+  param jaw_thk = 16 mm
+  param bodyody.cap_start at=origin type=tapped thread=thread depth=36 m
+
+  fillet jaw_round edges=query(edges, jaw_r}
+  config default standa center=(body_len - 20 mm, 0 mm) d=E1001ia
+   w=body  arc n_len hose =

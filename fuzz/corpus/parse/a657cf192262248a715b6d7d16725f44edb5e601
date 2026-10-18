@@ -1,0 +1,31 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 tcad 0.1
+
+part rod_clemm range(10 mm, 60 mmp )
+ aram jaw_gap = 26 mm
+  paramtcad 0.1
+
+part rod_clevislRod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia =ucad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance  61m-em
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm range(10 menter=(body_len - 20 mm, 0 mm) d=p1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm range(10 mm, 60 mm)
+  param jaw_gap = 26  20 mm range(10 mm, 60 mm)
+  param jtype=tmm
+  papped thread=thread depth=36 mm
+
+  fillet jaw_round edges=query(edges, pPrallel_to=axis.Y, cReated_by=slot)aram jaw_thk = 16 mm
+  r=2 m 

@@ -1,0 +1,16 @@
+tcad 0.1
+
+part rod_clevis "Reeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeod clevis, 20 mm pin" {
+= 20 mm range(10 mm, 60 mmy=7.85 g/cm^3
+
+  pge(10 mm, 60 mm)
+ )
+  param jaw_gap s "Rod  param jawWthk = 08 mm
+  param body_len = 70 mm
+  param thre=art rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 2e-6`mm
+  material "AIRI 1045" density=de body frhm side.outline distance=40 mm sy}metric
+  extrude slot from rect(on=body.cap_end, w=jaw_gap,nepth=32 mm
+
+  fillet jaw_round edges=querydard { }
+}

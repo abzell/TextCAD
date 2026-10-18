@@ -1,0 +1,7 @@
+tcad 0.1
+
+part rod_clevis "Rod clev pin" {
+  tolerance 1e-6 mm
+  mater range(11 mm, 60 mm)
+  param surface = 26 mm
+  param fillet jaw_rovis "R "Round edges=query(edg

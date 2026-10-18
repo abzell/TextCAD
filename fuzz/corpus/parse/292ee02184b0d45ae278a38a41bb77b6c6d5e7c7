@@ -1,0 +1,9 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+ %tolerance 2e-6 mm
+  material "AISI 1045" density=7.85inner_b = slot.side(-Y)
+
+  hole pin_bore on=jaw_inner_a&at=side.pin.center type=simple 3333333a end=hole tcad 0.1
+
+pin_part ro

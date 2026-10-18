@@ -1,0 +1,14 @@
+tcad 0.1
+
+part rod_evis "Rod clevis, 20
+parn" {
+  tolerantcad 0.1
+
+part rod_cet rod_ce 2e1111111111111111111111111.1111111vis "Rod clevis, 20
+parn" {axis
+  tolerantcad 0.1
+
+rtar pod_cet rod_ce 2e1111111111111111111111111111111111111111111111111111111111111-6`mm
+  mater11111111111111111111111111111111-6`mm
+  mater) 11111-6`mm
+  mater) s "AI

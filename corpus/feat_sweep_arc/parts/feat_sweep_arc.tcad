@@ -1,0 +1,11 @@
+tcad 0.1
+
+part feat_sweep_arc "Pipe bend" {
+  sketch profile_sk on plane.YZ {
+    circle c center=(0 mm, 0 mm) r=6 mm
+  }
+  sketch path on plane.XY {
+    arc a center=(0 mm, 40 mm) start=(0 mm, 0 mm) end=(40 mm, 40 mm)
+  }
+  sweep elbow from profile_sk.c path=path.a
+}

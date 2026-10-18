@@ -1,0 +1,15 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  p  param body_len = 70 mm
+  param thread = "M24x2"
+by=slot) r=t outline corner=(0 mm, -(jvis "Rod clevis, 20 mm pin" {
+  tolerance 2e-6`mm
+  material "aw_gAISI 1045" apdensity=7.is, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045= "M30x2" }10 mm, 60 mm)
+  param 
+  config 

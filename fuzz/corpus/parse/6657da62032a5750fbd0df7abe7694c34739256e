@@ -1,0 +1,13 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mmend, w= fillet jaw_round edges=query(edges, parallelnnim(jaw_inneerfillet_b)] d=0 mm
+
+  configvey ha { prim(jaw_inner_b)] =1md
+ m
+  configvey ha { pin_dia = 25 mm; jaefault standard llet_b)] d=0 mm
+
+  configvey ha { prim(jaw_inner_b)] =1md
+ m
+  configvey ha { pin_dia = 25 mm; jaefault standard { }
+}

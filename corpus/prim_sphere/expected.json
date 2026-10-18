@@ -1,0 +1,26 @@
+{
+  "note": "A half disk revolved: a sphere from an arc and a line.",
+  "volume_mm3": 33510.32163829113,
+  "area_mm2": 5026.548245743669,
+  "center_of_mass_mm": [
+    0,
+    0,
+    0
+  ],
+  "bbox_min_mm": [
+    -20,
+    -20,
+    -20
+  ],
+  "bbox_max_mm": [
+    20,
+    20,
+    20
+  ],
+  "topology": {
+    "solids": 1,
+    "faces": 1,
+    "edges": 3,
+    "vertices": 2
+  }
+}

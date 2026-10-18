@@ -1,0 +1,17 @@
+[package]
+name = "tcad-expr"
+description = "Expression AST, unit algebra and evaluation."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+tcad-diag.workspace = true
+# Pure-Rust math so trigonometric results are bit-identical on every target (determinism tier T1).
+libm = "0.2"
+
+[lints]
+workspace = true

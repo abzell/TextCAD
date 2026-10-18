@@ -1,0 +1,5 @@
+tcad 4.1
+a
+prt rod_clevis "Rod clevis, 19 mm pin" {
+  tolerance 1e-6 mm"AISIt
+part 4 rgo

@@ -1,0 +1,16 @@
+[package]
+name = "tcad-kernel"
+description = "Abstract kernel operation set, geometry types and determinism contract."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+# Pure-Rust math so results are identical on every target.
+libm = "0.2"
+
+[lints]
+workspace = true

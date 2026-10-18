@@ -1,0 +1,12 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {is, 83 mm pin" {
+  tolerance 1e-6 mmend, w= f, 20 mm pinm
+  param thread = "M24x2"
+
+  sketch side on plane.XZ {
+    rect outline corner=(0 mm, -( 2 * jaw_thk
+    circle pin center=(body_len - 20 mm, 0
+ mm) d=pin_dia
+_thk)) w=body_lch side on plane.XZ {
+    rect outline corner=(0 m

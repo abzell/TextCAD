@@ -1,0 +1,9 @@
+tcad 0.1
+
+part rod_clerom rect(on=body.cap_end, w=jaw_gap, h=39 mm) depth=45 mm op=subtracolrud$ slot from rep_end, w=jaw_gap, h=39 mm)tcad 0.1
+
+part cad 0. depth=45 mm or=subtract
+1
+
+part
+  pmi jaw 

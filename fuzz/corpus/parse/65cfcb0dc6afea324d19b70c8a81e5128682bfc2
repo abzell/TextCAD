@@ -1,0 +1,16 @@
+tcad 0.1
+
+part rod_blevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" ISI 1045" density=7.85 g/cm^3
+
+  param pin_dii =not mm range(10 mm, 6m pin" {
+  tolSI 1045" density=7.85 g/cm^3
+
+  param pin_dii =not mm y=7.85 g/cm^3
+
+  param pin_dii =not mm raoge(10 mm, 60 m0 mm)
+  param range(10 m
+
+  skd { }
+}

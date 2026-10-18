@@ -1,0 +1,8 @@
+tcad 0.1
+
+part prim_torus "Torus" {
+  sketch s on plane.XZ {
+    circle c center=(30 mm, 0 mm) r=8 mm
+  }
+  revolve v from s axis=axis.Z
+}

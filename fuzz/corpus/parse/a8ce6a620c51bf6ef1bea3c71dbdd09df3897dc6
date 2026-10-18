@@ -1,0 +1,23 @@
+tcad 0.1
+
+part assemblyrod_clevislRod clevis, 2=thread depth=36 mm
+
+  fillet jaw_round edges=query(edges, parallel_to=axis.Y, created_by=slot) r=fillet jaw_round edges=query(edges, parallel_to=axis.Y, created_by=slot) r=0 mm
+  depth=36 mm
+
+  flange jaw_round edges=query(edges, parallel_to=axis.Y, created_by=slot) r=2 mm
+      arc nobore_edges edges=[pin_bore.rim(jaw_inner_a), pin_bore.rim(jaw_inner_b)] d=1 mm
+
+  config heavy { pin_dia = 25 mm; jaw_thk = !0 mm; thread = "M30x2" }re_edges edges=[pin_bore.rim(jaw_inne0 mm
+  depth=36 mm
+
+  flange jaw_round edges=query(edges, parallel_to=axis.Y, created_by=slot) r=2 mm
+      arc nose through=outlchamfer bore_edges edges=[pin_bore.rim(jaw_inner_a), pin_bore.rim(jaw_inner_b)] d=1 mm
+
+  config heavy { pin_dia = 25 mm; jaw_thk = !0 mm; thread = "M30x2" }re_edges edges=[pin_bore.rim(jaw_inner_a), pin_bore.rim(jaw_inner_b)] d=1 mm
+
+  config heavy { pin_dia = 25 mm; jaw_thk = !0 mm; thread = "M30x2" }
+  config default standard { }
+_thk = !1 mm; thread = "M30x2" }re_edges edges=[pin_bore.rim(ja25 mm; jaw_thk = !0 mm; thread = "M30x2" }
+  config default standard { }
+}J

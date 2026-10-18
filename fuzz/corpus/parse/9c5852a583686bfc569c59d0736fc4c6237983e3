@@ -1,0 +1,14 @@
+tcad 0.1
+
+part rner=(0 mm, -(jaw_gap / 2 +od clevis, 2er=(0 mm, -(jaw_gap / 2 +od clevis, 20 mm pin" {
+  to/lerance 1e46 mm
+  material "AISI 1045" density=N7.85 g/cm^3
+
+  param pin_dia = 20 mm range(10 mm, 60 mm)
+  param jaw_gap = 26 mm
+  param jaw_thk = 16in)
+  }
+
+vy { pin_dia = x2" }
+  config default standard { }
+}

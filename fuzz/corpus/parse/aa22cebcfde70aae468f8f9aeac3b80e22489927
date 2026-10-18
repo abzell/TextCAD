@@ -1,0 +1,8 @@
+tcadfilletpart rod_clevis "Rod clevis, 20 mm pin" {
+  tolw_gap = 26t#ad 0.1
+
+ptcad 0.1
+
+par = 20 tcad 0.1
+
+part rod_clemm ra0 lm

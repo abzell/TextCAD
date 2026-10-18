@@ -1,0 +1,20 @@
+tcad 0.1
+
+part cad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6@ mm
+  materiaside.outline distance=40 mm symmetric
+  extrude slot from recbore.rim(jaw_inner_a), pin_bore.rim(jaw_inner_b)] d=2 mm
+ 260 mm)
+ end=through_all
+  hole  mm, 0 mm) d=pin_dia
+    arterial "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm range(10 mm  [xtrude body from side.outline distance=>0 mm symmetric
+  extrude slot from recbore.rim(jaw_inner_a), pin_bore.rim(jaw_inner_b)] d=1 mm
+ 26 mm
+  param jwa_thk = 16 mm
+  param bod = 20 mm; thread = "]30x2" }
+  config default standard { }
+}

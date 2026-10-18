@@ -1,0 +1,7 @@
+tcad 0.1
+
+part rod_evis "Rod clev, 20 mm pin" {
+  tolerantcad 0.1
+
+part rod_ce 2e-6`mm
+  material "AI

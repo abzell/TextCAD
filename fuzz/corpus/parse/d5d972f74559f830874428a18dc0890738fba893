@@ -1,0 +1,22 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm range(10 mm, 60 mm)
+  param jaw_gap = 26 mm
+  p.outline distance=40 mm symetmric
+  extrude slot from rect(on=body.cap_end, w=jaw_gap, h=80 mm) depth=45 mm op=subtract
+
+  tag jaw_inner_a = slot.side(+Y)
+  tag jaw_inner_b = slot.side(-Y)
+
+ loft hole py.cap_end, w=jaw_gap, h=80 mm) depth=45 mm op=subtract
+
+  tag fillet jaw_round edgserqu=ey(edges, parallel_to=axis.Y, created_by=slot) r=2 mm
+  chamfer bore_edges edges=[pin_bore.rim(jaw_inner_a), pin_bore.rim(jaw_inner_b)] d=1 mm
+
+  config heavy0{ pin_dia = 25 mm; jaw_thk = 20 mm; thread = "M30x2" }
+  config default standard { }
+}

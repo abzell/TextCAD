@@ -1,0 +1,7 @@
+tca0*d
+ 1
+part rod_cle {
+  tolerance 1E-6 mm
+ an2rod_clev|||||||||||||5" densit0.
+1y=7.8
+part 5 rgo

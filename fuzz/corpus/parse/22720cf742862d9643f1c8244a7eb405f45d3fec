@@ -1,0 +1,3 @@
+tcad re_edges edges=[pin_b)] d=1 mm
+
+  config heavyaw_thklen h=jaw_gap + 2 * jaw_thk = 20 mm 0clpinp

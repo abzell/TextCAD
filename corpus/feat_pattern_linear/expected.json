@@ -1,0 +1,27 @@
+{
+  "note": "Five instances of a hole, instance 3 skipped.",
+  "volume_mm3": 9197.876140340506,
+  "area_mm2": 3981.592894744621,
+  "center_of_mass_mm": [
+    30.218596039740007,
+    10.000000000000002,
+    3.999999999999999
+  ],
+  "bbox_min_mm": [
+    0,
+    0,
+    0
+  ],
+  "bbox_max_mm": [
+    60,
+    20,
+    8
+  ],
+  "topology": {
+    "solids": 1
+  },
+  "baseline": [
+    "area_mm2",
+    "center_of_mass_mm"
+  ]
+}

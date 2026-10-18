@@ -1,0 +1,47 @@
+[workspace]
+resolver = "3"
+members = [
+  "crates/tcad-diag",
+  "crates/tcad-syntax",
+  "crates/tcad-model",
+  "crates/tcad-build",
+  "crates/tcad-expr",
+  "crates/tcad-solver",
+  "crates/tcad-naming",
+  "crates/tcad-kernel",
+  "crates/tcad-occt",
+  "crates/tcad-cache",
+  "crates/tcad-io",
+  "crates/tcad-cli",
+  "crates/tcad-lsp",
+  "crates/tcad-mcp",
+]
+
+[workspace.package]
+version = "0.0.1"
+edition = "2024"
+rust-version = "1.97"
+license = "Apache-2.0"
+repository = "https://github.com/abzell/TextCAD"
+authors = ["The TextCAD authors"]
+
+[workspace.dependencies]
+tcad-diag = { path = "crates/tcad-diag", version = "0.0.1" }
+tcad-syntax = { path = "crates/tcad-syntax", version = "0.0.1" }
+tcad-expr = { path = "crates/tcad-expr", version = "0.0.1" }
+tcad-solver = { path = "crates/tcad-solver", version = "0.0.1" }
+tcad-kernel = { path = "crates/tcad-kernel", version = "0.0.1" }
+tcad-io = { path = "crates/tcad-io", version = "0.0.1" }
+tcad-cli = { path = "crates/tcad-cli", version = "0.0.1" }
+tcad-naming = { path = "crates/tcad-naming", version = "0.0.1" }
+tcad-build = { path = "crates/tcad-build", version = "0.0.1" }
+tcad-cache = { path = "crates/tcad-cache", version = "0.0.1" }
+tcad-occt = { path = "crates/tcad-occt", version = "0.0.1" }
+tcad-model = { path = "crates/tcad-model", version = "0.0.1" }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }

@@ -1,0 +1,30 @@
+{
+  "note": "A radius shrinking from 10 mm to 5 mm over a quarter circle of radius 50: volume = pi L (r0^2 + r0 r1 + r1^2) / 3.",
+  "volume_mm3": 14393.174549186533,
+  "area_mm2": 4101.388667185739,
+  "center_of_mass_mm": [
+    26.28139515602942,
+    12.402037636869004,
+    4.1664526232136175e-16
+  ],
+  "bbox_min_mm": [
+    -1.0000003552713678e-07,
+    -10.000000100000024,
+    -10.00000009697406
+  ],
+  "bbox_max_mm": [
+    55.091829829674914,
+    50.00000010000003,
+    10.000000096974057
+  ],
+  "topology": {
+    "solids": 1
+  },
+  "baseline": [
+    "volume_mm3",
+    "area_mm2",
+    "center_of_mass_mm",
+    "bbox_min_mm",
+    "bbox_max_mm"
+  ]
+}

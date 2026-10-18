@@ -1,0 +1,6 @@
+tcad 0.1
+
+s, 20 mm pin" {
+  molerance 1e-6 mm
+  mat y_len = 7` mm
+  p(ram thre a=d M"24x2erial "AISI [104nce 1e

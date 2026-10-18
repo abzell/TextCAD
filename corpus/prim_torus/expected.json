@@ -1,0 +1,26 @@
+{
+  "note": "A circle revolved about an axis that does not touch it.",
+  "volume_mm3": 37899.280900183134,
+  "area_mm2": 9474.820225045783,
+  "center_of_mass_mm": [
+    0,
+    0,
+    0
+  ],
+  "bbox_min_mm": [
+    -38,
+    -38,
+    -8
+  ],
+  "bbox_max_mm": [
+    38,
+    38,
+    8
+  ],
+  "topology": {
+    "solids": 1,
+    "faces": 1,
+    "edges": 2,
+    "vertices": 1
+  }
+}

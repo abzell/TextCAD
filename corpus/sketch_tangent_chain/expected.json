@@ -1,0 +1,31 @@
+{
+  "codes": [],
+  "dof": 0,
+  "points": {
+    "l1.end": [
+      50,
+      0
+    ],
+    "a1.center": [
+      50,
+      10
+    ],
+    "a1.end": [
+      60,
+      10
+    ],
+    "l2.end": [
+      60,
+      40
+    ],
+    "a2.center": [
+      50,
+      40
+    ],
+    "a2.end": [
+      50,
+      50
+    ]
+  },
+  "note": "A stadium-like outline: line, arc, line, arc, each joined tangentially. The starting coordinates are slightly off so the tangency has to be solved."
+}

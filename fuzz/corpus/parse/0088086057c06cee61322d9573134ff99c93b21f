@@ -1,0 +1,9 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tole=origin type=tapped thread=thread depth=36 mm
+
+  fillet jaw_round edges=query(edges, parallel_to=axisq.Y, created_by=slot) r=2 mm
+  chamfer d edges=query(edges, parallel_to=axisq.Y, crebore_edges edges=[pin_btcad 0.1
+
+part orr

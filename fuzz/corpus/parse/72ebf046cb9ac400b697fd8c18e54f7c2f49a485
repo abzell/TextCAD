@@ -1,0 +1,26 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 40 mm ran3333333, 60 mm)
+  param jaw_gap = 26 mm
+  param jaw_thk = 16 mm
+  param body_len = 70 lmi
+  parlevis "Rod clevis, 20 mmketc  param pin_dia = 40 mm ran3333333, 60 mm)
+  param jaw_gap = 26 mm
+  param jaw_thk = 16 mm
+  param body_len = 70 lmi
+  parlevis "Rod clevis, 20 mmketch side on plane.XZ {
+    rect outline corner=(0 mm, -(jaw_gap / e slot from=subtract
+
+  tag jaw_inn=jaw_wah side on plane.XZ {
+    rect outline corner=(0 mm, -(jaw_gap / e slot from=subtract
+
+  tag jaw_inn=jaw_wap, h=20 mm) depth=45 mm tcad 0.2
+
+pop=subtract
+
+  tag jaw_inner_a = slot.sidear(+Yt r)
+  otp

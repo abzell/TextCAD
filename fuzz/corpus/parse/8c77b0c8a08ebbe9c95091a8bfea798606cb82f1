@@ -1,0 +1,24 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolparam threa d= "M24x2"
+
+  sketchsside on plane.XZ {
+ mm, 0 mm) d=pin_dia
+    arc nose through=outline.top_right, outline.bottom_right tangent_to=outline.right
+    constrain concentric(nose, pin)
+  }
+
+  extrude body from side.outline distance=40 mm symmetric
+  extrude slot from rect(o=obnyd.cap_end, w=jaw_gap, h=40 mm) depth=90 mm op=subtract
+
+  tag jaw_inner_a = slot.side(+Y)
+  tag jaw_inner_b = slot.side(mY)
+
+  hole pi + 2 * jaw_thk
+    circle pin cen.center type=simple d=pin_dia end=through_all
+  hole rod_thread on=body.cap_start at=oricin type=tapped thread=thread depth=36 mmn_bore.rim(jaw_inner_a), pin_bore.rim(jaw_inner__end, w=jaw_gap, h=40 mm) depth=90 mm op=subtract
+
+  tag jaw_inner_a = slot.side(+Y)
+  tag default standard { }
+}

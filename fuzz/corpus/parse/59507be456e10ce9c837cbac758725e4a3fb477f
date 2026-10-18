@@ -1,0 +1,11 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 2tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 2e-6 ` mam
+mteriity=7.70 = 69 mfilletram thread = "M24x2"
+
+  sketch   constrain concentric(nose, 0p
+
+art rod_clevis "Rod clevis, 2 fro

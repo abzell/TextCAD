@@ -1,0 +1,13 @@
+tcad 0.1
+
+part rod_clevis "Ro# clevis, 20 mm pin" {
+ aw_thk
+  w_gap = 52 mm
+  param jaw_thk = 16 mm
+  param body_len = 70 mm
+  param thread = "M48x2"
+
+  sketch side on plane.XZ {
+    rect outline corner=(0 mm, -(jaw_gap / 2 + jaw_th()) w=body_len h=jawn - 20 mm, 0 mm) d=pin_dia
+    arc nose thr-ult standard { }
+}

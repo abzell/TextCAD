@@ -1,0 +1,19 @@
+{
+  "codes": [],
+  "entities": {
+    "control": {
+      "dof": 6
+    },
+    "fit": {
+      "dof": 4
+    },
+    "loop": {
+      "dof": 6
+    }
+  },
+  "note": "Control-point and interpolated splines; their points can be referenced (control.p3) and constrained. Points of a spline are ordinary variables.",
+  "dof": 16,
+  "info": [
+    "I4201"
+  ]
+}

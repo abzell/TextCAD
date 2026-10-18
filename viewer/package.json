@@ -1,0 +1,19 @@
+{
+  "name": "textcad-viewer",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Browser viewer for TextCAD parts: feature tree, source and 3D view linked both ways.",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "node build.mjs",
+    "check": "tsc --noEmit",
+    "test": "node tests/viewer.test.mjs"
+  },
+  "devDependencies": {
+    "@types/three": "0.160.0",
+    "esbuild": "0.25.0",
+    "playwright-core": "1.56.1",
+    "three": "0.160.0",
+    "typescript": "5.6.3"
+  }
+}

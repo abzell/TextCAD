@@ -1,0 +1,182 @@
+{
+  "note": "A hole and its mirror image, and four chamfers that name the top face with the long sides and with both hole walls. Swept width and chamfer size must keep every name.",
+  "volume_mm3": 31269.262602319308,
+  "area_mm2": 8366.651954462053,
+  "center_of_mass_mm": [
+    9.671062352364795e-16,
+    14.999999999999998,
+    5.92279072023957
+  ],
+  "bbox_min_mm": [
+    -45,
+    0,
+    0
+  ],
+  "bbox_max_mm": [
+    45,
+    30,
+    12
+  ],
+  "topology": {
+    "solids": 1
+  },
+  "baseline": [
+    "area_mm2",
+    "center_of_mass_mm"
+  ],
+  "sweeps": [
+    {
+      "set": {
+        "w": "60 mm",
+        "c": "1 mm"
+      },
+      "volume_mm3": 20840.472035800674,
+      "bbox_min_mm": [
+        -30.0,
+        0,
+        0
+      ],
+      "bbox_max_mm": [
+        30.0,
+        30,
+        12
+      ]
+    },
+    {
+      "set": {
+        "w": "60 mm",
+        "c": "2 mm"
+      },
+      "volume_mm3": 20589.262602319308,
+      "bbox_min_mm": [
+        -30.0,
+        0,
+        0
+      ],
+      "bbox_max_mm": [
+        30.0,
+        30,
+        12
+      ]
+    },
+    {
+      "set": {
+        "w": "60 mm",
+        "c": "3 mm"
+      },
+      "volume_mm3": 20155.22131576614,
+      "bbox_min_mm": [
+        -30.0,
+        0,
+        0
+      ],
+      "bbox_max_mm": [
+        30.0,
+        30,
+        12
+      ]
+    },
+    {
+      "set": {
+        "w": "90 mm",
+        "c": "1 mm"
+      },
+      "volume_mm3": 31610.472035800674,
+      "bbox_min_mm": [
+        -45.0,
+        0,
+        0
+      ],
+      "bbox_max_mm": [
+        45.0,
+        30,
+        12
+      ]
+    },
+    {
+      "set": {
+        "w": "90 mm",
+        "c": "2 mm"
+      },
+      "volume_mm3": 31269.262602319308,
+      "bbox_min_mm": [
+        -45.0,
+        0,
+        0
+      ],
+      "bbox_max_mm": [
+        45.0,
+        30,
+        12
+      ]
+    },
+    {
+      "set": {
+        "w": "90 mm",
+        "c": "3 mm"
+      },
+      "volume_mm3": 30685.22131576614,
+      "bbox_min_mm": [
+        -45.0,
+        0,
+        0
+      ],
+      "bbox_max_mm": [
+        45.0,
+        30,
+        12
+      ]
+    },
+    {
+      "set": {
+        "w": "140 mm",
+        "c": "1 mm"
+      },
+      "volume_mm3": 49560.472035800674,
+      "bbox_min_mm": [
+        -70.0,
+        0,
+        0
+      ],
+      "bbox_max_mm": [
+        70.0,
+        30,
+        12
+      ]
+    },
+    {
+      "set": {
+        "w": "140 mm",
+        "c": "2 mm"
+      },
+      "volume_mm3": 49069.2626023193,
+      "bbox_min_mm": [
+        -70.0,
+        0,
+        0
+      ],
+      "bbox_max_mm": [
+        70.0,
+        30,
+        12
+      ]
+    },
+    {
+      "set": {
+        "w": "140 mm",
+        "c": "3 mm"
+      },
+      "volume_mm3": 48235.221315766146,
+      "bbox_min_mm": [
+        -70.0,
+        0,
+        0
+      ],
+      "bbox_max_mm": [
+        70.0,
+        30,
+        12
+      ]
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+tce-6 m chamfer bore_edges edges=[pin_jore.rim(jaw_inner_a), pin_bore.rim(jaw_inner_b)] d=```````````````````````````````````````````````````````````````````````````````````YZ```1 mm
+
+  config heavtcad 0.1
+
+part rod_clevis "Ry { pin_dia = 25 mm; jawo

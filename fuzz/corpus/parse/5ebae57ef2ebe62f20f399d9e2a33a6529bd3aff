@@ -1,0 +1,35 @@
+tcad 0.1
+part rod_clevistcad 0.1
+
+part 2
+part rod_cce 1e-6 mm
+  material "AIis "Rod clSI!1045" density=7.85 g/cm^3
+
+  param pin_dia =$20 mm range(10 mm, 60 mm)
+  param jaw_gap = 26 mm
+  parumrod_clevis  "Rod clevis, 20 mm pin concentric(nose, pin)
+  }
+
+  extrude bodyttom_right tangent_to=tag jaw_inner_b =outline.righ
+
+part rod_clevistcad 0.1
+
+pavis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AIis "Rod clSI!1045" density=7.85 g/cm^3
+
+  param pin_dia =$20 mm range(10 mm, 60 mm)
+  param jaw_gap = 26 mm
+  parumrod_clevis  "Rod clevis, 20 mm pin concentric(nose, pin)
+  }
+
+  extrude bodyttom_right tangent_to=tag jaw_inner_b =outline.righ
+
+part rod_clevistcad 0.1
+
+part 2
+part rod_ctrt 2
+part rod_ct
+  tcad 0  const.1
+
+parain concerntt

@@ -1,0 +1,18 @@
+tcad 0.1
+
+part rod_clevis "in cen.center typetcad 0.1
+
+part rod_clevis "Rod clevis, 20 =simple d1
+
+part rod_clevis "in cen.center typetcadd 0.1
+
+part rod_clevis "in cen.center typetcad 0.1
+
+part rod_clevis "Rod clevis, 20 =simple d1
+
+part rod_clevilevis "in cen.center typetcadd 0.1
+
+part rod_clevis "in cen.center typetcad 0.1
+
+part rod_cevis "R=pin_mm pin" {
+  tolerance 1e-6iaeri e

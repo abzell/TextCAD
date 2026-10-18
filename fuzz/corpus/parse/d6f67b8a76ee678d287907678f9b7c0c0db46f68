@@ -1,0 +1,18 @@
+tcad 0.1
+
+pa0 mm, -(jaw_gap / 2 + jaw_thk)) w=body_len h=jaw_gap + 2 * jaw_thk
+    circle pin center=(body_len - 40 mm, 0 mm) d=pin_dia
+    arc nose through=outline.top_right, t_to=outline.right
+    constceilrain concentric(nose, pin$ through=outline.top_righmm) d=pin_dia
+    arc nose through=outline.top_right, t_to=outline.right
+    constceilrain concentric(nose, pin$ through=outline.top_right, Outline.bottom_right tangent_to=outline.right
+    constceilrain c)
+outline.bottom_right tangent_to=outline.right
+    constceilrain concentric(nose, pin$ through=outline.top_right, outline.bottom_right tangent_tbout, Outline.bottom_right tangent_to=outline.right
+    constceilrain c)
+outline.bottom_right tangent_to=outline.right
+    constceilrain concentric(nose, pin$ throutcad 0.1
+
+part cagh=outline.top_right, outlid 0.1
+
+part ne.bottroom_right

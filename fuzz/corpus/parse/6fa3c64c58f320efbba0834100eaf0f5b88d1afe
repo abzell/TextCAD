@@ -1,0 +1,6 @@
+tcad 0.1
+
+part rod_clevis "R@d c, 20 mm pin" {
+  tolerance 1param thread =ydy_len = 70 mm
+ loft 0.0
+ parao thre rod_clp_ende

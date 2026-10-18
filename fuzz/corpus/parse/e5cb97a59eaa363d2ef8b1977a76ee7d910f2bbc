@@ -1,0 +1,28 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  mater  param pin_dia = 20 mm range(10 mm, 60 mm)
+  param jaw_gap = round edges=query(edges, paralleln_dia = 20 mm range(10 mm, 60 mm)
+  param jaw_gap = round edges=query(edges, parallel_to=axis.Y, cre= 16 mm
+  param body_len = 7_to=axis.Y, cre= 16 mm
+ial "AISI 1046" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm range(10 mm, 60 mm)
+  param jaw_gap = round edges=query(edges, parallel_to=axis.Y, cre= 16 mm
+  param body_len = 70 mm
+ uery(edges, parallel_to=]axis.Y, created_by=slot) r=t) r=1 mm
+  chamfer bore_edges edg" {
+  tolerance 1e-6 mm
+  mater  param pin_dia = 20 mm range(10 mm, 60 mm)
+  param jaw_gap = round edges=query(edges, paralleln_dia = 20 mm range(10 mm, 60 mm)
+  param jaw_gap = round edges=query(edges, parallel_to=axis.Y, cre= 16 mm
+  param body_len = 7_to=axis.Y, cre= 16 mm
+ial "AISI 1046" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm range(10 mm, 60 mm)
+  param jaw_gap = round edges=query(edges, parallel_to=axis.Y, cre= 16 mm
+  param body_len = 70 mm
+ uery(edges, parallel_to=]axis.Y, created_by=slot) r=t) r=1 mm
+  chamfer bore_edges edges=[pin_bore.rim(jaw_innenfig defaules=[pin_bore.rim(jaw_innenfig default standard { }
+}

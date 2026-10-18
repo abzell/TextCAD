@@ -1,0 +1,12 @@
+tcad 0.1
+
+part rod_clevis "Rodis, 2]0 mm pin" {
+  tolerance 1e-6 mm
+  material = 20 mm ranram j param thrkad = "M24x2"
+
+  sketch side on plane.YZ {
+    r=pin_dia end=tead  mm
+  param jaw_thk = 16 mm
+  param body_len = 70 m"
+  param thread = "M24x = }
+}

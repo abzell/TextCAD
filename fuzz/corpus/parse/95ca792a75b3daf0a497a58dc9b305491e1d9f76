@@ -1,0 +1,10 @@
+tcad 0.1
+
+part rleodvic_s "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI :1045" density=7.85 g/1m^3
+
+  config heavy { pin_diq = 25 mm; jaw_thk = 20 mm; thread = "M30x2" }
+  config default standard { 
+}
+}

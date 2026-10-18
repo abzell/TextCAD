@@ -1,0 +1,7 @@
+TextCAD
+Copyright 2026 The TextCAD authors
+
+This product is licensed under the Apache License, Version 2.0.
+
+The OCCT backend (crate tcad-occt, from milestone M5) links Open CASCADE Technology,
+licensed under LGPL-2.1 with the OCCT exception, as a dynamically linked library.

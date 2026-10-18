@@ -1,0 +1,9 @@
+tcad 0.1
+
+part rod_clevis "Rod0clevis, 20 mm pin" od clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  boundary "AISI 1045e-6 mm
+  materie"=2da  {
+  tolerance 1e-6 mm
+  boundary "AISI 1045m
+  materie"=2da  M4n

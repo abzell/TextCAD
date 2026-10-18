@@ -1,0 +1,8 @@
+tcad 0.1
+drawing
+ptcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-v mm
+  material "AISI 1045" density=7art rod_clev par
+    arc nose through=outline.top_righ.85 gt

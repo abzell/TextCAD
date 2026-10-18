@@ -1,0 +1,6 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" { r=2 mm
+  chamfer bom; jaw_thk = 20 mm; thread = "M30x2" }
+  config default standard { }
+}

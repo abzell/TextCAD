@@ -1,0 +1,6 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mmend, w= fillet jaw_round edges=query(et rod_clevis "Rod clevis, 20 mm pin" {
+  tolerancpin_bore.rim(jaw_inner_a), rim(jaw_inner_b)] d=1  { pin_dg default standard { }
+}

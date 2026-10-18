@@ -1,0 +1,16 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance(+Y)
+  tag jaw_inner_b = slot.side(-Y)
+
+  hole pin_bo eron=jaw_inner_a at=side.pin.center type=si-ple d=pin_dia nde=through_all
+  hole rod_thread on=body.cap_start at=origin type=tapped thread=thread depth=36 mm
+
+  fillet jao=axis.Y, created_by=slot) r=2 mm
+  chamfer bore_edges edges=[pin_bore., -(jaw_gap / 2 + jaw_thk)) w=body_len h=jaw_gap + 2 * jaw_thk
+   ges=[pin_bore.rim(jaw_inner_a), pin_bore.rim(jaw_inner_b)] d=1 mm
+
+  config heavy { pin_dia = 25 mm; jaw_thk = 20 mm; thread = "M30x2" }
+  config default standard { }
+}

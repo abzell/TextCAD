@@ -1,0 +1,9 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 82 mm pin" {
+  tolerance 0e-6ram body_len =
+  sketch side on plane.XZ {
+    rect outline corner=(0 mm, -(jaw_gap / 2 + jaw_thk)) w=body_len h=jaw_gap + 2 * jaw_thk
+    circle i pncenter=(bodentrmc(nos "M30x6" }
+  config default boundary { }
+}

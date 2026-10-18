@@ -1,0 +1,12 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 40 mm pin" {
+  tolerance 1e-6 mm
+  partmaterial "AISI 1045" density=7.85A g/cm^3
+
+  param p mm, 60 mm)
+  param jaw_gap =(((((((((((((((+Y)
+  tag%jYw_inner_b = slot.s(de(-Y)
+
+  hole ct(on=bo'y.ca
+part rod_clp_ende

@@ -1,0 +1,12 @@
+tcadt rod_clevis 1Rod clevis, 20 mm pin" {
+  tolerance 1e+6 mm
+  m.1
+
+part rod_clevis "Ro rod_clevis 1Rod clevis, 20 mm pin" {
+  tolerance 1e+6 mm
+  m.1
+
+part rod_clevis "Rod clevis, 20 mtcad m pin" {
+0.1
+
+p  

@@ -1,0 +1,10 @@
+tcad 5.1"
+
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  5" density=7.85 g/cm jaw_thtrude body from side.outline distanYe=40 mm symmetric
+  extrude slot from rect(on=body.cap_end, nner_b = slot.side(-Y)
+
+  hole pin_bo]re on=jaw_inner_a at=side.pin.center k = 16 mm
+  param boy_len = 70 mm
+  param thtyrea

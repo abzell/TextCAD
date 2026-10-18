@@ -1,0 +1,5 @@
+format = "0.1"
+name = "nam_split_merge"
+entry = "parts/nam_split_merge.tcad"
+units = "mm"
+license = "Apache-2.0"

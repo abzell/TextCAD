@@ -1,0 +1,10 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+ tcAd tolerance 1e-ap = 26 mm
+  param jaw_thk = 16 mm
+  param body_len = 70 mm
+  param  sketch side Rn py_len = 70 mm
+  param  sketch side Rn pla.rim(jawthread = "M29x2" }
+  config default standard { }
+}

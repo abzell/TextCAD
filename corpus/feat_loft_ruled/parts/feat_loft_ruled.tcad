@@ -1,0 +1,12 @@
+tcad 0.1
+
+part feat_loft_ruled "Ruled loft between two squares" {
+  plane upper from=plane.XY offset=30 mm
+  sketch bottom on plane.XY {
+    rect r center=(0 mm, 0 mm) w=40 mm h=40 mm
+  }
+  sketch top on upper {
+    rect r center=(0 mm, 0 mm) w=20 mm h=20 mm
+  }
+  loft frustum sections=[bottom.r, top.r] ruled
+}

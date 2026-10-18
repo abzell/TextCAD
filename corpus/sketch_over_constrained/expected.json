@@ -1,0 +1,15 @@
+{
+  "codes": [
+    "E4101"
+  ],
+  "fails": true,
+  "conflict": [
+    "distance(a) = 10 mm",
+    "distance(a) = 12 mm"
+  ],
+  "not_named": [
+    "fix",
+    "distance(b)"
+  ],
+  "note": "Two different lengths for the same line cannot both hold with its end points pinned. The report names exactly those two constraints."
+}

@@ -1,0 +1,10 @@
+tcad 0.1
+
+part feat_hole_cbore_csk "Plate with a counterbore and a countersink" {
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=60 mm h=40 mm
+  }
+  extrude plate from s.r distance=10 mm
+  hole cbore on=plate.cap_end at=(15 mm, 20 mm) d=6 mm cbore_d=12 mm cbore_depth=4 mm end=through_all
+  hole csk on=plate.cap_end at=(45 mm, 20 mm) d=6 mm csk_d=12 mm end=through_all
+}

@@ -1,0 +1,7 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  sketch side on plane.XZ {
+    rect outline corner=(0 mm, -(jaw_gap / 2 + jaw_thk)) w=bodw_gap / on=body.cap_ges=query(edge
+
+  par / 2 +am pin  

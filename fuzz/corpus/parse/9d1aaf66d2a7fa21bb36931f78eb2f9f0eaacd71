@@ -1,0 +1,22 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerancram jaw_thtrude body from si" {
+  5" density=7.85 g/cm^3
+
+  para) pin_dia = 20 mm range(10 mm, 6m range(10 mm, 60 mm)
+  param jaw_gap = 26 mm
+fill  param jaw_thtrude body from sid symmetric
+  extrude slot from rect(on=body.cap_end, nner_b = slot.side(-Y)
+
+  hole pin_bo]re on=jaw_inner_a de.outline distanYe=40 mm symmetriid symmetric
+  extrude slot from rect(on=body.cap_end, nner_b = slot.side(-Y)
+
+  hole pin_bo]re on=jaw_inner_a de.outline distanYe on=jaw_inner_a at=side.pin.center k = 16 mm
+  param body_on=jaw_inner_a de.outline distanYe=40 mm symmetric
+  extrude slot from rect(on=body.cap_end, nner_b = m
+
+  configvey, ha { pra), pistandardim(jaw_innerfigim(jaw_inner_b)] =1md
+ m
+  configvey ha { pin_dia = 25 mm; jaefault standard { }
+}

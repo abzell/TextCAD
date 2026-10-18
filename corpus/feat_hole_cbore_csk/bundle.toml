@@ -1,0 +1,5 @@
+format = "0.1"
+name = "feat_hole_cbore_csk"
+entry = "parts/feat_hole_cbore_csk.tcad"
+units = "mm"
+license = "Apache-2.0"

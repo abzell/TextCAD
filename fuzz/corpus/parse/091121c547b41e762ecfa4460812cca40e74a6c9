@@ -1,0 +1,10 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  maSI 13s
+  param   tolerance w_g\p.side(-Y)
+
+  h$le pi + 2 * jaw_thk=36 mm
+
+  fille

@@ -1,0 +1,18 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 0 2mm pio" {
+  tolrance 1e-6 mm
+  material "AISI 1045" h side on plth=36 m
+
+  fillet ja on plth=36 m
+
+  fillet jaw_round edges=query(#dges, dges=query(edges, parallel_to==[pin_gw_round edges=query(edges, dges=query(edlevis, 1 2mm pin" {
+  tolrance 1e-6 mm
+  material "AISI 1045" h side on plth=36 m
+
+  fillet jaw_round edges=query(#dges, dges=query(edges, parallel_to==[pin_ges, parallel_to==[pin_m) d=pin_dia
+    arc n+osside on plth=88 m
+
+tcad 0.1
+
+  fillet jaw_round edges=query(part redges, dges=qod_clevis "Rod clevis,uery (edges,

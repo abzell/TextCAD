@@ -1,0 +1,19 @@
+tcad 0.1
+
+part rocde_lvis "Rod clevis, 40.mm pin" {h  tolm pin_dia = 20 mm (enract
+
+  tag jaw_inner_a = ]]]]
+  tolerance 7 mam body_to=`utli?m@@@@@@@@rod_clev 0.1
+
+part view]/]]]]]]]]]]]]]]]]]]]]]]
+  tolerance 7 mam body_to=`utli?m@@@@@@@@rod_clevim thview]/]]]]]]]]]]]]]]]]]]]]]]
+  tolerance 7 mam body_to=`utli?m@@@@@@@@@m
+  param jtcad mm rang0.1
+
+part view]/]]]]]]]]]]]]]]]]]]]]]]
+  tolerance 7 mam body_to=`utli?m@@@@@@@@rod_clevim thview]/]]]]]]]]]]]]]]]]]]]]]]
+  tolerance 7 mam body_to=`utli?m@@@@@@@@@im thview]/]]]]]]]]]]]]]]]]]]]]]]
+  tolerance 7 mam body_to=am body_to=`utli?m@slot.side(
++  Y)t{tcad 0.1
+
+part rod_ 

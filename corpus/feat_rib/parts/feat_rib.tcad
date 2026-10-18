@@ -1,0 +1,14 @@
+tcad 0.1
+
+part feat_rib "Plate with a triangular rib" {
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=60 mm h=40 mm
+  }
+  extrude base from s.r distance=5 mm
+  plane top from=plane.XY offset=5 mm
+  plane mid from=plane.XZ offset=-20 mm
+  sketch web on mid {
+    line l start=(10 mm, 5 mm) end=(50 mm, 25 mm)
+  }
+  rib stiffener profile=web thickness=4 mm direction=-Z to=top
+}

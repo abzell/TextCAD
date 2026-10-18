@@ -1,0 +1,4 @@
+tcad 0m pin" {
+  tolerance 2e-6`md_c material "AISI 104\" density=7.85 g/cm(3
+
+  param pin_dia = 20 mm ran333n3333, 60 mm

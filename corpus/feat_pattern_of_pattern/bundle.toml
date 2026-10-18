@@ -1,0 +1,5 @@
+format = "0.1"
+name = "feat_pattern_of_pattern"
+entry = "parts/feat_pattern_of_pattern.tcad"
+units = "mm"
+license = "Apache-2.0"

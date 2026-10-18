@@ -1,0 +1,9 @@
+tcad 0.1
+
+part rod_clevis "Rolcdiv es, 20 mm pin" {
+  toldrance 1e-6 mm
+  materi jaw_thk = 16 mm
+  param weldment B 70 ml
+p  cm^3
+
+  par / 2 +am pin  

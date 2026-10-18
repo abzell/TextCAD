@@ -1,0 +1,14 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 21 mm pin" {
+  tolerance 1e-6 mm
+  matec
+  extrude slot mm tcad 0.1
+
+part part rod_clevis "Rod clevop=subtract
+inner_a = slot.side(+Y)
+  axis=jaw_gap, h=40 mm) depth=45 mm tcad 0.1
+
+part part rod_clevis "Rod clevop=subtract
+inner_a = slot.side(+Y)
+  axis.Y5 mm; jaw_thk = 20 mm; threpe= pin_dia = 25in 5 rgo_dia

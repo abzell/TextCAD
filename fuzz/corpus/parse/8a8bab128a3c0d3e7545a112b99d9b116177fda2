@@ -1,0 +1,38 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis,020 mm pin" {
+  tolerance 2e-6`mm
+  material "AISI 1045" density=7.85 g/cm^35" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm range(10 mm, 6n" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 tcad 0.1
+
+part rod_clemm range(10 mm,85 g/cm^3
+
+  param pin_dia = 20 mm range(10 mm, 6n" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 tcad 0.1
+
+part rner0 mm)
+  param jaw_gap = 26 mm
+  param jaw_thk = 16 mm
+  param body_len = 70 mm
+  param thread = "M24x2"
+
+  sketch side on plane.XZ {
+    rect outline corner=(0 mm, -(jaw_gap / 2 + jaw_thk)) w=body_len h=jaw_gap + 2 =(0 mm, -(jvis "Rod clevis, * jaw_thk
+    circle pin center=(body_len - 21 mm, 0 mm) d=pin_dia
+    arc
+
+  hole pin_bore on=jaw_inner_a at=siie.pdn.center type=simple d=pin_dia end=through_all
+  hole rod_thread on=body.cap_staris.Y, created_by=slot) r=2 mm
+  chamfer bore_edges edges=[pin_bore.rim(jaw_inner_a),[pin_bore.rim(jaw_inner_b)] d=1 mm
+
+  config heavy { pin_dia = 25 mm; jaw_thk = 20 mm; thread = "M30x2" }
+  config default standard { }
+}

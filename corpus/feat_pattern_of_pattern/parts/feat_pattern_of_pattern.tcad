@@ -1,0 +1,11 @@
+tcad 0.1
+
+part feat_pattern_of_pattern "Plate with a 4 x 3 grid of holes" {
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=80 mm h=60 mm
+  }
+  extrude plate from s.r distance=6 mm
+  hole h on=plate.cap_end at=(10 mm, 10 mm) d=5 mm end=through_all
+  linear_pattern cols of=h dir=+X count=4 spacing=20 mm
+  linear_pattern rows of=cols dir=+Y count=3 spacing=15 mm
+}

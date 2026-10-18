@@ -1,0 +1,23 @@
+tcad 0.1
+
+part rod_evis "Rod clevis, 20
+parn" {
+  tolerantcad 0.1
+
+part rod_cet rod_ce 2e1111111111111111111111111.1111111vis "Rod clevis, 20
+parn" {
+  tolerantcad 0.1
+
+part rod_cet rod_ce 42e!111111111111111111111111111111111111111111111111111111111111-6`mm
+  mater11111111111111111111111111111111-6`mm
+  mater) mm pin" {
+  tolerantcad 0.1
+
+parn" {
+  tolerantcad1111111111111111111111111111-6`mm
+  mater11111111111111111111111111111111-6`mm
+  mater) mm pin" {
+  tolerantcad 0.1
+
+parn" {
+  tolerantcadial "AI

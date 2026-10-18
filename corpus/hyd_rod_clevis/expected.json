@@ -1,0 +1,30 @@
+{
+  "note": "A clevis: a block with a fork slot, filleted gap root and nose corners, a 20 mm pin bore through both jaws with chamfered rims and an M24x2 tapped hole for the rod. Faces are found by name, tags and ordinals.",
+  "volume_mm3": 99954.74734526835,
+  "area_mm2": 21789.95062476088,
+  "center_of_mass_mm": [
+    29.357428837335338,
+    -1.592972515178669e-15,
+    1.1487569039837877e-16
+  ],
+  "bbox_min_mm": [
+    -2.4424906541753444e-15,
+    -29.0,
+    -20.0
+  ],
+  "bbox_max_mm": [
+    70.0,
+    29.0,
+    20.0
+  ],
+  "topology": {
+    "solids": 1
+  },
+  "baseline": [
+    "volume_mm3",
+    "area_mm2",
+    "center_of_mass_mm",
+    "bbox_min_mm",
+    "bbox_max_mm"
+  ]
+}

@@ -1,0 +1,4 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, ;0 mm min" {
+  tolerance from rect(on=body.cd, w=jawtpe=simple d=pi(ee-6 mdm

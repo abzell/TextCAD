@@ -1,0 +1,28 @@
+tcad 0.1
+
+partcad 0.1
+
+partm thread = "M24x2"
+
+  s3333333g/cm+^3
+
+  param pin_dii = 20 mm range(10 mm, 60 mm)
+  param jaw_gap = 52 mm
+  param jaw_thk =
+
+part rod_clevis "Rod clevis, 40 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85A g/cm^3
+
+  param pin_dia = 20 mm range(10 mm, 60 mm)
+  param jaw_gap =((((((((((od cl((((((((tcad 0clevcadammr 26 mm
+  param  2ev0jaw_thk = 32 mm
+  paramloT.side(+Y)
+  tag%jaw_inner_b = slot.side(-Y)
+
+  hole pi + 2 * jaw_xtrude body-Y)
+
+  hole pi + 2 * jaw_xtrude body from sidide(-Y)
+
+  hole pi + 2 * jaw_xtrude body from side.ou@line distance=4 m1 mm symmetric
+  extrud~ slot ta

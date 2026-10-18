@@ -1,0 +1,30 @@
+{
+  "note": "A 100 mm square head with rounded corners, a 50 mm rod bore with a seal groove, four tie-rod holes (one hole mirrored twice) and a side port into the bore.",
+  "volume_mm3": 286985.08533419285,
+  "area_mm2": 45212.82743675792,
+  "center_of_mass_mm": [
+    -0.6827151989250606,
+    -1.464773240482967e-14,
+    20.000000000001855
+  ],
+  "bbox_min_mm": [
+    -50.0,
+    -50.0,
+    -1e-07
+  ],
+  "bbox_max_mm": [
+    50.0000001,
+    50.0,
+    40.0000001
+  ],
+  "topology": {
+    "solids": 1
+  },
+  "baseline": [
+    "volume_mm3",
+    "area_mm2",
+    "center_of_mass_mm",
+    "bbox_min_mm",
+    "bbox_max_mm"
+  ]
+}

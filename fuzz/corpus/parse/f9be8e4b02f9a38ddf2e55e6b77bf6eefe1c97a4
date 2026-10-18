@@ -1,0 +1,9 @@
+tcad 0.1
+
+part rod_clevis "Rod clev pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/1m^3
+
+  param pin_dia = 20 mm range(11 mm, 60 mm)
+  param surface = 26 mm
+  param fillet jaw_rovis "R "Round edges=query(edg

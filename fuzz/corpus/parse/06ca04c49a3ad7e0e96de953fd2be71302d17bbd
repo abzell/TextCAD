@@ -1,0 +1,9 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 0.1
+
+part rod_clevis " 0.1
+
+patcad  104colerance 2e-6 mm
+  mat.erial "AIS.8
+part 5 rgo045e 

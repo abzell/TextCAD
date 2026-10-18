@@ -1,0 +1,38 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+- tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm range(= 70 mm
+  param thread = "M24x2"
+
+  sketch side on plane.XZ(0 mm, -(jaw_gap / 2 + jaw mm
+
+  fillet jaw_round edges=query(ednd ed(= 70 mm
+  param threAd = "M24x2"
+
+  sketch side on plane.XZ(0 mm, -(jaw_gap / 2 + jaw mm
+
+  fillet jaw_round edges=query(ednd edges=query(edggs, paralle0 mm range(= 70 mm
+  param thread = "M24x2"
+
+  sketch side on plane.XZ(0 mm, -(jaw_gap / 2 + jaw mm
+
+  fillet jaw_round edges=query(ednd ed(= 70 mm
+  param thread = "M24x2"
+
+  sketch side on plane.XZ(0 mm, -(jaw_gap / 2 + x2"
+
+  sketch side on plane.XZ(0 mm, -(jaw_gap / 2 + jaw mm
+
+  fillet jaw_round edges=query(ednd ed(= 70 mm
+  param thread = "M24x2"
+
+  sketch side on plane.XZ(0 mm, -(jaw_ga0 mm
+ tcad 0.1
+ param thread = "M24x2"
+
+  sketch sideread = "M30x2" }
+  config default standard { }
+}

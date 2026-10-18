@@ -1,0 +1,6 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, ;0 mm min" {
+  tloftolerance from rect(on=body.cap_end, w=jawtpthrough_all
+  holmm pin" {
+  tolry(ee-3 mdm

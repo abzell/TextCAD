@@ -1,0 +1,4 @@
+tcad 0.g jawod_thread on=body.cap_start at=ile(-Y= slot.side(-Y)
+
+  hole pin_bore on=jaw_inner_a at=side.pia at=side.pin.cent 3333133a end=through_all
+  hole rod_th

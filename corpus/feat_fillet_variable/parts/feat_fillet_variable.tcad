@@ -1,0 +1,9 @@
+tcad 0.1
+
+part feat_fillet_variable "Block with a variable-radius fillet" {
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=50 mm h=30 mm
+  }
+  extrude boss from s.r distance=12 mm
+  fillet taper edges=[edge(boss.cap_end & boss.side(s.r.bottom))] r=(2 mm, 5 mm)
+}

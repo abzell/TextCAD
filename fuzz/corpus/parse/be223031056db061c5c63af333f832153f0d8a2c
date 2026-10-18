@@ -1,0 +1,13 @@
+tcad 0.1
+
+part rod_clevis "Rodis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material = 20 mm range(10 mm, 60 mm)
+  param jaw_gap = 26 mm
+  param j param thrkad = "M24x2"
+
+  sketch side on plane.YZ {
+    r=pin_tcad 0.1
+
+part assdia end=tead  mm
+  param jaw_temblyi

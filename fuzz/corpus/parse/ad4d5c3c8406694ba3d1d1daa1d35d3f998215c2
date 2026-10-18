@@ -1,0 +1,4 @@
+tcadp rod_clevis "Rod clevi 20 mm picld c jaw_thk
+    circle pin center=(body_len - 21 mm, 0 mm) d=qin_dia
+    arc nose20 mm pin" { o 
+t throu!ghler=

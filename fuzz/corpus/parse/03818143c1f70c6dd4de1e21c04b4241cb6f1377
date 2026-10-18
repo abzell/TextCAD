@@ -1,0 +1,25 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm rrod_clthreadange(10 mm, 60 mm)
+  param jaw_gap = 26 mm
+  param jaw_thk = 16 mm
+  param body_len = 70 mm
+  param thread = "M24x2"
+
+  sketch side on plane.XZ {
+    rect outline corner=(0 mm, -(jaw_gap / 2 + jaw_thk)) w=body_len h=j;aw_gap + 2 * jaw_thk
+    c.side(+Y)
+  tpe=simple d=pin_dia end=through_all
+  hole rod_thread on=body.cap_start at=mrim
+
+  fillet jaw_round edgesquery(edges,=origin type=tapped thread=thread depth=36 mm
+
+  fillet jaw_round edges=query(e1dges, parallel_to=axis.Y, created_by=slot) r=2 mm
+  chamfer bore_edges edges=[pin_bore.rim(jawpin" {
+  tolerance 1e-6 mm
+  materhdard { }
+}
