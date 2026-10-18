@@ -44,6 +44,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iterator>
+#include <typeinfo>
 #include <mutex>
 #include <random>
 #include <TopoDS_Compound.hxx>
@@ -131,7 +132,7 @@ auto guarded(const char* what, F&& f) -> decltype(f()) {
   try {
     return f();
   } catch (const Standard_Failure& e) {
-    std::string msg = std::string(what) + ": " + e.DynamicType()->Name();
+    std::string msg = std::string(what) + ": " + typeid(e).name();
     if (e.GetMessageString() != nullptr && e.GetMessageString()[0] != '\0') {
       msg += std::string(" (") + e.GetMessageString() + ")";
     }
