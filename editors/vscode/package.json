@@ -6,25 +6,48 @@
   "publisher": "textcad",
   "license": "Apache-2.0",
   "private": true,
-  "engines": { "vscode": "^1.85.0" },
-  "categories": ["Programming Languages", "Visualization"],
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Visualization"
+  ],
   "main": "./dist/extension.js",
-  "activationEvents": ["onLanguage:textcad", "onCommand:textcad.openViewer"],
+  "activationEvents": [
+    "onLanguage:textcad",
+    "onCommand:textcad.openViewer"
+  ],
   "contributes": {
     "languages": [
       {
         "id": "textcad",
-        "aliases": ["TextCAD", "tcad"],
-        "extensions": [".tcad"],
+        "aliases": [
+          "TextCAD",
+          "tcad"
+        ],
+        "extensions": [
+          ".tcad"
+        ],
         "configuration": "./language-configuration.json"
       }
     ],
     "grammars": [
-      { "language": "textcad", "scopeName": "source.textcad", "path": "./syntaxes/textcad.tmLanguage.json" }
+      {
+        "language": "textcad",
+        "scopeName": "source.textcad",
+        "path": "./syntaxes/textcad.tmLanguage.json"
+      }
     ],
     "commands": [
-      { "command": "textcad.openViewer", "title": "TextCAD: Open Viewer" },
-      { "command": "textcad.restartServer", "title": "TextCAD: Restart Language Server" }
+      {
+        "command": "textcad.openViewer",
+        "title": "TextCAD: Open Viewer"
+      },
+      {
+        "command": "textcad.restartServer",
+        "title": "TextCAD: Restart Language Server"
+      }
     ],
     "configuration": {
       "title": "TextCAD",
@@ -45,7 +68,8 @@
   "scripts": {
     "build": "node build.mjs",
     "check": "tsc --noEmit",
-    "package": "npm run build && vsce package"
+    "package": "npm run build && vsce package",
+    "test": "node test/runTest.mjs"
   },
   "dependencies": {
     "vscode-languageclient": "9.0.1"
@@ -54,6 +78,7 @@
     "@types/node": "22.7.5",
     "@types/vscode": "1.85.0",
     "esbuild": "0.25.0",
-    "typescript": "5.6.3"
+    "typescript": "5.6.3",
+    "@vscode/test-electron": "3.1.0"
   }
 }

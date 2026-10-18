@@ -185,11 +185,25 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - working-directory: editors/vscode
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.97.0
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build -p tcad-lsp
+      - name: Compile, bundle, and run the language server inside VS Code
+        working-directory: editors/vscode
         run: |
           npm ci
           npm run check
           npm run build
+          TCAD_LSP="$GITHUB_WORKSPACE/target/debug/tcad-lsp" xvfb-run -a npm test
+      - name: Run the extension and its language server inside Eclipse Theia
+        working-directory: editors/theia-test
+        run: |
+          npm ci
+          npm run build
+          npx playwright-core install --with-deps chromium
+          TCAD_LSP="$GITHUB_WORKSPACE/target/debug/tcad-lsp" npm test
 
   build123d-crosscheck:
     runs-on: ubuntu-latest
