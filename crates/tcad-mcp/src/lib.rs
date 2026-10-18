@@ -660,7 +660,7 @@ impl<K: Kernel> Server<K> {
         let mut data = serde_json::from_str::<Value>(&stdout).unwrap_or_else(|_| json!({}));
         if code == 0 {
             if let Ok(rel_out) = target.strip_prefix(&self.root) {
-                data["file"] = json!(rel_out.display().to_string());
+                data["file"] = json!(rel_out.to_string_lossy().replace('\\', "/"));
             }
             Outcome::ok(data)
         } else {
