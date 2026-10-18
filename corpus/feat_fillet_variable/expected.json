@@ -1,0 +1,30 @@
+{
+  "note": "One edge rounded with a radius growing from 2 mm at its start to 5 mm at its end.",
+  "volume_mm3": 17858.51920323057,
+  "area_mm2": 4838.713411286671,
+  "center_of_mass_mm": [
+    24.941418213861887,
+    15.111762352366895,
+    5.959538473671864
+  ],
+  "bbox_min_mm": [
+    -1e-07,
+    -1.0000000088817842e-07,
+    -1e-07
+  ],
+  "bbox_max_mm": [
+    50.0000001,
+    30.0000001,
+    12.000000100000003
+  ],
+  "topology": {
+    "solids": 1
+  },
+  "baseline": [
+    "volume_mm3",
+    "area_mm2",
+    "center_of_mass_mm",
+    "bbox_min_mm",
+    "bbox_max_mm"
+  ]
+}

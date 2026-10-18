@@ -1,0 +1,14 @@
+tcad 0.1
+
+part nam_mirror_chamfer "Symmetric plate with mirrored holes (naming robustness)" {
+  param w = 90 mm range(60 mm, 140 mm)
+  param c = 2 mm range(1 mm, 3 mm)
+
+  sketch s on plane.XY {
+    rect r corner=(-w / 2, 0 mm) w=w h=30 mm
+  }
+  extrude plate from s.r distance=12 mm
+  hole h on=plate.cap_end at=(w / 4, 15 mm) d=6 mm end=through_all
+  mirror twin of=h plane=plane.YZ
+  chamfer edges_ch edges=[edge(plate.cap_end & plate.side(s.r.top)), edge(plate.cap_end & plate.side(s.r.bottom)), edge(plate.cap_end & h.wall), edge(plate.cap_end & twin.wall)] d=c
+}

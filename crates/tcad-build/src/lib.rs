@@ -1192,7 +1192,7 @@ impl<K: Kernel> Cx<'_, K> {
     }
 
     pub(crate) fn loft(&mut self, item: &Item) -> Res {
-        self.only(item, &["sections", "ruled", "op"])?;
+        self.only(item, &["sections", "guides", "ruled", "op"])?;
         let secs = self.require(item, "sections")?;
         let refs = Self::flat(secs);
         if refs.len() < 2 {
@@ -1220,7 +1220,22 @@ impl<K: Kernel> Cx<'_, K> {
             sections.push(np.profile);
         }
         let ruled = Self::arg(item, "ruled").is_some();
-        let shape = match self.k.loft(&sections, ruled) {
+        let result = match Self::arg(item, "guides") {
+            Some(g) => {
+                let refs = Self::flat(g);
+                if refs.len() != 1 || ruled {
+                    return self.fail(
+                        codes::E5003,
+                        g.span,
+                        "a loft takes exactly one guide (the spine through the sections) and `ruled` does not combine with it",
+                    );
+                }
+                let guide = self.path(refs[0])?;
+                self.k.loft_guided(&sections, &guide)
+            }
+            None => self.k.loft(&sections, ruled),
+        };
+        let shape = match result {
             Ok(s) => s,
             Err(e) => return self.kernel_error(item, e),
         };

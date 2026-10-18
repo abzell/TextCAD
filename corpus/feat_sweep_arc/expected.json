@@ -1,0 +1,27 @@
+{
+  "note": "A circle of radius 6 swept along a quarter circle of radius 40: volume pi r^2 * arc length (Pappus).",
+  "volume_mm3": 7106.115168784338,
+  "area_mm2": 2594.899727319912,
+  "center_of_mass_mm": [
+    25.60803034348596,
+    14.391969656514036,
+    2.3532233574223747e-16
+  ],
+  "bbox_min_mm": [
+    0,
+    -6,
+    -6
+  ],
+  "bbox_max_mm": [
+    46,
+    40,
+    6
+  ],
+  "topology": {
+    "solids": 1
+  },
+  "baseline": [
+    "area_mm2",
+    "center_of_mass_mm"
+  ]
+}

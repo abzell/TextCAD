@@ -1,0 +1,30 @@
+{
+  "note": "A 120 mm cap with an 80 mm spigot, a 7/8-14 UNF O-ring port (tap drill, counterbore as the seal face), four tie-rod holes on a 100 mm circle and a chamfered rim.",
+  "volume_mm3": 290768.7768498663,
+  "area_mm2": 37358.26286543281,
+  "center_of_mass_mm": [
+    -1.7000118643028014e-15,
+    -6.088987432642039e-15,
+    10.75090964769857
+  ],
+  "bbox_min_mm": [
+    -60.0,
+    -60.0,
+    -6.0
+  ],
+  "bbox_max_mm": [
+    60.0,
+    60.0,
+    25.0
+  ],
+  "topology": {
+    "solids": 1
+  },
+  "baseline": [
+    "volume_mm3",
+    "area_mm2",
+    "center_of_mass_mm",
+    "bbox_min_mm",
+    "bbox_max_mm"
+  ]
+}

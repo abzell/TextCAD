@@ -10,24 +10,27 @@ part rod_clevis "Rod clevis, 20 mm pin" {
   param body_len = 70 mm
   param thread = "M24x2"
 
-  sketch side on plane.XZ {
+  sketch side on plane.XY {
     rect outline corner=(0 mm, -(jaw_gap / 2 + jaw_thk)) w=body_len h=jaw_gap + 2 * jaw_thk
-    circle pin center=(body_len - 20 mm, 0 mm) d=pin_dia
-    arc nose start=outline.bottom_right end=outline.top_right through=(75 mm, 0 mm)
-    constrain concentric(nose, pin)
   }
-
   extrude body from side.outline distance=40 mm symmetric
-  extrude slot from rect(on=body.cap_end, w=jaw_gap, h=40 mm) depth=45 mm op=subtract
 
-  tag jaw_inner_a = slot.side(+Y)
-  tag jaw_inner_b = slot.side(-Y)
+  sketch fork on plane.XY {
+    rect gap corner=(30 mm, -(jaw_gap / 2)) w=body_len - 30 mm + 5 mm h=jaw_gap
+  }
+  extrude slot from fork.gap op=subtract symmetric through_all
 
-  hole pin_bore on=jaw_inner_a at=side.pin.center type=simple d=pin_dia end=through_all
-  hole rod_thread on=body.cap_start at=origin type=tapped thread=thread depth=36 mm
+  tag jaw_inner_a = slot.side(fork.gap.top)
+  tag jaw_inner_b = slot.side(fork.gap.bottom)
+  tag gap_floor = slot.side(fork.gap.left)
 
-  fillet jaw_round edges=query(edges, parallel_to=axis.Y, created_by=slot) r=2 mm
-  chamfer bore_edges edges=[pin_bore.rim(jaw_inner_a), pin_bore.rim(jaw_inner_b)] d=1 mm
+  fillet root_round edges=[edge(gap_floor & jaw_inner_a), edge(gap_floor & jaw_inner_b)] r=4 mm
+  fillet nose_round edges=[edge(body.side(side.outline.right)#2 & body.side(side.outline.top)), edge(body.side(side.outline.right)#1 & body.side(side.outline.bottom))] r=4 mm
+
+  hole pin_bore on=body.side(side.outline.top) at=(-(body_len - 20 mm), 0 mm) d=pin_dia end=through_all
+  hole rod_thread on=body.side(side.outline.left) at=(0 mm, 0 mm) thread=thread depth=28 mm
+
+  chamfer bore_edges edges=[edge(body.side(side.outline.top) & pin_bore.wall#2), edge(body.side(side.outline.bottom) & pin_bore.wall#1)] d=1.5 mm
 
   config heavy { pin_dia = 25 mm; jaw_thk = 20 mm; thread = "M30x2" }
   config default standard { }

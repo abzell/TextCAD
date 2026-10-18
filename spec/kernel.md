@@ -40,6 +40,10 @@ the format never encodes behavior specific to OpenCASCADE.
 | `properties` | shape | volume, area, center of mass, inertia tensor **about the center of mass** (axes parallel to the world axes, unit density), bounding box, counts of solids, faces, edges, vertices | |
 | `canonical_brep` / `from_brep` | shape / bytes | A serialization that is identical for identical shapes built by the same backend on the same platform. It is also the cache format. | malformed input |
 
+Volume, area, center of mass and inertia are integrated to a relative precision of 1e-12 (the
+OpenCASCADE default quadrature is only good to about 1e-6 on curved faces and differs between a shape and
+its STEP round trip). The independent models in the corpus are measured the same way.
+
 The modeling tolerance of the part (default 1e-6 mm) is the fuzzy value of booleans and the gap
 within which sketch end points join into profiles.
 

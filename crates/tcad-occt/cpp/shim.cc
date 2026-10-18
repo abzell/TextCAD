@@ -18,6 +18,9 @@
 #include "tcad-occt/src/bridge.rs.h"
 
 #include <APIHeaderSection_MakeHeader.hxx>
+#include <Message.hxx>
+#include <Message_Messenger.hxx>
+#include <Message_PrinterOStream.hxx>
 #include <BRepAdaptor_Curve.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <IFSelect_ReturnStatus.hxx>
@@ -68,6 +71,8 @@
 #include <BRepPrimAPI_MakePrism.hxx>
 #include <BRepPrimAPI_MakeRevol.hxx>
 #include <BRepTools.hxx>
+#include <BRepTools_WireExplorer.hxx>
+#include <TopoDS_Vertex.hxx>
 #include <BRep_Builder.hxx>
 #include <Bnd_Box.hxx>
 #include <GC_MakeArcOfCircle.hxx>
@@ -428,18 +433,45 @@ std::unique_ptr<Shape> extrude(const ProfileData& p, Vec3 dir, double distance, 
     if (std::fabs(std::fabs(along) - 1.0) > 1e-9) {
       throw std::runtime_error("a drafted extrusion must be normal to the profile");
     }
-    // LocOpe_DPrism measures the height along the slanted side edges; the format says along the
-    // extrusion direction.
-    double height = std::fabs(distance) / std::cos(draft);
-    if (along * distance < 0.0) face.Reverse();
-    LocOpe_DPrism dp(face, height, draft);
-    auto out = wrap(orient_positive(dp.Shape()));
-    auto faces = face_map(out->s);
-    add_created(*out, faces, dp.FirstShape(), kCapStart, 0, 0);
-    add_created(*out, faces, dp.LastShape(), kCapEnd, 0, 0);
+    // Extrude straight, then lean the side faces about the start plane. (LocOpe_DPrism does this in
+    // one step but orders its work by object addresses, so its result differs from run to run.)
+    // OpenCASCADE measures the angle from each face's own outward normal, so one sign for every
+    // face offsets the profile inward: the outer boundary shrinks and holes grow.
+    gp_Vec v(dir.x * distance, dir.y * distance, dir.z * distance);
+    BRepPrimAPI_MakePrism mk(face, v);
+    mk.Build();
+    if (!mk.IsDone()) throw std::runtime_error("prism failed");
+    gp_Dir pull(v);
+    gp_Pln neutral(P(p.frame.o), pull);
+    BRepOffsetAPI_DraftAngle da(mk.Shape());
     for (size_t l = 0; l < grid.size(); l++) {
       for (size_t g = 0; g < grid[l].size(); g++) {
-        add_created_list(*out, faces, dp.Shapes(grid[l][g]), kSide, (uint32_t)l, (uint32_t)g);
+        const TopTools_ListOfShape& sides = mk.Generated(grid[l][g]);
+        for (TopTools_ListIteratorOfListOfShape it(sides); it.More(); it.Next()) {
+          da.Add(TopoDS::Face(it.Value()), pull, draft, neutral);
+          if (!da.AddDone()) throw std::runtime_error("a side face cannot be drafted");
+        }
+      }
+    }
+    da.Build();
+    if (!da.IsDone()) throw std::runtime_error("draft failed");
+    auto out = wrap(orient_positive(da.Shape()));
+    auto faces = face_map(out->s);
+    auto map_face = [&](const TopoDS_Shape& f, uint32_t role, uint32_t a, uint32_t b) {
+      const TopTools_ListOfShape& mod = da.Modified(f);
+      if (mod.IsEmpty()) {
+        add_created(*out, faces, f, role, a, b);
+      } else {
+        add_created_list(*out, faces, mod, role, a, b);
+      }
+    };
+    map_face(mk.FirstShape(), kCapStart, 0, 0);
+    map_face(mk.LastShape(), kCapEnd, 0, 0);
+    for (size_t l = 0; l < grid.size(); l++) {
+      for (size_t g = 0; g < grid[l].size(); g++) {
+        for (TopTools_ListIteratorOfListOfShape it(mk.Generated(grid[l][g])); it.More(); it.Next()) {
+          map_face(it.Value(), kSide, (uint32_t)l, (uint32_t)g);
+        }
       }
     }
     return out;
@@ -527,6 +559,47 @@ std::unique_ptr<Shape> loft(const rust::Vec<ProfileData>& sections, bool ruled) 
     for (size_t g = 0; g < grid[0].size(); g++) {
       add_created(*out, faces, gen.GeneratedFace(grid[0][g]), kSide, 0, (uint32_t)g);
     }
+    return out;
+  });
+}
+
+std::unique_ptr<Shape> loft_guided(const rust::Vec<ProfileData>& sections, const PathData& guide) {
+  return guarded("guided loft", [&]() {
+    if (sections.size() < 2) throw std::runtime_error("a loft needs at least two sections");
+    TopoDS_Wire spine = make_wire(guide.frame, guide.segs);
+    // the vertices of the spine in order from its start to its end
+    std::vector<TopoDS_Vertex> verts;
+    for (BRepTools_WireExplorer we(spine); we.More(); we.Next()) {
+      if (verts.empty()) verts.push_back(TopExp::FirstVertex(we.Current(), Standard_True));
+      verts.push_back(TopExp::LastVertex(we.Current(), Standard_True));
+      if (we.Orientation() == TopAbs_REVERSED) {
+        verts[verts.size() - 2] = TopExp::LastVertex(we.Current(), Standard_True);
+        verts[verts.size() - 1] = TopExp::FirstVertex(we.Current(), Standard_True);
+      }
+    }
+    if (verts.size() != sections.size()) {
+      throw std::runtime_error("a guided loft needs one section for each vertex of the guide (" +
+                               std::to_string(verts.size()) + " vertices, " +
+                               std::to_string(sections.size()) + " sections)");
+    }
+    EdgeGrid grid;
+    grid.resize(1);
+    BRepOffsetAPI_MakePipeShell mk(spine);
+    mk.SetMode(Standard_False);
+    for (size_t i = 0; i < sections.size(); i++) {
+      if (sections[i].loops.size() != 1) throw std::runtime_error("loft sections must not have holes");
+      TopoDS_Wire w = (i == 0) ? make_wire(sections[i].frame, sections[i].loops[0].segs, &grid[0])
+                               : outer_wire(sections[i]);
+      mk.Add(w, verts[i], Standard_False, Standard_False);
+    }
+    mk.Build();
+    if (!mk.IsDone()) throw std::runtime_error("guided loft failed");
+    if (!mk.MakeSolid()) throw std::runtime_error("guided loft did not close into a solid");
+    auto out = wrap(orient_positive(mk.Shape()));
+    auto faces = face_map(out->s);
+    add_created(*out, faces, mk.FirstShape(), kCapStart, 0, 0);
+    add_created(*out, faces, mk.LastShape(), kCapEnd, 0, 0);
+    created_sides(*out, mk, grid, faces);
     return out;
   });
 }
@@ -885,8 +958,15 @@ Props properties(const Shape& sh) {
   return guarded("properties", [&]() {
     const TopoDS_Shape& s = sh.s;
     Props out;
+    // Integrate to a relative precision of 1e-12 (the adaptive estimate is pessimistic: 1e-9 leaves ~4e-7 on an ellipse): the default quadrature is only good to about 1e-6
+    // on curved faces, which would show up as differences between a shape and its STEP round trip.
     GProp_GProps v;
-    BRepGProp::VolumeProperties(s, v);
+    try {
+      BRepGProp::VolumeProperties(s, v, 1e-12, Standard_False);
+    } catch (const Standard_Failure&) {
+      v = GProp_GProps();
+      BRepGProp::VolumeProperties(s, v);
+    }
     out.volume = v.Mass();
     gp_Pnt c = v.CentreOfMass();
     out.com = Vec3{c.X(), c.Y(), c.Z()};
@@ -895,7 +975,12 @@ Props properties(const Shape& sh) {
     for (int i = 0; i < 3; i++)
       for (int j = 0; j < 3; j++) out.inertia[i * 3 + j] = m(i + 1, j + 1);
     GProp_GProps sp;
-    BRepGProp::SurfaceProperties(s, sp);
+    try {
+      BRepGProp::SurfaceProperties(s, sp, 1e-12);
+    } catch (const Standard_Failure&) {
+      sp = GProp_GProps();
+      BRepGProp::SurfaceProperties(s, sp);
+    }
     out.area = sp.Mass();
     Bnd_Box box;
     BRepBndLib::AddOptimal(s, box, Standard_False, Standard_False);
@@ -930,6 +1015,14 @@ std::mutex& step_mutex() {
   return m;
 }
 
+// OpenCASCADE prints transfer statistics to standard output; our commands print JSON there.
+void silence_messages() {
+  static std::once_flag once;
+  std::call_once(once, []() {
+    Message::DefaultMessenger()->RemovePrinters(STANDARD_TYPE(Message_PrinterOStream));
+  });
+}
+
 struct Scratch {
   std::string path;
   explicit Scratch(const char* ext) : path(scratch_path(ext)) {}
@@ -945,6 +1038,7 @@ rust::Vec<uint8_t> export_step(const Shape& sh, rust::Str name, rust::Str config
                                rust::Str material, double density_g_cm3) {
   return guarded("export_step", [&]() {
     std::lock_guard<std::mutex> lock(step_mutex());
+    silence_messages();
     Handle(XCAFApp_Application) app = XCAFApp_Application::GetApplication();
     Handle(TDocStd_Document) doc;
     app->NewDocument("MDTV-XCAF", doc);
@@ -991,6 +1085,7 @@ rust::Vec<uint8_t> export_step(const Shape& sh, rust::Str name, rust::Str config
 std::unique_ptr<Shape> import_step(rust::Slice<const uint8_t> bytes) {
   return guarded("import_step", [&]() {
     std::lock_guard<std::mutex> lock(step_mutex());
+    silence_messages();
     std::string text(reinterpret_cast<const char*>(bytes.data()), bytes.size());
     std::istringstream is(text);
     STEPControl_Reader reader;

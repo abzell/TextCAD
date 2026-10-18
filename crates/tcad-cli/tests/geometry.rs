@@ -462,4 +462,25 @@ mod with_occt {
         assert_eq!(code, 1);
         assert!(out.contains("w: 30 mm -> 40 mm"), "{out}");
     }
+
+    /// OpenCASCADE must not write to standard output: it carries our JSON.
+    #[test]
+    fn standard_output_is_clean_json() {
+        let d = Dir::new("stdout");
+        let f = d.write("plate.tcad", PLATE);
+        let path = f.display().to_string();
+        for args in [
+            vec!["build", "--json", path.as_str()],
+            vec!["props", "--json", path.as_str()],
+            vec!["verify", "--json", path.as_str()],
+        ] {
+            let out = std::process::Command::new(env!("CARGO_BIN_EXE_tcad"))
+                .args(&args)
+                .output()
+                .expect("run tcad");
+            let text = String::from_utf8(out.stdout).expect("utf8");
+            serde_json::from_str::<Value>(&text)
+                .unwrap_or_else(|e| panic!("{args:?}: {e}\n{text}"));
+        }
+    }
 }

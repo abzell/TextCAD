@@ -1,0 +1,15 @@
+tcad 0.1
+
+part nam_shell_box "Open box with a cross hole (naming robustness)" {
+  param w = 80 mm range(60 mm, 100 mm)
+  param d = 50 mm range(40 mm, 70 mm)
+  param h = 40 mm range(30 mm, 50 mm)
+  param tw = 3 mm range(2 mm, 4 mm)
+
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=w h=d
+  }
+  extrude body from s.r distance=h
+  shell cup faces=[body.cap_end] thickness=tw
+  hole port on=body.side(s.r.left) at=(-(d / 2), h / 2) d=8 mm end=through_all
+}

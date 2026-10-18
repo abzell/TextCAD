@@ -72,11 +72,12 @@ by tag, semantic ID or query (`spec/naming.md`). Their results are named as list
 origin, z along the outward normal, x horizontal (`Z cross n`; world X for horizontal faces), y
 `n cross x`. A hole drills along `-z` of its frame (into the material when `on` is a face); `flip`
 reverses it. Through holes reach past the whole body; a blind hole's `depth` is measured from the
-surface. A hole tool sticks 0.5 mm out of the surface so the cut is clean.
+surface. A hole on a face starts 0.5 mm above the surface so the cut is clean; a hole on a datum plane starts exactly at the plane.
 
 **Tapped holes** are drilled at the tap drill diameter (`d` if given, otherwise from the thread:
 `M8` / `M8x1.25` give `nominal - pitch`, `1/2-13 UNC` gives `nominal - 1/tpi`) and the thread
-designation is stored as metadata in the manifest. Threads are cosmetic in Phase 1.
+designation is stored as metadata in the manifest. A tapped hole may also have `cbore_d` and `cbore_depth`
+(for example the seal face of an O-ring port). Threads are cosmetic in Phase 1.
 
 **Chamfer distances.** `d` is measured on the adjacent face whose name sorts first, so the choice
 never depends on kernel numbering; `d2` on the other face.

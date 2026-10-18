@@ -37,6 +37,8 @@ All notable changes are recorded here. Format follows [Keep a Changelog](https:/
   (T1/T2/T3), `tcad diff`, mass and inertia tensor in `tcad props`, `result.step` and `mesh.glb` in
   the cache, `tcad-io`, STEP round trip and independent-reader checks over the corpus,
   `spec/io.md`, `docs/interop.md`, ADR 0011.
+- M8 (so far): 43 corpus parts including six hydraulic components and guided lofts (`loft ... guides=`),
+  a deterministic drafted extrusion, properties integrated to 1e-12, a Windows OpenCASCADE CI job.
 
 ### Changed
 - Replaced the MIT `LICENSE` with Apache-2.0 (locked decision, requirements section 2).

@@ -121,3 +121,13 @@ and broke the T1 comparison; both now work on a copy.
 
 Deferred: the manual spot check in commercial CAD (docs/interop.md), STEP assemblies, GLB materials per
 face. The hydraulic parts and FreeCAD opening in CI belong to M8.
+
+## M8 (in progress): corpus
+
+- 43 corpus parts: guided loft, every extrude end condition, variable fillet, ruled loft, sweep, booleans,
+  four more naming-robustness parts (up to 81 swept parameter sets), six hydraulic parts.
+  `spec/examples/rod_clevis.tcad` is the clevis part and builds.
+- Findings: `LocOpe_DPrism` (drafted extrusion) is not deterministic across runs, so a drafted extrusion is
+  now a straight prism plus `DraftAngle`; OpenCASCADE's default volume quadrature differs by up to 4e-6
+  between a shape and its STEP round trip, so properties are integrated to 1e-12; holes on datum planes
+  no longer start 0.5 mm behind the plane.

@@ -1,0 +1,30 @@
+{
+  "note": "A 120 x 60 x 40 block with a 12 mm gallery drilled from one end, an 8 mm cross drill, four M18x1.5 ports (a linear pattern) that meet the gallery, and four mounting holes (a pattern of a pattern).",
+  "volume_mm3": 248128.1099425181,
+  "area_mm2": 40139.991520604395,
+  "center_of_mass_mm": [
+    60.25069120367662,
+    30.05064468760752,
+    19.37264526286332
+  ],
+  "bbox_min_mm": [
+    -1.0000000133226763e-07,
+    -1.0000000088817842e-07,
+    0.0
+  ],
+  "bbox_max_mm": [
+    120.0,
+    60.0,
+    40.0000001
+  ],
+  "topology": {
+    "solids": 1
+  },
+  "baseline": [
+    "volume_mm3",
+    "area_mm2",
+    "center_of_mass_mm",
+    "bbox_min_mm",
+    "bbox_max_mm"
+  ]
+}

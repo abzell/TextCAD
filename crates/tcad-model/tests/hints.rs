@@ -2,7 +2,7 @@
 
 use tcad_model::{Geometry, analyze, solve_hints};
 
-const CLEVIS: &str = include_str!("../../../spec/examples/rod_clevis.tcad");
+const CLEVIS: &str = include_str!("fixtures/clevis_sketch.tcad");
 
 fn geometries(src: &str) -> Vec<(String, Geometry)> {
     let a = analyze(src);

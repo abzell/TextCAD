@@ -131,6 +131,7 @@ pub mod ffi {
             has_guide: bool,
         ) -> Result<UniquePtr<Shape>>;
         fn loft(sections: &Vec<ProfileData>, ruled: bool) -> Result<UniquePtr<Shape>>;
+        fn loft_guided(sections: &Vec<ProfileData>, guide: &PathData) -> Result<UniquePtr<Shape>>;
         fn boolean_op(op: u32, a: &Shape, b: &Shape, tolerance: f64) -> Result<UniquePtr<Shape>>;
         fn fillet(s: &Shape, edges: &[u32], radii: &[f64]) -> Result<UniquePtr<Shape>>;
         fn chamfer(

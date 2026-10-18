@@ -180,14 +180,17 @@ fn every_measured_corpus_part_matches() {
                 "{name}: STEP round trip box"
             );
         }
-        // T1: building again gives the same canonical B-rep, byte for byte
-        let again = build(&k, &model, None).unwrap().shape.unwrap();
-        assert_eq!(
-            k.canonical_brep(shape).unwrap(),
-            k.canonical_brep(&again).unwrap(),
-            "{name}: not deterministic"
-        );
+        // T1: building again gives the same canonical B-rep, byte for byte (three builds in all)
+        let first = k.canonical_brep(shape).unwrap();
+        for _ in 0..2 {
+            let again = build(&k, &model, None).unwrap().shape.unwrap();
+            assert_eq!(
+                first,
+                k.canonical_brep(&again).unwrap(),
+                "{name}: not deterministic"
+            );
+        }
         checked += 1;
     }
-    assert!(checked >= 21, "only {checked} measured parts found");
+    assert!(checked >= 27, "only {checked} measured parts found");
 }

@@ -75,6 +75,10 @@ impl Kernel for MockKernel {
         unsupported("loft")
     }
 
+    fn loft_guided(&self, _: &[Profile], _: &Path) -> KResult<MockShape> {
+        unsupported("guided lofts")
+    }
+
     fn boolean(&self, _: BoolOp, _: &MockShape, _: &MockShape, _: f64) -> KResult<MockShape> {
         unsupported("boolean operations")
     }

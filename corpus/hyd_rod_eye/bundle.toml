@@ -1,0 +1,5 @@
+format = "0.1"
+name = "hyd_rod_eye"
+entry = "parts/hyd_rod_eye.tcad"
+units = "mm"
+license = "Apache-2.0"

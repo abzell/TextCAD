@@ -3,7 +3,7 @@
 use tcad_expr::Value;
 use tcad_model::{Analysis, ItemKind, analyze};
 
-const CLEVIS: &str = include_str!("../../../spec/examples/rod_clevis.tcad");
+const CLEVIS: &str = include_str!("fixtures/clevis_sketch.tcad");
 
 /// Codes of everything except informational notes.
 fn codes(a: &Analysis) -> Vec<&'static str> {

@@ -1,0 +1,16 @@
+tcad 0.1
+
+part nam_flange_pattern "Flange with a bolt circle (naming robustness)" {
+  param r_out = 50 mm range(40 mm, 70 mm)
+  param t = 10 mm range(6 mm, 14 mm)
+  param rb = 30 mm range(25 mm, 35 mm)
+
+  sketch s on plane.XY {
+    circle c center=(0 mm, 0 mm) r=r_out
+  }
+  extrude disc from s.c distance=t
+  hole bore on=disc.cap_end at=(0 mm, 0 mm) d=20 mm end=through_all
+  hole bolt on=disc.cap_end at=(rb, 0 mm) d=6 mm end=through_all
+  circular_pattern bolts of=bolt axis=axis.Z count=6
+  chamfer rims edges=[edge(disc.cap_end & bore.wall), edge(disc.cap_end & bolts.i3.wall)] d=1.5 mm
+}

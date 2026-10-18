@@ -1,0 +1,5 @@
+format = "0.1"
+name = "hyd_rod_clevis"
+entry = "parts/hyd_rod_clevis.tcad"
+units = "mm"
+license = "Apache-2.0"

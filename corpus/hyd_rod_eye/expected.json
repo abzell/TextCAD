@@ -1,0 +1,30 @@
+{
+  "note": "A 50 mm eye, 20 mm wide, with a 32 mm bore for a spherical plain bearing (chamfered both sides) and an M12x1.25 tapped hole in the shank.",
+  "volume_mm3": 27239.9150984189,
+  "area_mm2": 9566.786475345833,
+  "center_of_mass_mm": [
+    5.813737729943058,
+    1.3339490220201994e-12,
+    -2.990121946024547e-11
+  ],
+  "bbox_min_mm": [
+    -25.0000001,
+    -10.000000100000005,
+    -25.000000100000005
+  ],
+  "bbox_max_mm": [
+    50.0000001,
+    10.000000100000005,
+    25.000000100000005
+  ],
+  "topology": {
+    "solids": 1
+  },
+  "baseline": [
+    "volume_mm3",
+    "area_mm2",
+    "center_of_mass_mm",
+    "bbox_min_mm",
+    "bbox_max_mm"
+  ]
+}

@@ -1,0 +1,24 @@
+tcad 0.1
+
+part nam_pocket_tags "Pocketed plate (naming robustness)" {
+  param w = 80 mm range(60 mm, 120 mm)
+  param d = 50 mm range(40 mm, 80 mm)
+  param h = 20 mm range(14 mm, 30 mm)
+  param dp = 8 mm range(4 mm, 12 mm)
+
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=w h=d
+  }
+  extrude plate from s.r distance=h
+
+  sketch cut on plate.cap_end {
+    rect r corner=(15 mm, 10 mm) w=w - 30 mm h=d - 20 mm
+  }
+  extrude pocket from cut.r distance=-dp op=subtract
+
+  tag floor_face = pocket.cap_end
+  tag rim = edge(plate.cap_end & pocket.side(cut.r.left))
+
+  hole drain on=floor_face at=(w / 2, d / 2) d=6 mm end=through_all
+  chamfer rim_chamfer edges=[rim] d=1 mm
+}

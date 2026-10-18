@@ -36,6 +36,7 @@ std::unique_ptr<Shape> revolve(const ProfileData& p, Vec3 origin, Vec3 dir, doub
 std::unique_ptr<Shape> sweep(const ProfileData& p, const PathData& path, const PathData& guide,
                              bool has_guide);
 std::unique_ptr<Shape> loft(const rust::Vec<ProfileData>& sections, bool ruled);
+std::unique_ptr<Shape> loft_guided(const rust::Vec<ProfileData>& sections, const PathData& guide);
 std::unique_ptr<Shape> boolean_op(uint32_t op, const Shape& a, const Shape& b, double tolerance);
 std::unique_ptr<Shape> fillet(const Shape& s, rust::Slice<const uint32_t> edges,
                               rust::Slice<const double> radii);

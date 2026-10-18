@@ -15,6 +15,16 @@ import sys
 import tempfile
 
 from build123d import import_step
+from OCP.BRepGProp import BRepGProp
+from OCP.GProp import GProp_GProps
+
+
+def precise(shape):
+    """Volume and area integrated to a relative precision of 1e-12 (the default is only good to ~1e-6)."""
+    v, a = GProp_GProps(), GProp_GProps()
+    BRepGProp.VolumeProperties_s(shape.wrapped, v, 1e-12, False)
+    BRepGProp.SurfaceProperties_s(shape.wrapped, a, 1e-12)
+    return v.Mass(), a.Mass()
 
 
 def main():
@@ -40,10 +50,11 @@ def main():
             shape = import_step(out)
             bb = shape.bounding_box()
             problems = []
-            if abs(shape.volume - exp["volume_mm3"]) > 1e-6 * max(1.0, exp["volume_mm3"]):
-                problems.append(f"volume {shape.volume} vs {exp['volume_mm3']}")
-            if abs(shape.area - exp["area_mm2"]) > 1e-6 * max(1.0, exp["area_mm2"]):
-                problems.append(f"area {shape.area} vs {exp['area_mm2']}")
+            volume, area = precise(shape)
+            if abs(volume - exp["volume_mm3"]) > 1e-6 * max(1.0, exp["volume_mm3"]):
+                problems.append(f"volume {volume} vs {exp['volume_mm3']}")
+            if abs(area - exp["area_mm2"]) > 1e-6 * max(1.0, exp["area_mm2"]):
+                problems.append(f"area {area} vs {exp['area_mm2']}")
             for got, want in zip([bb.min.X, bb.min.Y, bb.min.Z, bb.max.X, bb.max.Y, bb.max.Z],
                                  exp["bbox_min_mm"] + exp["bbox_max_mm"]):
                 if abs(got - want) > 1e-5:

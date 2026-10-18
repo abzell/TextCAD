@@ -1,0 +1,5 @@
+format = "0.1"
+name = "feat_loft_ruled"
+entry = "parts/feat_loft_ruled.tcad"
+units = "mm"
+license = "Apache-2.0"

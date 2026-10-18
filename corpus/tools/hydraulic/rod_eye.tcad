@@ -1,0 +1,27 @@
+tcad 0.1
+
+part rod_eye "Rod eye with a spherical bearing bore" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param eye_od = 50 mm range(40 mm, 80 mm)
+  param eye_w = 20 mm range(12 mm, 40 mm)
+  param bore = 32 mm range(20 mm, 50 mm)
+  param shank_d = 18 mm range(14 mm, 19 mm)
+  param shank_len = 50 mm range(30 mm, 100 mm)
+  param thread = "M12x1.25"
+
+  sketch eye_sk on plane.XZ {
+    circle c center=(0 mm, 0 mm) r=eye_od / 2
+  }
+  extrude eye from eye_sk.c distance=eye_w symmetric
+
+  sketch shank_sk on plane.YZ {
+    circle c center=(0 mm, 0 mm) r=shank_d / 2
+  }
+  extrude shank from shank_sk.c distance=shank_len
+
+  hole seat on=eye.cap_start at=(0 mm, 0 mm) d=bore end=through_all
+  hole rod_thread on=shank.cap_end at=(0 mm, 0 mm) thread=thread depth=24 mm
+  chamfer seat_edges edges=[edge(eye.cap_start & seat.wall), edge(eye.cap_end & seat.wall)] d=1.5 mm
+}

@@ -1,11 +1,11 @@
 {
   "note": "All four sides drafted by 3 degrees about the bottom: a square frustum.",
   "volume_mm3": 30352.24786645607,
-  "area_mm2": 6157.113612591904,
+  "area_mm2": 6157.113612591903,
   "center_of_mass_mm": [
     20.0,
     20.0,
-    9.820649886298092
+    9.82064988629809
   ],
   "bbox_min_mm": [
     0,

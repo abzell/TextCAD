@@ -1,0 +1,27 @@
+{
+  "note": "Straight-sided loft: a square frustum, volume h/3 (A1 + A2 + sqrt(A1 A2)).",
+  "volume_mm3": 28000.0,
+  "area_mm2": 5794.733192202057,
+  "center_of_mass_mm": [
+    1.1769211854993586e-15,
+    8.770127481381807e-16,
+    11.785714285714285
+  ],
+  "bbox_min_mm": [
+    -20,
+    -20,
+    0
+  ],
+  "bbox_max_mm": [
+    20,
+    20,
+    30
+  ],
+  "topology": {
+    "solids": 1
+  },
+  "baseline": [
+    "area_mm2",
+    "center_of_mass_mm"
+  ]
+}

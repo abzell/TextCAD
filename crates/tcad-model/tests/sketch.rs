@@ -3,7 +3,7 @@
 use tcad_diag::Severity;
 use tcad_model::{Analysis, Geometry, analyze};
 
-const CLEVIS: &str = include_str!("../../../spec/examples/rod_clevis.tcad");
+const CLEVIS: &str = include_str!("fixtures/clevis_sketch.tcad");
 
 fn sketch(body: &str) -> String {
     format!("tcad 0.1\n\npart p {{\n  sketch s on plane.XY {{\n{body}\n  }}\n}}\n")

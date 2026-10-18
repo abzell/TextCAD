@@ -306,3 +306,22 @@ fn failures_name_the_feature_and_stop() {
     let d = run(open).err().unwrap();
     assert!(d[0].message.contains("not closed"), "{}", d[0].message);
 }
+
+#[test]
+fn drafted_extrusion_offsets_the_whole_profile_so_holes_grow() {
+    let p = props(
+        "
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=20 mm h=20 mm
+    circle c center=(10 mm, 10 mm) r=4 mm
+  }
+  extrude e from s distance=10 mm draft=5 deg
+",
+    );
+    let t = 5.0_f64.to_radians().tan();
+    let w2 = 20.0 - 2.0 * 10.0 * t;
+    let (r1, r2) = (4.0, 4.0 + 10.0 * t);
+    let outer = 10.0 / 3.0 * (400.0 + w2 * w2 + 20.0 * w2);
+    let hole = PI * 10.0 / 3.0 * (r1 * r1 + r1 * r2 + r2 * r2);
+    near(p.volume, outer - hole, "drafted extrusion with a hole");
+}

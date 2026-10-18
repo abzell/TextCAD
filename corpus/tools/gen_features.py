@@ -11,78 +11,12 @@ checked against our own results at tier T2 in CI. Sweeps list, for every swept p
 closed-form volume and bounding box.
 """
 import itertools
-import json
 import math
-import os
-import subprocess
 import sys
 
-PI = math.pi
-ROOT = os.path.join(os.path.dirname(__file__), "..")
-PY = os.environ.get("B123_PYTHON", "/tmp/b123/bin/python")
+sys.path.insert(0, __import__('os').path.dirname(__file__))
 
-
-def write(path, text):
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "w") as f:
-        f.write(text)
-
-
-def part_source(name, title, body):
-    return f'tcad 0.1\n\npart {name} "{title}" {{\n{body}}}\n'
-
-
-REF_HEAD = (
-    '"""Independent build123d model of the same part (CI only; never part of the product)."""\n'
-    "import json\n"
-    "from math import cos, sin, pi, tan, radians\n"
-    "from build123d import *\n\n"
-)
-REF_TAIL = (
-    "bb = shape.bounding_box()\n"
-    "c = shape.center()\n"
-    "print(json.dumps({\n"
-    '    "volume_mm3": shape.volume, "area_mm2": shape.area,\n'
-    '    "center_of_mass_mm": [c.X, c.Y, c.Z],\n'
-    '    "bbox_min_mm": [bb.min.X, bb.min.Y, bb.min.Z], "bbox_max_mm": [bb.max.X, bb.max.Y, bb.max.Z],\n'
-    '    "topology": {"solids": len(shape.solids()), "faces": len(shape.faces()),\n'
-    '                 "edges": len(shape.edges()), "vertices": len(shape.vertices())},\n'
-    "}))\n"
-)
-
-
-def run_reference(code):
-    out = subprocess.run([PY, "-c", REF_HEAD + code + "\n" + REF_TAIL], capture_output=True, text=True)
-    if out.returncode != 0:
-        sys.exit(f"build123d failed:\n{out.stderr}")
-    return json.loads(out.stdout.strip().splitlines()[-1])
-
-
-def emit(name, title, body, note, volume, lo, hi, ref, sweeps=None):
-    got = run_reference(ref)
-    if abs(got["volume_mm3"] - volume) > 1e-6 * max(1.0, volume):
-        sys.exit(f"{name}: closed-form volume {volume} disagrees with build123d {got['volume_mm3']}")
-    for a, b in zip(got["bbox_min_mm"] + got["bbox_max_mm"], list(lo) + list(hi)):
-        if abs(a - b) > 1e-5:
-            sys.exit(f"{name}: closed-form bounding box disagrees with build123d")
-    expected = {
-        "note": note,
-        "volume_mm3": volume,
-        "area_mm2": got["area_mm2"],
-        "center_of_mass_mm": got["center_of_mass_mm"],
-        "bbox_min_mm": list(lo),
-        "bbox_max_mm": list(hi),
-        "topology": {"solids": 1},
-        "baseline": ["area_mm2", "center_of_mass_mm"],
-    }
-    if sweeps:
-        expected["sweeps"] = sweeps
-    d = os.path.join(ROOT, name)
-    write(os.path.join(d, "bundle.toml"), f'format = "0.1"\nname = "{name}"\nentry = "parts/{name}.tcad"\nunits = "mm"\nlicense = "Apache-2.0"\n')
-    write(os.path.join(d, "parts", f"{name}.tcad"), part_source(name, title, body))
-    write(os.path.join(d, "expected.json"), json.dumps(expected, indent=2) + "\n")
-    write(os.path.join(d, "reference.py"), REF_HEAD + ref + "\n" + REF_TAIL)
-    print("wrote", name)
+from corpuslib import *  # noqa: F401,F403
 
 
 PLATE = "  sketch s on plane.XY {\n    rect r corner=(0 mm, 0 mm) w=60 mm h=40 mm\n  }\n  extrude plate from s.r distance=10 mm\n"

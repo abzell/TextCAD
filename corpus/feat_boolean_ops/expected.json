@@ -1,0 +1,27 @@
+{
+  "note": "Two overlapping blocks united, a column drilled through both, then clipped to x <= 50.",
+  "volume_mm3": 34036.50459150638,
+  "area_mm2": 8028.318530717958,
+  "center_of_mass_mm": [
+    25.59296696883994,
+    19.11859339376799,
+    12.059296696883994
+  ],
+  "bbox_min_mm": [
+    0,
+    0,
+    0
+  ],
+  "bbox_max_mm": [
+    50,
+    40,
+    25
+  ],
+  "topology": {
+    "solids": 1
+  },
+  "baseline": [
+    "area_mm2",
+    "center_of_mass_mm"
+  ]
+}

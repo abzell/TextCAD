@@ -193,6 +193,10 @@ pub trait Kernel {
     /// Lofts through the sections in order (smooth, or ruled with straight sides).
     fn loft(&self, sections: &[Profile], ruled: bool) -> KResult<Self::Shape>;
 
+    /// Lofts through sections placed at the vertices of `guide`, in order from its start to its end,
+    /// following the guide as the spine of the loft. The sections are interpolated along the guide.
+    fn loft_guided(&self, sections: &[Profile], guide: &Path) -> KResult<Self::Shape>;
+
     /// Combines two solids. `tolerance` is the modeling tolerance of the part.
     fn boolean(
         &self,

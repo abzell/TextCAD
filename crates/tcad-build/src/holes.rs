@@ -96,8 +96,21 @@ impl<K: Kernel> Cx<'_, K> {
         }
         // where: a frame (a face of the body, a plane or the plane of a sketch) and positions in it
         let mut frame: Option<Frame> = None;
+        // a hole on a face starts a little above it so the cut is clean; on a datum plane (inside the
+        // body, perhaps) it starts exactly at the plane
+        let mut overshoot = OVERSHOOT;
         if let Some(a) = Self::arg(item, "on") {
             frame = Some(self.plane_expr(&a.values[0])?);
+            let is_plane = match &a.values[0].kind {
+                ExprKind::Ref(r) => {
+                    matches!(r.head(), "plane")
+                        || r.simple_name().is_some_and(|n| self.frames.contains_key(n))
+                }
+                _ => false,
+            };
+            if is_plane {
+                overshoot = 0.0;
+            }
         }
         let mut positions: Vec<P2> = Vec::new();
         if let Some(a) = Self::arg(item, "at") {
@@ -216,9 +229,15 @@ impl<K: Kernel> Cx<'_, K> {
         if depth <= 0.0 {
             return self.fail(codes::E5001, item.span, "the hole depth must be positive");
         }
-        let e = OVERSHOOT;
+        let e = overshoot;
+        // a tapped hole may also have a counterbore (a seal face for a port)
+        let profile_kind = if kind == "tapped" && Self::arg(item, "cbore_d").is_some() {
+            "counterbore"
+        } else {
+            kind.as_str()
+        };
         // half-section (radial u, height v above the surface), counterclockwise, axis first
-        let (pts, roles): (Vec<P2>, Vec<Option<&str>>) = match kind.as_str() {
+        let (pts, roles): (Vec<P2>, Vec<Option<&str>>) = match profile_kind {
             "simple" | "tapped" => (
                 vec![[0.0, e], [0.0, -depth], [r, -depth], [r, e]],
                 vec![None, Some("floor"), Some("wall"), None],

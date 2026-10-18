@@ -1,6 +1,6 @@
 //! Semantic analysis must never panic, whatever the input.
 
-const CLEVIS: &str = include_str!("../../../spec/examples/rod_clevis.tcad");
+const CLEVIS: &str = include_str!("fixtures/clevis_sketch.tcad");
 
 struct Rng(u64);
 impl Rng {

@@ -1,0 +1,25 @@
+tcad 0.1
+
+part end_cap "Cylinder end cap with an SAE O-ring port" {
+  tolerance 1e-6 mm
+  material "EN-GJS-400" density=7.1 g/cm^3
+
+  param cap_od = 120 mm range(100 mm, 160 mm)
+  param cap_t = 25 mm range(20 mm, 40 mm)
+  param pilot_d = 80 mm range(60 mm, 100 mm)
+
+  sketch cap_sk on plane.XY {
+    circle c center=(0 mm, 0 mm) r=cap_od / 2
+  }
+  extrude cap from cap_sk.c distance=cap_t
+
+  sketch pilot_sk on plane.XY {
+    circle c center=(0 mm, 0 mm) r=pilot_d / 2
+  }
+  extrude pilot from pilot_sk.c distance=-6 mm
+
+  hole port on=cap.cap_end at=(0 mm, 0 mm) thread="7/8-14 UNF" cbore_d=30 mm cbore_depth=2 mm depth=16 mm
+  hole tie on=cap.cap_end at=(50 mm, 0 mm) d=14 mm end=through_all
+  circular_pattern ties of=tie axis=axis.Z count=4
+  chamfer rim edges=[edge(cap.cap_end & cap.side(cap_sk.c))] d=2 mm
+}

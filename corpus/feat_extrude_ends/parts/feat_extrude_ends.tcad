@@ -1,0 +1,29 @@
+tcad 0.1
+
+part feat_extrude_ends "Plate with one boss for every extrude end condition" {
+  sketch base on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=60 mm h=40 mm
+  }
+  extrude plate from base.r distance=10 mm
+  sketch boss1 on plane.XY {
+    circle c center=(10 mm, 10 mm) r=5 mm
+  }
+  extrude centered from boss1.c distance=30 mm symmetric
+  sketch boss2 on plane.XY {
+    circle c center=(30 mm, 10 mm) r=4 mm
+  }
+  extrude two_sided from boss2.c distance=20 mm distance2=5 mm
+  plane stop from=plane.XY offset=25 mm
+  sketch boss3 on plane.XY {
+    circle c center=(50 mm, 10 mm) r=3 mm
+  }
+  extrude up_to from boss3.c to=stop
+  sketch bore on plane.XY {
+    circle c center=(10 mm, 30 mm) r=3 mm
+  }
+  extrude clear from bore.c op=subtract through_all
+  sketch tower on plate.cap_end {
+    rect r corner=(25 mm, 22 mm) w=10 mm h=10 mm
+  }
+  extrude tapered from tower.r distance=10 mm draft=5 deg
+}

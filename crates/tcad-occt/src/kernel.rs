@@ -160,6 +160,11 @@ impl Kernel for OcctKernel {
         shape(ffi::loft(&data, ruled))
     }
 
+    fn loft_guided(&self, sections: &[Profile], guide: &Path) -> KResult<OcctShape> {
+        let data: Vec<ffi::ProfileData> = sections.iter().map(profile).collect();
+        shape(ffi::loft_guided(&data, &path(guide)))
+    }
+
     fn boolean(
         &self,
         op: BoolOp,

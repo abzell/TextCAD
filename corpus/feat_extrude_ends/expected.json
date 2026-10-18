@@ -1,0 +1,27 @@
+{
+  "note": "Blind, symmetric, two-sided, to a plane, through all (subtract) and drafted, the last on a sketch on a face.",
+  "volume_mm3": 27301.378594343543,
+  "area_mm2": 8554.464913124784,
+  "center_of_mass_mm": [
+    29.367110362759345,
+    19.103716667872504,
+    5.173918937620934
+  ],
+  "bbox_min_mm": [
+    0,
+    0,
+    -15
+  ],
+  "bbox_max_mm": [
+    60,
+    40,
+    25
+  ],
+  "topology": {
+    "solids": 1
+  },
+  "baseline": [
+    "area_mm2",
+    "center_of_mass_mm"
+  ]
+}

@@ -1,0 +1,15 @@
+tcad 0.1
+
+part feat_loft_guided "Tapered tube along a curved guide" {
+  plane stop from=plane.XZ offset=-50 mm
+  sketch start on plane.YZ {
+    circle c center=(0 mm, 0 mm) r=10 mm
+  }
+  sketch end on stop {
+    circle c center=(50 mm, 0 mm) r=5 mm
+  }
+  sketch spine on plane.XY {
+    arc a center=(0 mm, 50 mm) start=(0 mm, 0 mm) end=(50 mm, 50 mm)
+  }
+  loft tube sections=[start.c, end.c] guides=[spine.a]
+}
