@@ -122,12 +122,35 @@ and broke the T1 comparison; both now work on a copy.
 Deferred: the manual spot check in commercial CAD (docs/interop.md), STEP assemblies, GLB materials per
 face. The hydraulic parts and FreeCAD opening in CI belong to M8.
 
-## M8 (in progress): corpus
+## M8: tooling and the full corpus
 
-- 43 corpus parts: guided loft, every extrude end condition, variable fillet, ruled loft, sweep, booleans,
-  four more naming-robustness parts (up to 81 swept parameter sets), six hydraulic parts.
+Done:
+- Corpus of 43 parts: guided loft, every extrude end condition, variable fillet, ruled loft, sweep,
+  booleans, four more naming-robustness parts (up to 81 swept parameter sets), six hydraulic parts.
   `spec/examples/rod_clevis.tcad` is the clevis part and builds.
-- Findings: `LocOpe_DPrism` (drafted extrusion) is not deterministic across runs, so a drafted extrusion is
-  now a straight prism plus `DraftAngle`; OpenCASCADE's default volume quadrature differs by up to 4e-6
-  between a shape and its STEP round trip, so properties are integrated to 1e-12; holes on datum planes
-  no longer start 0.5 mm behind the plane.
+- `tcad-mcp`: 12 tools over the same crates as the CLI, structured validated edits, probe-tag
+  reference resolution, software renderer; a scripted agent builds the rod clevis from an empty bundle
+  and matches `expected.json` (spec/mcp.md, ADR 0012).
+- `tcad-lsp`: diagnostics, completion, hover, definition, rename (verified by re-analysis), formatting,
+  quick fixes, symbols; WASM-capable core with a provider for the persistent names (ADR 0013).
+- `tcad serve` and `viewer/` (three.js, TypeScript): feature tree, source and model linked both ways,
+  re-render on save; Chromium test (Playwright) in CI. `editors/vscode`: language client and viewer
+  webview for VS Code and Theia; compile job in CI.
+- Cross-platform determinism: `corpus/determinism.txt` digests the canonical text and solved sketches
+  of every corpus part; checked on Linux, Windows and under WASI.
+- CI: FreeCAD opens the six hydraulic STEP exports; release workflow (Windows zip and MSI, on a tag or
+  by hand); one-hour parser fuzz workflow (weekly and by hand).
+
+Findings: `LocOpe_DPrism` (drafted extrusion) is not deterministic across runs, so a drafted extrusion
+is now a straight prism plus `DraftAngle`; OpenCASCADE's default volume quadrature differs by up to
+4e-6 between a shape and its STEP round trip, so properties are integrated to 1e-12; holes on datum
+planes no longer start 0.5 mm behind the plane; rename must treat `config` keys as references and
+argument names as not.
+
+Not done / needs a person:
+- A tagged Windows release (acceptance criterion "published from a tagged build"): the workflow exists
+  but no tag has been created; that is the maintainer's decision.
+- The spot check of the hydraulic STEP files in a commercial CAD system (docs/interop.md).
+- The Windows MSI definition (`packaging/windows/tcad.wxs`) has not run on a Windows runner yet; it is
+  exercised by the first release workflow run.
+- The viewer is not exercised inside a real VS Code or Theia window (the extension only compiles in CI).

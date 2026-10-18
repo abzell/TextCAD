@@ -37,8 +37,12 @@ All notable changes are recorded here. Format follows [Keep a Changelog](https:/
   (T1/T2/T3), `tcad diff`, mass and inertia tensor in `tcad props`, `result.step` and `mesh.glb` in
   the cache, `tcad-io`, STEP round trip and independent-reader checks over the corpus,
   `spec/io.md`, `docs/interop.md`, ADR 0011.
-- M8 (so far): 43 corpus parts including six hydraulic components and guided lofts (`loft ... guides=`),
-  a deterministic drafted extrusion, properties integrated to 1e-12, a Windows OpenCASCADE CI job.
+- M8: 43 corpus parts including six hydraulic components and guided lofts (`loft ... guides=`),
+  a deterministic drafted extrusion, properties integrated to 1e-12, a Windows OpenCASCADE CI job;
+  `tcad-mcp` (MCP server, 12 tools, software renderer); `tcad-lsp` (language server); `tcad serve` and
+  the three.js `viewer/`; the VS Code / Theia extension in `editors/vscode`; bit-exact determinism
+  digests checked on Linux, Windows and WASI; FreeCAD import check; release (Windows zip, MSI) and
+  one-hour fuzz workflows; `spec/viewer.md`, `spec/mcp.md`, ADRs 0012 and 0013.
 
 ### Changed
 - Replaced the MIT `LICENSE` with Apache-2.0 (locked decision, requirements section 2).
