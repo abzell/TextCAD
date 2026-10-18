@@ -1,0 +1,173 @@
+(* TextCAD grammar, DRAFT (milestone M1). Normative once the parser (M2) lands.
+
+   Notation: ISO 14977-style EBNF.
+     =  definition        ,  concatenation     |  alternation
+     [ ] optional         { } repetition (zero or more)     ( ) grouping
+     "x" terminal         (* *) comment        ? ? special sequence (described in prose)
+   Names in UPPER_CASE are lexical tokens (see spec/lexical.md); lower_case names are syntactic.
+
+   Whitespace and comments (# ... and slash-star ... star-slash) separate tokens and are kept in the
+   concrete syntax tree. A statement ends at NEWLINE; NEWLINE is ignored inside ( ), [ ] and after a
+   binary operator or ",". Blocks use { } and may span lines. ";" is an optional extra statement
+   separator inside one-line blocks such as config bodies. See "Open questions" at the end. *)
+
+
+(* ---------- file ---------- *)
+
+file            = header , { top_item } ;
+header          = "tcad" , VERSION , NEWLINE ;                  (* VERSION = INT "." INT, e.g. 0.1 *)
+top_item        = part_decl | reserved_stmt ;
+
+
+(* ---------- part ---------- *)
+
+part_decl       = "part" , IDENT , [ STRING ] , "{" , { part_item } , "}" ;
+
+part_item       = tolerance_decl
+                | material_decl
+                | param_decl
+                | import_decl
+                | sketch_decl
+                | ref_geom_stmt
+                | feature_stmt
+                | tag_decl
+                | config_decl
+                | reserved_stmt ;
+
+tolerance_decl  = "tolerance" , quantity ;                      (* default 1e-6 mm *)
+material_decl   = "material" , STRING , { named_arg } ;         (* density=7.85 g/cm^3 *)
+
+param_decl      = "param" , IDENT , "=" , ( expr | STRING ) ,
+                  [ "range" , "(" , expr , "," , expr , ")" ] ,
+                  [ "doc" , STRING ] ;
+
+import_decl     = "import" , IDENT , "=" , "step" , "(" , STRING , ")" ;
+
+tag_decl        = "tag" , IDENT , "=" , reference ;
+
+config_decl     = "config" , [ "default" ] , IDENT , "{" , { config_item , [ ";" ] } , "}" ;
+config_item     = IDENT , "=" , ( expr | STRING )               (* parameter override *)
+                | "suppress" , reference , { "," , reference } ;
+
+
+(* ---------- reference geometry and features ---------- *)
+
+(* Reference geometry: origin, base planes, offset/angled/3-point planes, axes, points, csys. *)
+ref_geom_stmt   = ref_geom_kw , IDENT , { arg } , [ suppress_clause ] ;
+ref_geom_kw     = "plane" | "axis" | "point" | "csys" ;
+
+(* Feature statements. The per-feature argument schema (required/optional args, spec order for the
+   canonical formatter, topology roles) is defined in spec/features.md, not here. *)
+feature_stmt    = feature_kw , IDENT , { arg } , [ suppress_clause ] ;
+feature_kw      = "extrude" | "revolve" | "sweep" | "loft"
+                | "hole" | "fillet" | "chamfer" | "shell" | "draft" | "rib"
+                | "linear_pattern" | "circular_pattern" | "mirror" ;      (* provisional *)
+
+suppress_clause = "suppress" , "if" , expr ;                    (* the only conditional *)
+
+arg             = named_arg | from_clause | flag ;
+named_arg       = IDENT , "=" , value_list ;
+from_clause     = "from" , reference ;                          (* extrude body from side.outline *)
+flag            = IDENT ;                                       (* symmetric, through_all, ... *)
+value_list      = value , { "," , value } ;                     (* see open question 3 *)
+
+value           = expr | direction | vector | list | query | STRING ;
+vector          = "(" , expr , "," , expr , { "," , expr } , ")" ;
+list            = "[" , [ value , { "," , value } ] , "]" ;
+direction       = ( "+" | "-" ) , AXIS_NAME ;                   (* +Y, -Z *)
+
+
+(* ---------- sketch ---------- *)
+
+sketch_decl     = "sketch" , IDENT , "on" , reference , "{" , { sketch_item } , "}" ;
+sketch_item     = entity_stmt | constraint_stmt | reserved_stmt ;
+
+entity_stmt     = entity_kw , IDENT , { arg } , [ "construction" ] , [ hint ] ;
+entity_kw       = "point" | "line" | "arc" | "circle" | "ellipse" | "spline"
+                | "slot" | "rect" | "polygon" | "project" ;      (* provisional *)
+
+(* constrain coincident(a, b) ;  constrain distance(a, b) = 12 mm *)
+constraint_stmt = "constrain" , IDENT , "(" , [ reference , { "," , reference } ] , ")" ,
+                  [ "=" , expr ] ;
+
+hint            = "@hint" , "(" , expr , { "," , expr } , ")" ;  (* solver output, written by fmt --solve *)
+
+
+(* ---------- references (spec/naming.md) ---------- *)
+
+(* Resolution order: tag, then semantic ID, then query. All three share this syntax; the resolver
+   decides which one a reference is. *)
+reference       = path_segment , { "." , path_segment } , [ "#" , INT ] ;
+path_segment    = ( IDENT | AXIS_NAME ) , [ "(" , [ gen_arg , { gen_sep , gen_arg } ] , ")" ] ;
+gen_arg         = reference | direction ;
+gen_sep         = "," | "&" ;                                   (* a & b: intersection of generators *)
+
+query           = "query" , "(" , entity_kind , { "," , IDENT , "=" , value } , ")" ;
+entity_kind     = "faces" | "edges" | "vertices" ;
+(* Filters: type, normal, parallel_to, axis, radius, created_by, adjacent_to, nearest, largest,
+   smallest. Their value types are fixed in spec/naming.md. *)
+
+
+(* ---------- expressions (spec/expressions.md) ---------- *)
+
+expr            = or_expr ;
+or_expr         = and_expr , { "or" , and_expr } ;
+and_expr        = not_expr , { "and" , not_expr } ;
+not_expr        = [ "not" ] , cmp_expr ;
+cmp_expr        = add_expr , [ ( "==" | "!=" | "<" | "<=" | ">" | ">=" ) , add_expr ] ;
+add_expr        = mul_expr , { ( "+" | "-" ) , mul_expr } ;
+mul_expr        = unary_expr , { ( "*" | "/" ) , unary_expr } ;
+unary_expr      = [ "-" ] , pow_expr ;
+pow_expr        = primary , [ "^" , unary_expr ] ;               (* right associative *)
+primary         = quantity
+                | NUMBER                                         (* dimensionless only *)
+                | "true" | "false"
+                | call
+                | reference                                      (* parameter or entity property *)
+                | "(" , expr , ")"
+                | vector ;
+call            = FUNC_NAME , "(" , [ expr , { "," , expr } ] , ")" ;
+FUNC_NAME       = "min" | "max" | "abs" | "sqrt" | "sin" | "cos" | "tan"
+                | "asin" | "acos" | "atan" | "atan2" | "floor" | "ceil" | "round" ;
+
+quantity        = NUMBER , unit ;
+unit            = unit_term , { ( "*" | "/" ) , unit_term } ;
+unit_term       = UNIT_NAME , [ "^" , INT ] ;
+UNIT_NAME       = "mm" | "cm" | "m" | "in" | "ft" | "deg" | "rad" | "kg" | "g" | "lb" ;
+                  (* composites such as kg/m^3 and g/cm^3 come from unit_term "/" unit_term *)
+
+
+(* ---------- reserved for later phases (requirements 4.8) ---------- *)
+
+(* Parsed so Phase 1 files stay valid later, then rejected with E0001 "feature not yet supported".
+   The parser consumes the rest of the statement, or a balanced { } block if one follows. *)
+reserved_stmt   = RESERVED_KW , ? tokens up to end of statement or balanced block ? ;
+RESERVED_KW     = "assembly" | "instance" | "mate" | "skeleton" | "bom" | "pmi" | "datum_feature"
+                | "gdt" | "drawing" | "view" | "section" | "surface" | "boundary" | "fill"
+                | "sheet_metal" | "flange" | "bend" | "flat_pattern" | "weldment" | "direct_edit" ;
+
+
+(* ---------- lexical tokens (details in spec/lexical.md) ---------- *)
+
+IDENT           = ( "a".."z" | "_" ) , { "a".."z" | "0".."9" | "_" } ;   (* not a keyword *)
+AXIS_NAME       = "X" | "Y" | "Z" | "XY" | "YZ" | "XZ" ;
+INT             = digit , { digit } ;
+NUMBER          = INT , [ "." , INT ] , [ ( "e" | "E" ) , [ "+" | "-" ] , INT ] ;
+STRING          = '"' , { ? any UTF-8 char except '"' and newline, or an escape ? } , '"' ;
+NEWLINE         = ? LF ? ;
+digit           = "0".."9" ;
+
+
+(* ---------- open questions, to settle in M2 via ADR ---------- *)
+
+(* 1. Statement termination: newline-terminated as drafted, or explicit ";"? Newline keeps diffs
+      line-oriented (goal 3) but needs the continuation rules above.
+   2. Unit names vs identifiers: "m", "g", "in" are unit names and also plausible parameter names.
+      Drafted rule: a unit is recognized only directly after a NUMBER; elsewhere "m" is an IDENT.
+      "10 kg / m" would then need a different spelling than a param named m.
+   3. Unbracketed comma lists in named_arg (through=a, b in the requirements example). The draft
+      accepts them to match the example; the canonical form may require brackets.
+   4. Hard vs contextual keywords: drafted as hard (never identifiers). Check against real parts.
+   5. and/or/not are additions to the requirement's expression list, needed for "suppress if".
+   6. Final spellings of feature_kw / entity_kw (e.g. rect vs rectangle), fixed per feature in
+      spec/features.md and spec/sketch.md. *)

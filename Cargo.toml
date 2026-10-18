@@ -1,0 +1,31 @@
+[workspace]
+resolver = "3"
+members = [
+  "crates/tcad-syntax",
+  "crates/tcad-model",
+  "crates/tcad-expr",
+  "crates/tcad-solver",
+  "crates/tcad-naming",
+  "crates/tcad-kernel",
+  "crates/tcad-occt",
+  "crates/tcad-cache",
+  "crates/tcad-io",
+  "crates/tcad-cli",
+  "crates/tcad-lsp",
+  "crates/tcad-mcp",
+]
+
+[workspace.package]
+version = "0.0.1"
+edition = "2024"
+rust-version = "1.97"
+license = "Apache-2.0"
+repository = "https://github.com/abzell/TextCAD"
+authors = ["The TextCAD authors"]
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }

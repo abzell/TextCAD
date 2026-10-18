@@ -1,0 +1,12 @@
+[package]
+name = "tcad-syntax"
+description = "Lexer, parser, lossless concrete syntax tree and canonical formatter."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[lints]
+workspace = true

@@ -1,0 +1,33 @@
+# Dependency policy (requirements section 12.3).
+# Allowed: Apache-2.0, MIT, BSD, ISC, Zlib, MPL-2.0. GPL/AGPL are forbidden by omission.
+# OCCT (LGPL-2.1 + exception) is a C++ library linked dynamically via tcad-occt's build
+# script, not a Cargo dependency, so it needs no entry here; see docs/adr for the linking ADR.
+
+[graph]
+all-features = true
+
+[licenses]
+allow = [
+  "Apache-2.0",
+  "Apache-2.0 WITH LLVM-exception",
+  "MIT",
+  "BSD-2-Clause",
+  "BSD-3-Clause",
+  "ISC",
+  "Zlib",
+  "MPL-2.0",
+  "Unicode-3.0",
+]
+confidence-threshold = 0.9
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+
+[advisories]
+yanked = "deny"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
