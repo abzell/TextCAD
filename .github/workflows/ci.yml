@@ -132,8 +132,16 @@ jobs:
           echo "OCCT_INCLUDE_DIR=$MAMBA_ROOT_PREFIX/envs/occt/include/opencascade" >> "$GITHUB_ENV"
           echo "OCCT_LIB_DIR=$MAMBA_ROOT_PREFIX/envs/occt/lib" >> "$GITHUB_ENV"
           echo "LD_LIBRARY_PATH=$MAMBA_ROOT_PREFIX/envs/occt/lib" >> "$GITHUB_ENV"
+          echo "BREP_T1_DUMP=$RUNNER_TEMP/brep-linux" >> "$GITHUB_ENV"
       - name: Test with OCCT
         run: cargo test --workspace --features tcad-cli/occt,tcad-build/occt,tcad-mcp/occt
+      - name: Keep the canonical B-reps (compare platforms line by line)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: brep-linux
+          path: ${{ runner.temp }}/brep-linux
+          if-no-files-found: ignore
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -286,6 +294,18 @@ jobs:
 
   # The same tests as occt-linux, on Windows with OpenCASCADE from vcpkg (cached). Windows is the
   # primary platform: every corpus part must build here and match expected.json.
+  # Where the canonical B-reps of two platforms differ (docs/adr/0014), line by line.
+  brep-compare:
+    needs: [occt-linux, occt-windows]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: breps
+      - run: python3 tools/brep-diff.py breps/brep-windows breps/brep-linux
+
   occt-windows:
     runs-on: windows-latest
     timeout-minutes: 150
