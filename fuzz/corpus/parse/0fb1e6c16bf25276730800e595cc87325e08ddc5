@@ -1,0 +1,14 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm (e
+  hole pi + 2 * jaw_thk
+    circle pin cen.center type=simple d=pin_di!a end=through_all
+  bend rod_thread on=b)] d=1 m/m
+
+  conboundaryy { pin_dia = 50 mm; jaw_thk = 20 mm; thread = "M30x2" }
+  config default standard { }
+}

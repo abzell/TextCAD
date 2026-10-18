@@ -7,9 +7,9 @@
    Names in UPPER_CASE are lexical tokens (see spec/lexical.md); lower_case names are syntactic.
 
    Whitespace and comments (# ... and slash-star ... star-slash) separate tokens and are kept in the
-   concrete syntax tree. A statement ends at NEWLINE; NEWLINE is ignored inside ( ), [ ] and after a
-   binary operator or ",". Blocks use { } and may span lines. ";" is an optional extra statement
-   separator inside one-line blocks such as config bodies. See "Open questions" at the end. *)
+   concrete syntax tree. A statement ends at NEWLINE or ";", or implicitly before "}" and at the end
+   of the file. NEWLINE is ignored inside ( ) and [ ] (nesting counts) and nowhere else. Blocks use
+   { }. All words lex as IDENT; keywords are recognized by position (spec/lexical.md). *)
 
 
 (* ---------- file ---------- *)
@@ -67,9 +67,11 @@ suppress_clause = "suppress" , "if" , expr ;                    (* the only cond
 
 arg             = named_arg | from_clause | flag ;
 named_arg       = IDENT , "=" , value_list ;
-from_clause     = "from" , reference ;                          (* extrude body from side.outline *)
+from_clause     = "from" , ( reference | profile_call ) ;       (* from side.outline | from rect(...) *)
+profile_call    = entity_kw , "(" , [ call_arg , { "," , call_arg } ] , ")" ;
+call_arg        = IDENT , "=" , expr | flag ;                   (* a comma separates arguments here *)
 flag            = IDENT ;                                       (* symmetric, through_all, ... *)
-value_list      = value , { "," , value } ;                     (* see open question 3 *)
+value_list      = value , { "," , value } ;                     (* only in statement arguments *)
 
 value           = expr | direction | vector | list | query | STRING ;
 vector          = "(" , expr , "," , expr , { "," , expr } , ")" ;
@@ -97,12 +99,13 @@ hint            = "@hint" , "(" , expr , { "," , expr } , ")" ;  (* solver outpu
 
 (* Resolution order: tag, then semantic ID, then query. All three share this syntax; the resolver
    decides which one a reference is. *)
-reference       = path_segment , { "." , path_segment } , [ "#" , INT ] ;
+reference       = path_segment , { "." , path_segment } , [ HASH , INT ] ;   (* side#2 *)
 path_segment    = ( IDENT | AXIS_NAME ) , [ "(" , [ gen_arg , { gen_sep , gen_arg } ] , ")" ] ;
+                  (* "(" must directly follow the name; AXIS_NAME only after a ".", e.g. plane.XZ *)
 gen_arg         = reference | direction ;
 gen_sep         = "," | "&" ;                                   (* a & b: intersection of generators *)
 
-query           = "query" , "(" , entity_kind , { "," , IDENT , "=" , value } , ")" ;
+query           = "query" , "(" , entity_kind , { "," , call_arg } , ")" ;
 entity_kind     = "faces" | "edges" | "vertices" ;
 (* Filters: type, normal, parallel_to, axis, radius, created_by, adjacent_to, nearest, largest,
    smallest. Their value types are fixed in spec/naming.md. *)
@@ -131,7 +134,7 @@ FUNC_NAME       = "min" | "max" | "abs" | "sqrt" | "sin" | "cos" | "tan"
                 | "asin" | "acos" | "atan" | "atan2" | "floor" | "ceil" | "round" ;
 
 quantity        = NUMBER , unit ;
-unit            = unit_term , { ( "*" | "/" ) , unit_term } ;
+unit            = unit_term , { ( "*" | "/" ) , unit_term } ;   (* no whitespace around "*" "/" "^" *)
 unit_term       = UNIT_NAME , [ "^" , INT ] ;
 UNIT_NAME       = "mm" | "cm" | "m" | "in" | "ft" | "deg" | "rad" | "kg" | "g" | "lb" ;
                   (* composites such as kg/m^3 and g/cm^3 come from unit_term "/" unit_term *)
@@ -150,7 +153,8 @@ RESERVED_KW     = "assembly" | "instance" | "mate" | "skeleton" | "bom" | "pmi" 
 (* ---------- lexical tokens (details in spec/lexical.md) ---------- *)
 
 IDENT           = ( "a".."z" | "_" ) , { "a".."z" | "0".."9" | "_" } ;   (* not a keyword *)
-AXIS_NAME       = "X" | "Y" | "Z" | "XY" | "YZ" | "XZ" ;
+AXIS_NAME       = "X" | "Y" | "Z" | "XY" | "YZ" | "XZ" ;           (* lexed as UPPER, checked by the parser *)
+HASH            = "#" ;   (* only when directly after a token and directly before a digit; else a comment *)
 INT             = digit , { digit } ;
 NUMBER          = INT , [ "." , INT ] , [ ( "e" | "E" ) , [ "+" | "-" ] , INT ] ;
 STRING          = '"' , { ? any UTF-8 char except '"' and newline, or an escape ? } , '"' ;
@@ -158,16 +162,15 @@ NEWLINE         = ? LF ? ;
 digit           = "0".."9" ;
 
 
-(* ---------- open questions, to settle in M2 via ADR ---------- *)
+(* ---------- decisions taken in M2 (docs/adr/0004-syntax-decisions.md) ---------- *)
 
-(* 1. Statement termination: newline-terminated as drafted, or explicit ";"? Newline keeps diffs
-      line-oriented (goal 3) but needs the continuation rules above.
-   2. Unit names vs identifiers: "m", "g", "in" are unit names and also plausible parameter names.
-      Drafted rule: a unit is recognized only directly after a NUMBER; elsewhere "m" is an IDENT.
-      "10 kg / m" would then need a different spelling than a param named m.
-   3. Unbracketed comma lists in named_arg (through=a, b in the requirements example). The draft
-      accepts them to match the example; the canonical form may require brackets.
-   4. Hard vs contextual keywords: drafted as hard (never identifiers). Check against real parts.
-   5. and/or/not are additions to the requirement's expression list, needed for "suppress if".
-   6. Final spellings of feature_kw / entity_kw (e.g. rect vs rectangle), fixed per feature in
+(* 1. Statements end at NEWLINE or ";"; NEWLINE is ignored inside ( ) and [ ] only.
+   2. A unit is recognized only directly after a NUMBER. Composite units need no whitespace around
+      "*", "/" and "^" ("kg/m^3"); with whitespace, "/" is division ("10 mm / 2").
+   3. Unbracketed comma lists are accepted in statement arguments (through=a, b). Inside the
+      parentheses of a call or query, a comma separates arguments, so lists need brackets there.
+   4. Keywords are contextual: every word lexes as IDENT and the parser decides by position. A
+      declared name may not be a keyword that is meaningful in the same scope.
+   5. and / or / not are part of the expression language (needed for "suppress if").
+   6. The feature and entity keyword lists stay provisional and are fixed per feature in
       spec/features.md and spec/sketch.md. *)

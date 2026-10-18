@@ -1,9 +1,7 @@
-//! The `tcad` command-line tool. Subcommands arrive with later milestones.
+//! The `tcad` command-line tool.
 
 fn main() {
-    println!(
-        "{} {} (no commands implemented yet)",
-        tcad_cli::FORMAT_NAME,
-        env!("CARGO_PKG_VERSION")
-    );
+    let args: Vec<String> = std::env::args().skip(1).collect();
+    let code = tcad_cli::run(&args, &mut std::io::stdout(), &mut std::io::stderr());
+    std::process::exit(code);
 }

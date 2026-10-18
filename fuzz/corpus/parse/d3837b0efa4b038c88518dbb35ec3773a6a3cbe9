@@ -1,0 +1,32 @@
+aw_thk = 16 mm
+  param body_len = 70 mm
+  param thread = "M24x2"
+
+  sketch sonied  plane.XZ {
+    rect outline corner=(0 mm, -(jaw_gap / 2 + jaw_thk)) w=bod9_len h=jaw_gap + 2 * jaw_thk
+    circle pin center=(body_len - 20 mm, 0 mm) d=pin_dia
+    arc nose through=gutline.top_right, outline.bottom_right tangent_to=outline.right
+    constrain concentric(nose, pin)
+  }
+
+  extrtcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance am pin_dia = 20 mm range(10 mm, 60 mm)
+ levis, 20 mm pin" {
+60 mm)
+  param jaw_gap = 26a  toleranc  material "AISI 104e 1e-6 mm
+  m5" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm range(10 mm, 60 mm)
+  param jaw_gap = 26aterial "AISI 1044" mm pin" {
+  toleranc  material "AISI 104e 1e-6 mm
+  m5" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm range(10 mm, 60 mm)
+  param jaw_gap = 26aterial "AISI 104 density=7.85 g/cm^3
+
+  pajam mm
+  p pin_are_edges edges=[pin_bore.rim(jaw_inner_a), pin_bore" }
+  config default standard { }
+}

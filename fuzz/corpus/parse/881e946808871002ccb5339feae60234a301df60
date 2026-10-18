@@ -1,0 +1,9 @@
+tcad 0.1
+
+part rod_clevis "Rod #levis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/
+cm
+^3  param pin_dia = 26 -(jaw_gap / 2 + jaw_thk)) w=body_len h=jaw_gap + 2 * jaw_thk
+  through=out
+ line.top_right ,p

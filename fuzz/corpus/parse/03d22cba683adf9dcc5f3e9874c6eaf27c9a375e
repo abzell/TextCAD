@@ -1,0 +1,19 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 tcad 0.1
+
+part rod_clemm ran_len = 70 mm
+  param thread = "M24x2" 16 mm
+  param body_len = 70 mm
+  param thread = "M24x2"
+
+  sketch side on plane.XZ {
+    rect outline corner=(0 mm, -(jaw_gap / 2 + jaw_thk)) w=bodw_gap / on=body.cap_start at=origin type=tapped thread=thread depth=36 mm
+
+  fillet jaw_round edges=query(edge
+
+  par / 2 +am pin  

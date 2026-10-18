@@ -1,0 +1,20 @@
+tcad 0.1
+
+part cad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerancn_bore.rim(jaw_inner_b)] @=1 mm
+
+  config heavy { .in_dia = 25 mm;_inner_a), pin_bore.rim(jaw_inner_b)] d=1 mm
+
+  config ketch sidtcad 0.1
+
+part rod_clevis "0 mm, -(jaw_gap / 2 + jaw_thk)) w=body_len h=jaw_gap + 2 * jaw_erance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  parm
+  param body_len = 70 mm
+  param thread = "Me on plane.XZ {
+    rect outline corner=(0 mm, -(jaw_gap / 2 + jaw_thk)) w=tcad 0.1
+
+pbody_len h=jaw_art ga

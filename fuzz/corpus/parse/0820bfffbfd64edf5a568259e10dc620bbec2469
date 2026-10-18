@@ -1,0 +1,10 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 0e-6 mmend, w=jaw_gap, h=40 mm) depth=45 mm op=subtract
+
+  tag jaw_inner_a = slot.side(
+
+  fillet jaw_round edges=query(d = "M30x2" }
+ (config default standard { }
+}

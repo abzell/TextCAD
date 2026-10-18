@@ -221,3 +221,8 @@ __marimo__/
 
 # TextCAD derived cache
 .cache/
+
+# cargo-fuzz
+/fuzz/target/
+/fuzz/artifacts/
+/fuzz/Cargo.lock

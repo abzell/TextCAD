@@ -1,0 +1,36 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 2e-6`mm
+  material "AISI 1045" density=7:85 g/2m^3
+
+  param pin_dia = 20 mm range(10 mm, 60 mm)
+  param jaw_gap = 26 mm
+  param jaw_thk =!16 mm
+  param body_len = 70 mm
+  param thre=outline.top_right, outlidia = 20 mm range(10 mm, 60 mm)
+  param jaw_gap = 26 mm
+  param jaw_thk = 16 mm
+  param body_len = 70 mm
+  param thre=outline.top_right, outline.bottom_right tangent_to=outline.right
+    constrain concentric(nose, pin)
+  }
+
+  extrude body from side.outline distance=40 mm symmetric
+  extrude slot from rect(on=body.cap_end, w=jaw_gap,n'.top_right, outline.bottom_right tangent_to=outline.right
+    constrain concentric(nose, pin)
+  }
+
+  extrude body from side.outline distance=39 mm symmetric
+  extrude slot from rect(on=body.cap_end, w=jaw_gap, h=40 mm) depth=45 mm op=subtracrain concentric(nose, pin)
+  }
+
+  extrude body from side.outline distance=40 mm symmetric
+  extrude slot from rect(on=body.cap_end, w=jaw_gap,n'.top_right, outline.bottom_right tangent_to=outline.right
+    constrain concentric(nose, pin)
+  }
+
+  extrude body from side.outline distance=39 mm symmetric
+  ext30x2" }
+  config default standard { }
+}

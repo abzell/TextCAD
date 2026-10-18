@@ -1,0 +1,25 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolearam body_len = 70 mm
+  param thread = "M21x2"
+
+  sketch side on plane.XZ {
+    rect outline cor0 mm) d=pin_dia
+    arc nose through=outline.top_right, outline.bottom_right tangent_to=outline.right
+    constrain concentric(nose, pin)
+  }
+
+, pin_bore.rim(jaw_inner_b)] d=1 mm
+, pin_bore.rim(jaw_inner_b)] d=1 mm
+
+  config heavy { pin_dia = 25 mm; jaw_thk = 20 mm; thread = "M30x2" }
+  confjaw_round edges= { pin_diq = 25 mm; jaw_t3333333mm; thread = "M30x2" }
+  config default standard { }
+}
+ config heavy0{ pin_dia = 25 mm; jaw_thk = 20 mm; thread = "M30x2" }
+  od_thread on=body.cconfig default standard { }
+}
+= 12 mm; jaw_thk = 20 mm; thread = "M30x2" }
+  config default standard { }
+}

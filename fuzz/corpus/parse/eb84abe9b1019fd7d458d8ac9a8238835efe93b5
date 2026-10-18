@@ -1,0 +1,16 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 2e-6`mm
+  material "AISI 1045" density=7.85 g/cm^30.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" de parallel_to=axis.Y, created_by=slot) r=2 mm
+  chamfer bore_edges edges=[pin_bore.rim(jaw_inner_a), pin_bore.rim(jaw_inner_b)] d=1 mm
+
+  config heavy0{ pin_dia = 25 mm; jaw_thk = 20 mm; thread = "M30x2" }
+  config default standard { }
+}; thread = "M30x2" }
+  config default standard { }
+}

@@ -1,0 +1,10 @@
+tcad 0.1
+ad 0.1
+
+part rod_clevis "Rod clevitcad 0.1
+
+part rod_cleVis " {
+  tolerance 1e-6  mm, 60 mm)
+  param jaw_gap = 26 mm
+  param jaw_thk ner_a), pin_bores, 20 mm pin" {
+ &toct outline corner=(0m

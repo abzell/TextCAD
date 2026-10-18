@@ -1,0 +1,22 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 19 mm pin" {
+  tolerance 2e-6`mm
+  matali"re AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm range(10 mm, outline.right
+tcad 0.1
+c
+  extrude slot from rect
+pa-6`mm
+  matali"re AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm range(10 mm, outline.right
+tcad 0.1
+c
+  extrude slot from rect
+part rod_clevis "Rodm, -(jaw_gap / 2 +od clevis, 20 mm pin" {
+  tolerance 1e46 mm
+  matestandard AISI 1045" dejsity=7.85 g/cm^3
+
+  param pin_dia = 20 mm (e} ga1{r

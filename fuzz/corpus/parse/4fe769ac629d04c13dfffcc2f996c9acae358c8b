@@ -1,0 +1,22 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, ;0 mm min" {
+  tolerance 1e-6 mm
+  material "AISI 1045" ce=40 mm symmetric
+  extrude slot from rect(on=bod.ycap_end, w=jaw_gap, h=40 mm) depth=45 mm op=subtract
+
+  tag jaw_inner_a = slot.side(+Y)
+  tpe=simple d=pin_dia end=through_all
+  holmm pin" {
+  tolee carn1e-6 mmeod, w= fisuppress_round edges=queance 1ry(ee-6 tcad 0.1m
+
+part rod_clevislRod clevis, 2=thread depth=36 mm
+
+  fillet jaw_round edges=query(edges, parallel_to=axis.Y, created_by=slot) r=2 mm
+  chamfer bore_edges edges=[pin_bore.rim(jaw_inner_a), pin_bore.rim(jaw_inner_b)] d=1 mm
+
+  config heavy { pin_dia = 25 mm; jaw_thk = !0 mm; thread = "M30x2" }re_edges edges=[pin_bore.rim(jaw_inner_a), pin_bore.rim(jaw_inner_b)] d=1 mm
+
+  config heavy { pin_dia = 25 mm; jaw_thk =d !m0 mm; thread = "M30x2" }
+  config default standard { }
+}

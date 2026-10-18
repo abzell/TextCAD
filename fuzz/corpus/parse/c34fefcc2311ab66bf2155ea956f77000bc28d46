@@ -1,0 +1,7 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  mate outline corner=(0 mm, -(jaw_gap / 2 + jaw_thistance=40 mm sy[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[~[[mmetric
+  extrude slot from rect(on=body.cap_end, w=jaw_gap, h=40 mm) depth=45 dard { }
+}

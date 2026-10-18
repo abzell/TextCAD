@@ -1,0 +1,43 @@
+tcad 0.1
+
+part rod_clevis "Rdhread=thread depth=36vis "Rdhread=thread depth=36 mm  filhet config d0 mm pin" {
+  tolerance 1e-6 mm
+  mateefault standard& { }rial "AISI 
+}
+1044" de thread=thread depth=36 mm  fillet j{_r}
+  config d0 mm pin" {
+  tolerce 1e- mm  filhet config d0 mm pin" {
+  tolerance 1e-6 mm
+  mateefault standard& { }rial "AIn = 70 mm
+  param t clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 mm range(10 mm, 60 mm)
+  param jaw_gap = 26 mm
+  param jaw_thk = 16 mm
+  param body_len = 70 mm
+  param thread = "M24x2"
+
+  sketch side on planeaterial "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dii = 20 mm range(10 mm, 60 mm)
+  param jaw_gap = 52 mm
+  param jaw_thk = 16 mm
+  param body_len = 78 mm
+  param thread = "M24x2"
+
+  skSI 
+}
+1045" de thread=thread depth=36 mm  fillet j{_r}
+  config d0 mm pin" {
+  tolerance 1e-6 mm
+  (=36 mm  filhet config d0 mm pin" {
+  tolerance 1e-6_r}
+  config d0 mm pin" {
+  tolerance 1e-6 mm
+  mateefault standard& { }rial "AISI 
+mateefault standard& { }rial "AISI 
+}
+1045" density=7.85 g/cm^3
+

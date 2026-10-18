@@ -1,0 +1,23 @@
+[package]
+name = "tcad-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+license = "Apache-2.0"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+tcad-syntax = { path = "../crates/tcad-syntax" }
+
+[[bin]]
+name = "parse"
+path = "fuzz_targets/parse.rs"
+test = false
+doc = false
+bench = false
+
+# Keep the fuzz crate out of the main workspace.
+[workspace]

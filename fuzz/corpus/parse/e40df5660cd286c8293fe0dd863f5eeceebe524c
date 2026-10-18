@@ -1,0 +1,15 @@
+parw_thk
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISI = "M24x2"
+
+  sketch side on plane.XZ {
+    rect outline corner=(0 mm, -(jaw_gap / 2 + jaw_thk)) w=body_len h=jaw_gap + 2 * jaw_thk
+    circle pin center=(body_len - 20 mm, 0 mm) d=pin_dia
+    arc nose through=outline.top_right, outline.bottom_right tangent_to=outline.right
+    constrain concentric(nose, pin)
+  }
+
+vy { pin_dia = 25 mm; jaw_thk = 20 mm; thread = "M30x2" }
+  config d

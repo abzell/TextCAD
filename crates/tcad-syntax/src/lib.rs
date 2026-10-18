@@ -1,4 +1,17 @@
-//! `tcad-syntax`: Lexer, parser, lossless concrete syntax tree and canonical formatter.
+//! `tcad-syntax`: lexer, parser, lossless concrete syntax tree and canonical formatter.
+
+pub mod cst;
+pub mod format;
+pub mod keywords;
+pub mod lexer;
+pub mod number;
+pub mod parser;
+pub mod token;
+
+pub use cst::{Child, Node, NodeKind};
+pub use format::{FormatError, format_source};
+pub use parser::{Parse, SUPPORTED_VERSION, parse};
+pub use token::{Token, TokenKind, Trivia, TriviaKind};
 
 /// Working name of the format. Defined once per crate so it can be renamed later
 /// (see `spec/name.md`).

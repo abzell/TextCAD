@@ -1,0 +1,7 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mm
+  material "AISItcad  1045" densit0.1
+y=7.8
+part 5 rgo

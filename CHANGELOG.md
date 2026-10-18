@@ -9,5 +9,11 @@ All notable changes are recorded here. Format follows [Keep a Changelog](https:/
   (`LICENSE`, `NOTICE`, DCO), ADR template and log, normative spec skeleton in `spec/` with a draft EBNF grammar.
 - Requirements specification in `docs/TextCAD-Requirements.md`.
 
+- M2: `tcad-diag` (diagnostics with stable codes, spans, fix hints, text and JSON output) and
+  `tcad-syntax` (lexer, lossless concrete syntax tree, error-recovering parser, canonical formatter);
+  `tcad check` and `tcad fmt [--check]` with `--json`; normative spec chapters for lexical structure,
+  canonical form, diagnostics, reserved keywords and the header; parser fuzz target and 5-minute CI
+  fuzz smoke run; ADRs 0004 and 0005; the section 15 example as `spec/examples/rod_clevis.tcad`.
+
 ### Changed
 - Replaced the MIT `LICENSE` with Apache-2.0 (locked decision, requirements section 2).

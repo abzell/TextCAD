@@ -1,6 +1,7 @@
 [workspace]
 resolver = "3"
 members = [
+  "crates/tcad-diag",
   "crates/tcad-syntax",
   "crates/tcad-model",
   "crates/tcad-expr",
