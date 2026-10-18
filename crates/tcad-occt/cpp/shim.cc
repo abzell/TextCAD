@@ -41,6 +41,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iterator>
+#include <mutex>
 #include <random>
 #include <TopoDS_Compound.hxx>
 #include <BRepAdaptor_Curve.hxx>
@@ -922,6 +923,13 @@ std::string scratch_path(const char* ext) {
   return (dir / ("tcad-" + std::to_string(rd()) + "-" + std::to_string(counter++) + ext)).string();
 }
 
+// OpenCASCADE's STEP and XDE machinery keeps global state (interface parameters, the shared
+// application object), so concurrent exports and imports corrupt each other. One at a time.
+std::mutex& step_mutex() {
+  static std::mutex m;
+  return m;
+}
+
 struct Scratch {
   std::string path;
   explicit Scratch(const char* ext) : path(scratch_path(ext)) {}
@@ -936,6 +944,7 @@ struct Scratch {
 rust::Vec<uint8_t> export_step(const Shape& sh, rust::Str name, rust::Str configuration,
                                rust::Str material, double density_g_cm3) {
   return guarded("export_step", [&]() {
+    std::lock_guard<std::mutex> lock(step_mutex());
     Handle(XCAFApp_Application) app = XCAFApp_Application::GetApplication();
     Handle(TDocStd_Document) doc;
     app->NewDocument("MDTV-XCAF", doc);
@@ -981,6 +990,7 @@ rust::Vec<uint8_t> export_step(const Shape& sh, rust::Str name, rust::Str config
 
 std::unique_ptr<Shape> import_step(rust::Slice<const uint8_t> bytes) {
   return guarded("import_step", [&]() {
+    std::lock_guard<std::mutex> lock(step_mutex());
     std::string text(reinterpret_cast<const char*>(bytes.data()), bytes.size());
     std::istringstream is(text);
     STEPControl_Reader reader;
