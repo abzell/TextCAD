@@ -1,0 +1,7 @@
+tcad 0.1
+
+part rod_evis "Rod clevis, 20 mm pin" {
+  tolrtanecad 0.1
+
+direct_edit 2e-6`mm
+  material "AI

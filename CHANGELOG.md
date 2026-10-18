@@ -15,5 +15,10 @@ All notable changes are recorded here. Format follows [Keep a Changelog](https:/
   canonical form, diagnostics, reserved keywords and the header; parser fuzz target and 5-minute CI
   fuzz smoke run; ADRs 0004 and 0005; the section 15 example as `spec/examples/rod_clevis.tcad`.
 
+- M3: `tcad-expr` (expression AST, dimension and unit algebra, deterministic evaluation) and
+  `tcad-model` (typed IR, lowering from the syntax tree, scope/unit/range/configuration checks,
+  `Model::resolve`); `tcad check` now performs the full semantic check; diagnostics E2xxx; spec
+  chapters for units, expressions and parameters; ADR 0006; randomized property and mutation tests.
+
 ### Changed
 - Replaced the MIT `LICENSE` with Apache-2.0 (locked decision, requirements section 2).

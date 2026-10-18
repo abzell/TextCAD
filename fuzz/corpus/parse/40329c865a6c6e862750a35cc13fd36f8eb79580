@@ -1,0 +1,14 @@
+tcad 0.1
+
+part rod_evis "Rod clevis, 20
+parn" {
+  tolerantcad 0.1
+
+part rod_cet rod_ce 2e-6`mm
+  mater mm pin" {
+  tolerantcad 0.1
+
+parn" {
+  tolerantcad 0.1
+
+part rod_cet rod_ce 2ial "AI

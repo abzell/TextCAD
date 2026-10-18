@@ -23,12 +23,12 @@ The registry lives in `crates/tcad-diag/src/codes.rs`; a test keeps it unique an
 | --- | --- | --- |
 | E0xxx, W0xxx | General: unsupported features, versioning | M2 |
 | E1xxx | Lexical and syntax | M2 |
-| E2xxx | Types, units, parameters, expressions | M3 |
+| E2xxx | Types, units, parameters, expressions, configurations | M3 |
 | E3xxx | Naming and references | M6 |
 | E4xxx | Sketch solver | M4 |
 | E5xxx | Kernel and geometry | M5 |
 
-## Codes (M2)
+## Codes
 
 | Code | Meaning |
 | --- | --- |
@@ -50,6 +50,28 @@ The registry lives in `crates/tcad-diag/src/codes.rs`; a test keeps it unique an
 | E1203 | expected end of statement |
 | E1204 | expected an expression |
 | E1205 | unclosed block |
+| E2101 | name declared more than once |
+| E2102 | undefined name (with a "did you mean" hint when a close name exists) |
+| E2103 | name used before its declaration |
+| E2104 | name does not denote a value |
+| E2201 | dimension mismatch |
+| E2202 | type mismatch |
+| E2204 | invalid exponent or root of a dimensional quantity; unit exponent out of range |
+| E2205 | arithmetic error: division by zero or non-finite result |
+| E2206 | wrong function name or number of arguments |
+| E2301 | value outside the declared range |
+| E2302 | invalid tolerance |
+| E2303 | single-use statement declared twice |
+| E2304 | invalid range |
+| E2305 | invalid material |
+| E2401 | configuration overrides an unknown parameter |
+| E2402 | override does not match the parameter's type or dimension |
+| E2403 | configuration suppresses something that is not a feature |
+| E2404 | more than one default configuration |
+| W2405 | configurations exist but none is marked default |
+| E2501 | unknown value for an enumerated argument |
+| E2601 | `suppress if` condition is not boolean |
+| E2701 | a file must contain exactly one part |
 
 ## Output
 

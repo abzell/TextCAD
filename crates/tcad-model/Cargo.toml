@@ -8,5 +8,10 @@ license.workspace = true
 repository.workspace = true
 authors.workspace = true
 
+[dependencies]
+tcad-diag.workspace = true
+tcad-syntax.workspace = true
+tcad-expr.workspace = true
+
 [lints]
 workspace = true

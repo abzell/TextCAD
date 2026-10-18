@@ -1,0 +1,26 @@
+tcad 0.1
+
+part   param jaw_thk = 16 mm
+  param body_len = 70 mm
+  param thread = "M24x2"
+
+  sketch side on plane.XZ {
+    rect outline corner=(5 mm, -(jaw_gap / 2 + jaw_thk)) w=body_len h=jaw_gap + 1 * jaw_thk
+ aram body_len = 70 mm
+  param thread = "M24x2"
+
+  sketch side on plane.XZ {
+    rect outline corner=(0 mm, -(jaw_gap / 2 + jaw_thk)) i=body_ltline.right
+   constrain en h=jaw_gap + 2 * jaw_thk
+    circle pin center=(body_len - 20 mm, 0 mm) d=pin_dia
+    arc nose through=outline.top_right, outline.bottom_right tangent_to=outline.right
+   constrain concentric(nose, pin)
+  }
+
+  extrude bodslot.side(+Y)
+  tpe=simple d=pin_dia end=through_all
+  hole 
+  fillet jaw_round edges=query(edges,=origin type=tapped thread=thread ~~~~~~~~~~~~~~depth=35 mm
+
+  fillet jaw_round edges=query(edges, parallel_to=axis.Y, created_by=slot) r=2 mm
+  chamfer bore_edges edges=[pin_bore.rim(jaw_inner_a), suppress.rim(jaw_inner_config heavy { pin_dia = 25 m}

@@ -58,6 +58,28 @@ registry! {
     E1203 = "E1203", "expected end of statement";
     E1204 = "E1204", "expected an expression";
     E1205 = "E1205", "unclosed block";
+    E2101 = "E2101", "name declared more than once";
+    E2102 = "E2102", "undefined name";
+    E2103 = "E2103", "name used before its declaration";
+    E2104 = "E2104", "name does not denote a value";
+    E2201 = "E2201", "dimension mismatch";
+    E2202 = "E2202", "type mismatch";
+    E2204 = "E2204", "invalid exponent or root of a dimensional quantity";
+    E2205 = "E2205", "arithmetic error (division by zero or non-finite result)";
+    E2206 = "E2206", "wrong function or arguments";
+    E2301 = "E2301", "value outside the declared range";
+    E2302 = "E2302", "invalid tolerance";
+    E2303 = "E2303", "duplicate declaration of a single-use statement";
+    E2304 = "E2304", "invalid range";
+    E2305 = "E2305", "invalid material";
+    E2401 = "E2401", "configuration overrides an unknown parameter";
+    E2402 = "E2402", "override does not match the parameter's type or dimension";
+    E2403 = "E2403", "configuration suppresses an unknown feature";
+    E2404 = "E2404", "more than one default configuration";
+    W2405 = "W2405", "configurations exist but none is marked default";
+    E2501 = "E2501", "unknown value for an enumerated argument";
+    E2601 = "E2601", "suppress condition must be a boolean";
+    E2701 = "E2701", "a file must contain exactly one part";
 }
 
 #[cfg(test)]

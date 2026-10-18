@@ -11,6 +11,7 @@ cargo-fuzz = true
 [dependencies]
 libfuzzer-sys = "0.4"
 tcad-syntax = { path = "../crates/tcad-syntax" }
+tcad-model = { path = "../crates/tcad-model" }
 
 [[bin]]
 name = "parse"

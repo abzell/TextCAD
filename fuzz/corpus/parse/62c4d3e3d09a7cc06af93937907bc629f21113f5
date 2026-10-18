@@ -1,0 +1,5 @@
+tcad 0.21
+
+part rod_clevis2"Rod clevis, 20 mllel_to=axis.Yrough=o = 20 mm; thread = "M3#x2" }
+  flange default standard { }
+}

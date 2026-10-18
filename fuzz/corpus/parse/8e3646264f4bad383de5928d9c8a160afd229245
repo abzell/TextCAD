@@ -1,0 +1,5 @@
+tcad 0.1
+
+part rod_clEvis "Rod clevis, 20 mm pin" {
+  toleralen h=jaw_gap + 2 * jaw_thk
+    1 +am pin  

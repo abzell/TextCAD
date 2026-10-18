@@ -68,7 +68,7 @@ jobs:
       - name: Build WASM-capable crates
         run: >
           cargo build --target wasm32-unknown-unknown
-          -p tcad-diag -p tcad-syntax -p tcad-model -p tcad-expr -p tcad-solver
+          -p tcad-diag -p tcad-syntax -p tcad-expr -p tcad-model -p tcad-solver
           -p tcad-naming -p tcad-kernel -p tcad-cache
 
   deny:

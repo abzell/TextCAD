@@ -1,0 +1,13 @@
+tcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerance 1e-6 mmdy.cap_end, w=jaw_gap, h=80 mm) depth=45 mm op=subtract
+
+  tag jaw_inner_a = slot.side(+Yn_p ect(on=body.cap_end, w=jaw_gap, h=71 mm) depth=45 mm op=subtract
+
+  tag jaw_inner_a = slot.side(+Yn_p = 26 mm
+  param j=80 mm) depth=45 mm op=subtract
+
+  tag jaw_inner_a = slot.side(+Yn_rbetoge(10 mm, 60 mm)
+  param ja.XZ {
+    rect outline corner9(0 mm, -(jaw_gap / 2 + jaw_thk)) w=body_len }

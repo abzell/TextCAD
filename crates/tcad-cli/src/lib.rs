@@ -20,7 +20,7 @@ const USAGE: &str = "\
 Usage: tcad <command> [options] <path>...
 
 Commands:
-  check   Parse and report diagnostics (syntax only until milestone M3)
+  check   Parse, resolve names, units and configurations; report diagnostics (no geometry)
   fmt     Rewrite files in canonical form; with --check only report differences
 
 Options:
@@ -133,9 +133,9 @@ pub fn run(args: &[String], out: &mut dyn Write, err: &mut dyn Write) -> i32 {
 }
 
 fn check_file(src: &str) -> (&'static str, Vec<Diagnostic>) {
-    let parsed = tcad_syntax::parse(src);
-    let status = if parsed.has_errors() { "error" } else { "ok" };
-    (status, parsed.diagnostics)
+    let analysis = tcad_model::analyze(src);
+    let status = if analysis.has_errors() { "error" } else { "ok" };
+    (status, analysis.diagnostics)
 }
 
 fn fmt_file(
@@ -239,6 +239,21 @@ mod tests {
         let (code, _, err) = run_args(&["check", &bad]);
         assert_eq!(code, 1);
         assert!(err.contains("error[E1102]"), "{err}");
+    }
+
+    #[test]
+    fn check_reports_semantic_errors() {
+        let d = Dir::new("sem");
+        let f = d.write(
+            "units.tcad",
+            "tcad 0.1\npart p {\n  param a = 1 mm + 1 deg\n}\n",
+        );
+        let (code, _, err) = run_args(&["check", &f]);
+        assert_eq!(code, 1);
+        assert!(err.contains("error[E2201]"), "{err}");
+        let (_, out, _) = run_args(&["check", "--json", &f]);
+        let v: Value = serde_json::from_str(&out).expect("json");
+        assert_eq!(v["files"][0]["diagnostics"][0]["code"], "E2201");
     }
 
     #[test]

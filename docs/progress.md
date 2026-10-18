@@ -28,3 +28,25 @@ Not done / deferred:
 - The 1-hour fuzz run required for the final Phase 1 acceptance (section 14) is scheduled for M8.
 - The argument order table is provisional until M5/M6.
 - `tcad check` is syntax-only until M3.
+
+## M3: Model, expressions, units (2026-10-18)
+
+CI for M2 was green at `938da73` (8 jobs, including Windows and the 5-minute fuzz run) after two
+fixes to my CI config: wildcard path dependencies (`cargo-deny`) and the nightly toolchain for
+`cargo fuzz` (the repo pins stable in `rust-toolchain.toml`).
+
+Done:
+- `tcad-expr`: dimensions (length, mass, angle), unit table, canonical storage, evaluator with
+  dimension checking, `libm` for platform-independent trigonometry (ADR 0006).
+- `tcad-model`: IR, CST lowering, scope analysis ("references only point backward", with
+  did-you-mean hints), parameter evaluation with ranges, configurations (overrides, suppression,
+  default), `suppress if`, enumerated arguments, one part per file; `Model::resolve`.
+- `tcad check` runs the semantic checks and evaluates every configuration.
+- Tests: 16 model tests, 7 randomized property tests for units/expressions, a 60k-iteration mutation
+  run (2k in the normal run), fuzz target extended to semantic analysis.
+- Spec: units, expressions, parameters; diagnostics table extended.
+
+Deferred:
+- Per-feature argument schemas (required arguments, expected dimensions, topology roles) arrive with
+  the features in M5/M6; until then only names, units, ranges and the provisional enum words are checked.
+- The golden corpus starts in M5, when geometry exists to compare against `expected.json`.

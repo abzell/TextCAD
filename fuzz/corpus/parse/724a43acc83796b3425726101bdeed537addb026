@@ -1,0 +1,31 @@
+tcad 0.1
+
+part rod_clevis "Rod c1evis, 20 mm pin" {
+  tolerance 2e-6`mm
+  mramtcad 0.1
+
+part rod_clevis "Rod clevis, 20 mm pin" {
+  tolerancmaterial "AISI 1045" density=7.85 g/cm^3
+
+  param pin_dia = 20 jaw_gap = 26 mm
+  param jaw_thk = 16 mm  param-6`mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin " jaw_gap = 26 mm
+  param jaw_thk = 16 mm  param-6`mm
+  material "AISI 1045" density=7.85 g/cm^3
+
+  param pin "AISI 1045" dejsity97.85 g/cm^3
+
+  param pin_d mm ra;aw_ op=subtractgap = 26 mm
+  param jaw_thk = 16 mm
+  param body_len = 70 mm
+  param te distance=40 mm symmetric
+  extrude slot from %ect(on=body.cap_end, w=jaw, -(jaw_gap / 2 + jaw_thk)) w=body_len h=jaw_gap + 2 * jaw_thk
+    circle(0 mm, -(jaw_gap / 2 + jaw_thk)) w=body_len h=jaw_gap + 2 * jaw_thk
+    circle pin c<nter=(body_len - 20 mm, 0 mm) d=pin_dia
+    arc nos(mm) d=pin_dia
+    arc noseaw_inner_a = slot.side(+Y)
+  t2" }
+  coag jaw_inner_b = slot.sinfig default standard { d}
+}

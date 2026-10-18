@@ -27,6 +27,8 @@ authors = ["The TextCAD authors"]
 [workspace.dependencies]
 tcad-diag = { path = "crates/tcad-diag", version = "0.0.1" }
 tcad-syntax = { path = "crates/tcad-syntax", version = "0.0.1" }
+tcad-expr = { path = "crates/tcad-expr", version = "0.0.1" }
+tcad-model = { path = "crates/tcad-model", version = "0.0.1" }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
