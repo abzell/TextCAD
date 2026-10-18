@@ -125,6 +125,8 @@ jobs:
           environment-name: occt
           create-args: occt=8.0.1
           cache-environment: true
+          # the second micromamba step below cleans up the shell; a second cleanup fails
+          post-cleanup: none
       - name: Point the build at OpenCASCADE 8.0.1
         run: |
           echo "OCCT_INCLUDE_DIR=$MAMBA_ROOT_PREFIX/envs/occt/include/opencascade" >> "$GITHUB_ENV"
