@@ -147,6 +147,13 @@ is now a straight prism plus `DraftAngle`; OpenCASCADE's default volume quadratu
 planes no longer start 0.5 mm behind the plane; rename must treat `config` keys as references and
 argument names as not.
 
+Windows: `occt-windows` builds OpenCASCADE 8.0.1 with vcpkg (cached) and runs every test. Porting
+from 7.6 needed: `TopTools_ListOfShape::Iterator` (the iterator typedef headers are gone),
+`typeid` instead of `Standard_Failure::DynamicType`, `TKDESTEP` instead of the five STEP
+libraries, forward slashes in MCP paths, and `/EHsc`: without it MSVC skips destructors during
+exception unwinding, so a failed STEP import left the STEP mutex locked and the next export hung.
+`TCAD_OCCT_TRACE=1` prints the stages of a STEP export.
+
 Not done / needs a person:
 - A tagged Windows release (acceptance criterion "published from a tagged build"): the workflow exists
   but no tag has been created; that is the maintainer's decision.

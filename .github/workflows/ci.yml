@@ -229,17 +229,6 @@ jobs:
         with:
           path: vcpkg_installed
           key: occt-vcpkg-x64-windows-v1
-      - name: STEP round trip alone (diagnostic)
-        shell: pwsh
-        timeout-minutes: 7
-        continue-on-error: true
-        run: |
-          $root = "$env:GITHUB_WORKSPACE\vcpkg_installed\x64-windows"
-          $env:OCCT_INCLUDE_DIR = "$root\include\opencascade"
-          $env:OCCT_LIB_DIR = "$root\lib"
-          $env:PATH = "$root\bin;$env:PATH"
-          $env:TCAD_OCCT_TRACE = "1"
-          cargo test -p tcad-occt --features occt --test io -- --test-threads=1 --nocapture
       - name: Test with OCCT
         shell: pwsh
         timeout-minutes: 40
