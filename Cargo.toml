@@ -15,6 +15,7 @@ members = [
   "crates/tcad-cli",
   "crates/tcad-lsp",
   "crates/tcad-mcp",
+  "crates/tcad-web",
 ]
 
 [workspace.package]

@@ -1,0 +1,38 @@
+[package]
+name = "tcad-web"
+description = "Regeneration in the browser: the TextCAD build as a WebAssembly module (Phase 1b, ADR 0014)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+build = "build.rs"
+
+[[bin]]
+name = "tcad-web"
+path = "src/main.rs"
+
+[dependencies]
+tcad-diag.workspace = true
+tcad-model.workspace = true
+tcad-build.workspace = true
+tcad-kernel.workspace = true
+tcad-cache.workspace = true
+tcad-io.workspace = true
+tcad-occt = { workspace = true, optional = true }
+serde_json = "1"
+
+[features]
+# Regenerate with OpenCASCADE (the browser module); without it the mock kernel is used.
+occt = ["dep:tcad-occt", "tcad-occt/occt", "tcad-build/occt"]
+
+# A C interface for JavaScript needs `extern "C"` functions over raw pointers, so the workspace's
+# `unsafe_code = "forbid"` cannot apply; every unsafe block states why it is sound.
+[lints.rust]
+unsafe_code = "allow"
+missing_docs = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }

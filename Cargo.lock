@@ -491,6 +491,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "tcad-web"
+version = "0.0.1"
+dependencies = [
+ "serde_json",
+ "tcad-build",
+ "tcad-cache",
+ "tcad-diag",
+ "tcad-io",
+ "tcad-kernel",
+ "tcad-model",
+ "tcad-occt",
+]
+
+[[package]]
 name = "termcolor"
 version = "1.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

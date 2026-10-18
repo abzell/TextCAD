@@ -1,0 +1,9 @@
+# Settings for the browser module (crates/tcad-web, docs/adr/0014). Emscripten dynamic linking needs
+# position-independent code everywhere and one exception model: native WebAssembly exceptions, as
+# Rust's Emscripten target uses. `-ffp-contract=off` keeps floating point identical to MSVC.
+[env]
+CFLAGS_wasm32_unknown_emscripten = "-fPIC -fwasm-exceptions -ffp-contract=off"
+CXXFLAGS_wasm32_unknown_emscripten = "-fPIC -fwasm-exceptions -ffp-contract=off"
+
+[target.wasm32-unknown-emscripten]
+rustflags = ["-C", "relocation-model=pic"]

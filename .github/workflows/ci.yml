@@ -215,6 +215,44 @@ jobs:
           npx playwright-core install --with-deps chromium
           TCAD_LSP="$GITHUB_WORKSPACE/target/debug/tcad-lsp" npm test
 
+  # Phase 1b (docs/adr/0014): the build in WebAssembly with OpenCASCADE 8.0.1 as a side module.
+  # Gate: every measured corpus part regenerates with the canonical B-rep hash of the native builds.
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.97.0
+          targets: wasm32-unknown-emscripten
+      - uses: Swatinem/rust-cache@v2
+      - uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-name: emsdk
+          create-args: emscripten=4.0.9 cmake ninja
+          cache-environment: true
+      - name: Cache OpenCASCADE for WebAssembly
+        id: occt-wasm
+        uses: actions/cache@v4
+        with:
+          path: occt-wasm
+          key: occt-wasm-8.0.1-emscripten-4.0.9-${{ hashFiles('tools/wasm/build-occt.sh') }}
+      - name: Build OpenCASCADE for WebAssembly
+        if: steps.occt-wasm.outputs.cache-hit != 'true'
+        shell: bash -el {0}
+        run: tools/wasm/build-occt.sh occt-wasm
+      - name: Build the browser module
+        shell: bash -el {0}
+        run: |
+          export OCCT_INCLUDE_DIR="$PWD/occt-wasm/include/opencascade"
+          export TCAD_OCCT_WASM="$PWD/occt-wasm/occt.wasm"
+          cargo build --release -p tcad-web --features occt --target wasm32-unknown-emscripten
+          cp occt-wasm/occt.wasm target/wasm32-unknown-emscripten/release/
+          ls -la target/wasm32-unknown-emscripten/release/ | grep -E 'tcad|occt'
+      - name: Regenerate the corpus in WebAssembly (T1 against the native builds)
+        run: node tools/wasm/gate.mjs target/wasm32-unknown-emscripten/release/tcad-web.js corpus
+
   build123d-crosscheck:
     runs-on: ubuntu-latest
     steps:

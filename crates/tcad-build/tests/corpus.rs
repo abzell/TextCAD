@@ -212,7 +212,9 @@ fn check_cross_platform(kernel: &str, hashes: &[String]) {
     let golden = std::fs::read_to_string(&path).expect("corpus/brep-t1.txt");
     let version = golden.lines().next().unwrap_or("").trim_start_matches("# ");
     if version != kernel {
-        eprintln!("brep-t1.txt is for {version}, this build is {kernel}: cross-platform check skipped");
+        eprintln!(
+            "brep-t1.txt is for {version}, this build is {kernel}: cross-platform check skipped"
+        );
         return;
     }
     let want: Vec<&str> = golden.lines().skip(1).collect();

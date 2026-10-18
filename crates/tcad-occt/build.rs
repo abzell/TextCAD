@@ -106,6 +106,11 @@ fn main() {
             build.flag("/EHsc");
         }
         build.compile("tcad_occt_shim");
+        // In the browser OpenCASCADE is a side module (occt.wasm) that the final executable
+        // (crates/tcad-web) loads at start-up: nothing to link here (docs/adr/0014).
+        if std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("emscripten") {
+            return;
+        }
         println!("cargo:rustc-link-search=native={}", lib.display());
         for l in LIBS {
             println!("cargo:rustc-link-lib=dylib={l}");
