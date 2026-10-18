@@ -1,0 +1,81 @@
+name: release
+
+# Builds the Windows distribution (zip and MSI) with the OpenCASCADE kernel. It runs on a version
+# tag or by hand and only uploads workflow artifacts; a GitHub release is attached when the run
+# was started by a tag. Nothing here creates tags.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.97.0
+      - uses: Swatinem/rust-cache@v2
+      - name: Cache OpenCASCADE
+        id: occt-cache
+        uses: actions/cache@v4
+        with:
+          path: vcpkg_installed
+          key: occt-vcpkg-x64-windows-v1
+      - name: Install OpenCASCADE
+        if: steps.occt-cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: vcpkg install "opencascade[core]:x64-windows" --x-install-root="$env:GITHUB_WORKSPACE\vcpkg_installed"
+      - name: Build
+        shell: pwsh
+        run: |
+          $root = "$env:GITHUB_WORKSPACE\vcpkg_installed\x64-windows"
+          $env:OCCT_INCLUDE_DIR = "$root\include\opencascade"
+          $env:OCCT_LIB_DIR = "$root\lib"
+          $env:PATH = "$root\bin;$env:PATH"
+          cargo build --release -p tcad-cli -p tcad-mcp -p tcad-lsp --features tcad-cli/occt,tcad-build/occt,tcad-mcp/occt
+      - name: Stage
+        shell: pwsh
+        run: |
+          $root = "$env:GITHUB_WORKSPACE\vcpkg_installed\x64-windows"
+          New-Item -ItemType Directory -Force stage | Out-Null
+          Copy-Item target\release\tcad.exe, target\release\tcad-mcp.exe, target\release\tcad-lsp.exe stage\
+          # the OpenCASCADE and runtime libraries the executables load
+          Copy-Item "$root\bin\*.dll" stage\
+          Copy-Item LICENSE, NOTICE stage\ -ErrorAction SilentlyContinue
+          Copy-Item -Recurse spec\examples stage\examples
+          .\stage\tcad.exe --version
+          .\stage\tcad.exe check stage\examples
+      - name: Smoke test the staged executables
+        shell: pwsh
+        run: |
+          .\stage\tcad.exe build --json corpus\hyd_rod_clevis | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw "tcad build failed" }
+          .\stage\tcad.exe verify corpus\hyd_rod_clevis
+          if ($LASTEXITCODE -ne 0) { throw "tcad verify failed" }
+      - name: Zip
+        shell: pwsh
+        run: Compress-Archive -Path stage\* -DestinationPath textcad-windows-x64.zip
+      - name: MSI
+        shell: pwsh
+        run: |
+          dotnet tool install --global wix --version 5.0.2
+          $version = (Select-String -Path Cargo.toml -Pattern '^version = "(\d+\.\d+\.\d+)"' | Select-Object -First 1).Matches[0].Groups[1].Value
+          wix build packaging\windows\tcad.wxs -d Version=$version -d StageDir=stage -arch x64 -o textcad-windows-x64.msi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: textcad-windows-x64
+          path: |
+            textcad-windows-x64.zip
+            textcad-windows-x64.msi
+      - name: Attach to the release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            textcad-windows-x64.zip
+            textcad-windows-x64.msi
