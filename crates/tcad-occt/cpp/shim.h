@@ -47,7 +47,7 @@ std::unique_ptr<Shape> shell(const Shape& s, rust::Slice<const uint32_t> remove,
 std::unique_ptr<Shape> draft(const Shape& s, rust::Slice<const uint32_t> faces, Vec3 pull,
                              double angle, Vec3 neutral_origin, Vec3 neutral_normal);
 std::unique_ptr<Shape> translate(const Shape& s, Vec3 v);
-std::unique_ptr<Shape> rotate(const Shape& s, Vec3 origin, Vec3 dir, double angle);
+std::unique_ptr<Shape> rotate(const Shape& s, Vec3 origin, Vec3 q, double w);
 std::unique_ptr<Shape> mirror(const Shape& s, Vec3 origin, Vec3 normal);
 rust::Vec<FaceRec> faces_of(const Shape& s);
 rust::Vec<EdgeRec> edges_of(const Shape& s);

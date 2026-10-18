@@ -156,7 +156,8 @@ pub mod ffi {
             neutral_normal: Vec3,
         ) -> Result<UniquePtr<Shape>>;
         fn translate(s: &Shape, v: Vec3) -> Result<UniquePtr<Shape>>;
-        fn rotate(s: &Shape, origin: Vec3, dir: Vec3, angle: f64) -> Result<UniquePtr<Shape>>;
+        /// `q`, `w`: the rotation as a unit quaternion (computed with the portable libm).
+        fn rotate(s: &Shape, origin: Vec3, q: Vec3, w: f64) -> Result<UniquePtr<Shape>>;
         fn mirror(s: &Shape, origin: Vec3, normal: Vec3) -> Result<UniquePtr<Shape>>;
         fn faces_of(s: &Shape) -> Result<Vec<FaceRec>>;
         fn edges_of(s: &Shape) -> Result<Vec<EdgeRec>>;

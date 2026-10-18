@@ -11,10 +11,11 @@ authors.workspace = true
 [features]
 # Link OpenCASCADE. Off by default so the workspace builds (WASM, docs, deny) without a C++
 # toolchain and without OCCT installed. See build.rs for how OCCT is located.
-occt = ["dep:cxx", "dep:cxx-build"]
+occt = ["dep:cxx", "dep:cxx-build", "dep:libm"]
 
 [dependencies]
 tcad-kernel.workspace = true
+libm = { version = "0.2", optional = true }
 cxx = { version = "1", optional = true }
 
 [build-dependencies]

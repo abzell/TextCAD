@@ -451,6 +451,7 @@ dependencies = [
 name = "tcad-model"
 version = "0.0.1"
 dependencies = [
+ "libm",
  "serde_json",
  "tcad-diag",
  "tcad-expr",
@@ -473,6 +474,7 @@ version = "0.0.1"
 dependencies = [
  "cxx",
  "cxx-build",
+ "libm",
  "tcad-kernel",
 ]
 

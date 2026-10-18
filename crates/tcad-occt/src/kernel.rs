@@ -78,7 +78,15 @@ fn seg(s: &Segment) -> ffi::Seg {
             theta,
         } => {
             out.kind = 3;
-            out.p = [center[0], center[1], *a, *b, *theta, 0.0];
+            // cos/sin here, not in C++: the C library's differ between platforms (docs/adr/0014)
+            out.p = [
+                center[0],
+                center[1],
+                *a,
+                *b,
+                libm::cos(*theta),
+                libm::sin(*theta),
+            ];
         }
         Segment::Spline {
             points,
@@ -226,7 +234,19 @@ impl Kernel for OcctKernel {
         match *by {
             Transform::Translate(v) => shape(ffi::translate(&s.0, v3(v))),
             Transform::Rotate { origin, dir, angle } => {
-                shape(ffi::rotate(&s.0, v3(origin), v3(dir), angle))
+                // the quaternion's cos and sin come from the portable libm, not the platform's
+                // C library (docs/adr/0014)
+                let n = libm::sqrt(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
+                if n < 1e-12 {
+                    return Err(KernelError("rotate: zero axis".into()));
+                }
+                let (s_half, c_half) = (libm::sin(angle / 2.0), libm::cos(angle / 2.0));
+                let q = [
+                    dir[0] / n * s_half,
+                    dir[1] / n * s_half,
+                    dir[2] / n * s_half,
+                ];
+                shape(ffi::rotate(&s.0, v3(origin), v3(q), c_half))
             }
             Transform::Mirror { origin, normal } => {
                 shape(ffi::mirror(&s.0, v3(origin), v3(normal)))

@@ -292,7 +292,7 @@ impl<K: Kernel> Cx<'_, K> {
                 if rs <= r || !(half > 0.0 && half < std::f64::consts::FRAC_PI_2) {
                     return self.fail(codes::E5001, item.span, "a countersink must be wider than the hole, with an included angle between 0 and 180 degrees");
                 }
-                let ds = (rs - r) / half.tan();
+                let ds = (rs - r) / libm::tan(half);
                 if ds >= depth {
                     return self.fail(
                         codes::E5001,
@@ -306,7 +306,7 @@ impl<K: Kernel> Cx<'_, K> {
                         [0.0, -depth],
                         [r, -depth],
                         [r, -ds],
-                        [rs + e * half.tan(), e],
+                        [rs + e * libm::tan(half), e],
                     ],
                     vec![None, Some("floor"), Some("wall"), Some("csk"), None],
                 )
