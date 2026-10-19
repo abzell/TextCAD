@@ -5,7 +5,7 @@
 #ifndef _EXP2F_DATA_H
 #define _EXP2F_DATA_H
 
-#include <features.h>
+#include "tcad_musl_names.h" /* TextCAD: instead of musl's <features.h> (for `hidden`) */
 #include <stdint.h>
 
 /* Shared between expf, exp2f and powf.  */

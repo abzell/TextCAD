@@ -8,7 +8,7 @@ set_target_properties(tcad_math PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED ON
   MSVC_RUNTIME_LIBRARY "MultiThreadedDLL" POSITION_INDEPENDENT_CODE ON)
 # One floating-point model everywhere: no contraction into FMA, no fast math.
 if(MSVC)
-  target_compile_options(tcad_math PRIVATE /fp:precise /W3 /wd4146 /wd4244)
+  target_compile_options(tcad_math PRIVATE /fp:precise /W3 /wd4116 /wd4146 /wd4244)
 else()
   target_compile_options(tcad_math PRIVATE -ffp-contract=off)
 endif()

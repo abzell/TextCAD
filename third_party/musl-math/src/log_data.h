@@ -5,7 +5,7 @@
 #ifndef _LOG_DATA_H
 #define _LOG_DATA_H
 
-#include <features.h>
+#include "tcad_musl_names.h" /* TextCAD: instead of musl's <features.h> (for `hidden`) */
 
 #define LOG_TABLE_BITS 7
 #define LOG_POLY_ORDER 6

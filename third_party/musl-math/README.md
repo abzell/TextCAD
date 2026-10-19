@@ -20,7 +20,8 @@ and the internal functions and tables they use.
 
 ## Changes from musl
 
-- Every `.c` file starts with `#include "tcad_musl_names.h"`, which includes the platform's
+- Every `.c` file starts with `#include "tcad_musl_names.h"` (the `*_data.h` headers include it
+  instead of musl's `<features.h>`), which includes the platform's
   `<math.h>` first and then renames the public functions to `tcad_*` and the internal ones to
   `tcad_musl_*`, so they never collide with the C library.
 - `src/libm.h` is musl's `src/internal/libm.h` without the long double layout (no long double function

@@ -5,7 +5,7 @@
 #ifndef _POW_DATA_H
 #define _POW_DATA_H
 
-#include <features.h>
+#include "tcad_musl_names.h" /* TextCAD: instead of musl's <features.h> (for `hidden`) */
 
 #define POW_LOG_TABLE_BITS 7
 #define POW_LOG_POLY_ORDER 8
