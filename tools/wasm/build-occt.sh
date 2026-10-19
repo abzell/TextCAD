@@ -17,7 +17,12 @@ tar -xzf "$work/occt.tar.gz" -C "$work"
 src=$(echo "$work"/OCCT-*)
 
 # Same floating-point and exception model as the shim and Rust (.cargo/config.toml).
-flags="-fPIC -fwasm-exceptions -ffp-contract=off"
+# -UOCC_CONVERT_SIGNALS: OpenCASCADE's CMake defines it on every non-Windows platform, turning
+# OCC_CATCH_SIGNALS into setjmp/longjmp, which Emscripten 4.0.9 lowers to invalid code next to wasm
+# exceptions (ShapeCustom_BSplineRestriction, ShapeUpgrade_ShapeDivide). WebAssembly has no OS
+# signals to convert, the Windows build does not define it either, and the shim is compiled
+# without it.
+flags="-fPIC -fwasm-exceptions -ffp-contract=off -UOCC_CONVERT_SIGNALS"
 emcmake cmake -S "$src" -B "$work/build" -G Ninja \
   -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
   -DCMAKE_C_FLAGS="$flags" -DCMAKE_CXX_FLAGS="$flags" \

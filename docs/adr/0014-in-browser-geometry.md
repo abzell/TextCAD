@@ -56,6 +56,11 @@ For linking OCCT into the module:
   together (conda-forge's `emscripten 4.0.9` pairs with binaryen 117, which rejects the wasm
   features emcc asks for when it optimises the side module); OCCT built with `emcmake`, only the toolkits we link (FoundationClasses, ModelingData,
   ModelingAlgorithms, the STEP part of DataExchange), no threads, no visualization, cached in CI.
+  `OCC_CONVERT_SIGNALS` is undefined for this build (as on Windows): its setjmp/longjmp handlers
+  made Emscripten emit invalid code next to wasm exceptions, and WebAssembly has no OS signals to
+  convert. `tools/wasm/repair-objects.mjs` validates every object after the build and recompiles
+  any the engine rejects. `occt.wasm` is linked without the link-time `wasm-opt` pass (the objects
+  are already optimised) and the main module is linked with `-sMAIN_MODULE=2`.
 - **Floating point**: OCCT and the shim are compiled with `-ffp-contract=off` on every clang build
   (Emscripten, Linux), matching MSVC's `/fp:precise`. The C library difference is measured first
   (the gate harness reports, per corpus part, the first differing line of the canonical B-rep). If

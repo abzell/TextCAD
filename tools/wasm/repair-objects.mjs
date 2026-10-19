@@ -1,6 +1,7 @@
-// Emscripten 4.0.9 emits invalid code for a few OpenCASCADE functions in the Release build
-// ("br_table: label arity inconsistent"; ShapeCustom_BSplineRestriction and ShapeUpgrade_ShapeDivide
-// as of 8.0.1), although the same sources compile correctly standalone. This validates every
+// A guard for the OpenCASCADE WebAssembly build: Emscripten 4.0.9 emitted invalid code
+// ("br_table: label arity inconsistent") for ShapeCustom_BSplineRestriction and
+// ShapeUpgrade_ShapeDivide while OCC_CONVERT_SIGNALS was defined (build-occt.sh now undefines it).
+// This validates every
 // object of a CMake build and recompiles each invalid one: at a lower optimisation level, else
 // without one of its options (reporting which), else with only its includes, definitions and our
 // flags. None of these changes the arithmetic (IEEE, -ffp-contract=off).
