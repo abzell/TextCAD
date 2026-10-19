@@ -20,7 +20,10 @@ fn main() {
         println!("cargo:rustc-link-arg={arg}");
     }
     if let Ok(side) = std::env::var("TCAD_OCCT_WASM") {
-        println!("cargo:rustc-link-arg=-sMAIN_MODULE=1");
+        // MAIN_MODULE=2: export only the listed functions plus what the side module imports (emcc
+        // reads occt.wasm's imports at link time). MAIN_MODULE=1 would export every symbol, and
+        // emcc rejects cxx's `cxxbridge1$...` names as exports.
+        println!("cargo:rustc-link-arg=-sMAIN_MODULE=2");
         println!("cargo:rustc-link-arg={side}");
         println!("cargo:rerun-if-changed={side}");
     }
