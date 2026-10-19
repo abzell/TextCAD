@@ -161,3 +161,47 @@ Not done / needs a person:
 - The Windows MSI definition (`packaging/windows/tcad.wxs`) has not run on a Windows runner yet; it is
   exercised by the first release workflow run.
 - The viewer is not exercised inside a real VS Code or Theia window (the extension only compiles in CI).
+
+## Phase 1 close-out (2026-10-18/19)
+
+Done:
+- The one-hour parser fuzz run (workflow `fuzz-long`) and the release dry run (Windows zip and MSI
+  built with OpenCASCADE 8.0.1, staged executables smoke-tested) are green on `main`.
+- The language server is exercised inside real editors in CI (job `editors`): VS Code
+  (`@vscode/test-electron`: diagnostics with codes, hover, definition, completion, formatting) and
+  Eclipse Theia (a minimal Theia app loads the extension; Playwright reads the server's diagnostic).
+
+Needs a person:
+- The tag that publishes the Windows release: the session's git access cannot push tags.
+- The commercial CAD spot check of the hydraulic STEP exports (FreeCAD and build123d pass in CI).
+
+## Phase 1b: in-browser geometry (2026-10-18/19)
+
+Gate: every corpus part regenerates in the browser at T1 against the Windows build. **Passes**: all
+37 measured parts give the same canonical B-rep (SHA-256) in WebAssembly as on Windows
+(`corpus/brep-t1.txt`, `tools/wasm/gate.mjs`, CI job `browser`); 6-7 s for the whole corpus in Node.
+
+Done (ADR 0014):
+- One OpenCASCADE version (8.0.1) on Windows (vcpkg), Linux (conda-forge) and WebAssembly (built from
+  source with Emscripten 4.0.9, `tools/wasm/build-occt.sh`), as a side module `occt.wasm` that the
+  user can replace (LGPL).
+- `crates/tcad-web`: the build as a C ABI for the browser (manifest JSON, GLB, canonical B-rep).
+- The viewer's in-browser mode (`viewer/web`): edit the source, regenerate in a Web Worker, the text
+  and the model linked both ways; Chromium test in CI.
+- Bit identity across platforms: our own code uses the `libm` crate and passes rotations as
+  quaternions; OpenCASCADE takes its transcendental functions from `third_party/musl-math` (musl 1.2.5)
+  on Windows and in the browser instead of the platform C library.
+- Tools: `tools/brep-diff.py` and CI job `brep-compare` (line-by-line B-rep comparison between
+  platforms), `tools/wasm/validate.mjs`, `tools/wasm/repair-objects.mjs`.
+
+Findings: conda-forge's Emscripten pairs with an incompatible binaryen (the official emsdk is used);
+binaryen 123 cannot read the linked side module (linked without the link-time optimiser);
+`MAIN_MODULE=1` exports cxx's `$` symbol names (the main module uses `MAIN_MODULE=2`);
+`OCC_CONVERT_SIGNALS` makes Emscripten emit invalid code next to wasm exceptions (undefined for the
+browser build, as on Windows); the Microsoft C runtime rounds sin/cos differently from glibc and musl
+in the last bit, which OpenCASCADE's fitted surfaces amplify to 1e-6.
+
+Not done:
+- Linux still uses glibc's math and differs from Windows on 4 corpus parts (reported by CI, not a
+  gate); building OpenCASCADE from source on Linux with the shared library would remove that.
+

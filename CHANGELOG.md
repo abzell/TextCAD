@@ -44,5 +44,12 @@ All notable changes are recorded here. Format follows [Keep a Changelog](https:/
   digests checked on Linux, Windows and WASI; FreeCAD import check; release (Windows zip, MSI) and
   one-hour fuzz workflows; `spec/viewer.md`, `spec/mcp.md`, ADRs 0012 and 0013.
 
+- Phase 1b: in-browser geometry. `crates/tcad-web` (the build as a WebAssembly module with
+  OpenCASCADE 8.0.1 as a replaceable side module), the viewer's in-browser mode (`viewer/web`), the
+  T1 gate against Windows (`corpus/brep-t1.txt`, `tools/wasm/gate.mjs`), `third_party/musl-math` (one
+  implementation of the transcendental functions on Windows and in the browser), cross-platform
+  B-rep comparison (`tools/brep-diff.py`), ADR 0014.
+- CI: the language server inside VS Code and Eclipse Theia (job `editors`).
+
 ### Changed
 - Replaced the MIT `LICENSE` with Apache-2.0 (locked decision, requirements section 2).

@@ -1,6 +1,6 @@
 # 0014. In-browser geometry (Phase 1b): OpenCASCADE in WebAssembly
 
-- Status: proposed
+- Status: accepted (2026-10-19)
 - Date: 2026-10-18
 
 ## Context
@@ -81,6 +81,10 @@ For linking OCCT into the module:
   `tools/wasm/build-occt.sh` (`-include`, the library inside `occt.wasm`). The library gives identical
   bits natively and in WebAssembly (checked over 200 000 arguments per function). Linux keeps
   conda-forge's OpenCASCADE and glibc and reports its differences without failing.
+
+  **Result (2026-10-19)**: with the shared library the Windows build produces exactly the browser's
+  canonical B-reps for all 37 measured corpus parts (`corpus/brep-t1.txt` regenerated from Windows;
+  the gate `tools/wasm/gate.mjs` passes). Linux, still on glibc, differs on 4 of them.
 - **Licence check (LGPL-2.1 with the OCCT exception 1.0)**: OCCT stays a separately replaceable
   component in the browser (`occt.wasm`), its sources and our build script are published, and our
   own code is Apache-2.0 with complete sources, so a user can rebuild or relink with a modified OCCT.
