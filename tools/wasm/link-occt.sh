@@ -7,7 +7,7 @@
 #   tools/wasm/link-occt.sh OUT_DIR
 set -euo pipefail
 out=$(realpath "${1:?usage: link-occt.sh OUT_DIR}")
-libs=$(find "$out/lib" -name 'libTK*.a' | sort)
+libs="$(find "$out/lib" -name 'libTK*.a' | sort) $out/lib/libtcad_math.a"
 # -O0 here only skips the link-time wasm-opt pass (the objects are already optimised by the Release
 # build): binaryen 123 fails to parse this module ("popping from empty stack").
 # --profiling-funcs keeps function names, so tools/wasm/validate.mjs can name a rejected function.

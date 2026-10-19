@@ -5,6 +5,11 @@
 //! `VCPKG_TARGET_TRIPLET` defaulting to `x64-windows`); then the Linux system paths
 //! (`/usr/include/opencascade`, `/usr/lib/x86_64-linux-gnu`). OCCT is always linked dynamically
 //! (it is LGPL-2.1 with an exception; see docs/adr/0008-occt-linking-and-license.md).
+//!
+//! On Windows and in the browser the shim is compiled like OpenCASCADE itself there: with
+//! `third_party/musl-math/include/tcad_math.h` force-included, so every transcendental function
+//! comes from one portable implementation (docs/adr/0014). On Windows the shim links its own copy
+//! of that library; in the browser it comes from `occt.wasm`.
 
 use std::path::{Path, PathBuf};
 
@@ -51,6 +56,18 @@ fn has_lib(dir: &Path, name: &str) -> bool {
             .iter()
             .any(|ext| dir.join(format!("{prefix}{name}.{ext}")).is_file())
     })
+}
+
+/// The C files of the vendored math library.
+#[cfg_attr(not(feature = "occt"), allow(dead_code))]
+fn c_sources(dir: &Path) -> Vec<PathBuf> {
+    let mut files: Vec<PathBuf> = std::fs::read_dir(dir)
+        .expect("third_party/musl-math/src")
+        .filter_map(|e| e.ok().map(|e| e.path()))
+        .filter(|p| p.extension().is_some_and(|e| e == "c"))
+        .collect();
+    files.sort();
+    files
 }
 
 #[cfg_attr(not(feature = "occt"), allow(dead_code))]
@@ -102,8 +119,26 @@ fn main() {
         // MSVC runs destructors during exception unwinding only with /EHsc. Without it a C++
         // exception thrown inside a `std::lock_guard` scope leaves the mutex locked (and leaks
         // scratch files): the next STEP export then waits forever.
-        if std::env::var("CARGO_CFG_TARGET_ENV").as_deref() == Ok("msvc") {
+        let msvc = std::env::var("CARGO_CFG_TARGET_ENV").as_deref() == Ok("msvc");
+        let emscripten = std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("emscripten");
+        if msvc {
             build.flag("/EHsc");
+        }
+        if msvc || emscripten {
+            let math = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../third_party/musl-math");
+            let header = math.join("include").join("tcad_math.h");
+            println!("cargo:rerun-if-changed={}", math.display());
+            if msvc {
+                build.flag(format!("/FI{}", header.display()));
+                let mut libm = cc::Build::new();
+                libm.files(c_sources(&math.join("src")))
+                    .std("c11")
+                    .flag("/fp:precise")
+                    .warnings(false);
+                libm.compile("tcad_math");
+            } else {
+                build.flag("-include").flag(header.display().to_string());
+            }
         }
         build.compile("tcad_occt_shim");
         // In the browser OpenCASCADE is a side module (occt.wasm) that the final executable

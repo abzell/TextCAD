@@ -5,7 +5,7 @@
 #   tools/wasm/build-occt.sh OUT_DIR
 #
 # Needs emcc/emcmake (emsdk 4.0.9), cmake and ninja on PATH. Produces OUT_DIR/include/opencascade
-# (headers for the shim) and OUT_DIR/lib/libTK*.a.
+# (headers for the shim), OUT_DIR/lib/libTK*.a and OUT_DIR/lib/libtcad_math.a.
 set -euo pipefail
 out=$(realpath -m "${1:?usage: build-occt.sh OUT_DIR}")
 version=V8_0_1
@@ -22,7 +22,10 @@ src=$(echo "$work"/OCCT-*)
 # exceptions (ShapeCustom_BSplineRestriction, ShapeUpgrade_ShapeDivide). WebAssembly has no OS
 # signals to convert, the Windows build does not define it either, and the shim is compiled
 # without it.
-flags="-fPIC -fwasm-exceptions -ffp-contract=off -UOCC_CONVERT_SIGNALS"
+# tcad_math.h: every transcendental function from the vendored musl library, as on Windows
+# (third_party/musl-math, docs/adr/0014).
+math=$(realpath "$(dirname "$(realpath "$0")")/../../third_party/musl-math")
+flags="-fPIC -fwasm-exceptions -ffp-contract=off -UOCC_CONVERT_SIGNALS -include $math/include/tcad_math.h"
 emcmake cmake -S "$src" -B "$work/build" -G Ninja \
   -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
   -DCMAKE_C_FLAGS="$flags" -DCMAKE_CXX_FLAGS="$flags" \
@@ -42,4 +45,10 @@ node "$(dirname "$(realpath "$0")")/repair-objects.mjs" "$work/build"
 cmake --build "$work/build"
 cmake --install "$work/build"
 
+# The math library goes into the side module next to the toolkits (tools/wasm/link-occt.sh).
+mkdir -p "$work/math"
+for f in "$math"/src/*.c; do
+  emcc -std=c11 -O2 -fPIC -ffp-contract=off -c "$f" -o "$work/math/$(basename "$f" .c).o"
+done
+emar rcs "$out/lib/libtcad_math.a" "$work"/math/*.o
 test -f "$out/include/opencascade/Standard_Version.hxx"

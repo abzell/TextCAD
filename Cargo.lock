@@ -472,6 +472,7 @@ dependencies = [
 name = "tcad-occt"
 version = "0.0.1"
 dependencies = [
+ "cc",
  "cxx",
  "cxx-build",
  "libm",

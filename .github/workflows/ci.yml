@@ -250,7 +250,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: occt-wasm
-          key: occt-wasm-8.0.1-emsdk-4.0.9-${{ hashFiles('tools/wasm/build-occt.sh', 'tools/wasm/repair-objects.mjs') }}
+          key: occt-wasm-8.0.1-emsdk-4.0.9-${{ hashFiles('tools/wasm/build-occt.sh', 'tools/wasm/repair-objects.mjs', 'third_party/musl-math/**') }}
       - name: Build OpenCASCADE for WebAssembly
         if: steps.occt-wasm.outputs.cache-hit != 'true'
         run: |
@@ -304,8 +304,6 @@ jobs:
       - run: pip install build123d
       - run: python3 corpus/tools/compare_reference.py corpus
 
-  # The same tests as occt-linux, on Windows with OpenCASCADE from vcpkg (cached). Windows is the
-  # primary platform: every corpus part must build here and match expected.json.
   # Where the canonical B-reps of two platforms differ (docs/adr/0014), line by line.
   brep-compare:
     needs: [occt-linux, occt-windows, browser]
@@ -321,6 +319,9 @@ jobs:
       - name: Windows (A) against Linux (B)
         run: python3 tools/brep-diff.py breps/brep-windows breps/brep-linux
 
+  # The same tests as occt-linux, on Windows with OpenCASCADE from vcpkg (cached). Windows is the
+  # primary platform: every corpus part must build here and match expected.json, and its canonical
+  # B-reps are the reference of corpus/brep-t1.txt.
   occt-windows:
     runs-on: windows-latest
     timeout-minutes: 150
@@ -330,28 +331,34 @@ jobs:
         with:
           toolchain: 1.97.0
       - uses: Swatinem/rust-cache@v2
+      # The portable math library linked into every OpenCASCADE DLL (ci/vcpkg-triplets, docs/adr/0014).
+      - name: Math library
+        shell: pwsh
+        run: |
+          cmake -S third_party/musl-math -B build-tcad-math -A x64
+          cmake --build build-tcad-math --config Release
       - name: Restore OpenCASCADE
         id: occt-cache
         uses: actions/cache/restore@v4
         with:
           path: vcpkg_installed
-          key: occt-vcpkg-x64-windows-v1
+          key: occt-vcpkg-x64-windows-tcad-${{ hashFiles('ci/vcpkg-triplets/**', 'third_party/musl-math/**') }}
       - name: Install OpenCASCADE
         if: steps.occt-cache.outputs.cache-hit != 'true'
         shell: pwsh
-        run: vcpkg install "opencascade[core]:x64-windows" --x-install-root="$env:GITHUB_WORKSPACE\vcpkg_installed"
+        run: vcpkg install "opencascade[core]:x64-windows-tcad" --overlay-triplets=ci/vcpkg-triplets --x-install-root="$env:GITHUB_WORKSPACE\vcpkg_installed"
       # Saved right after the (very long) build, so a failing test run does not throw it away.
       - name: Save OpenCASCADE
         if: steps.occt-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: vcpkg_installed
-          key: occt-vcpkg-x64-windows-v1
+          key: occt-vcpkg-x64-windows-tcad-${{ hashFiles('ci/vcpkg-triplets/**', 'third_party/musl-math/**') }}
       - name: Test with OCCT
         shell: pwsh
         timeout-minutes: 40
         run: |
-          $root = "$env:GITHUB_WORKSPACE\vcpkg_installed\x64-windows"
+          $root = "$env:GITHUB_WORKSPACE\vcpkg_installed\x64-windows-tcad"
           Get-ChildItem "$root\lib" -Filter "TK*STEP*.lib" | ForEach-Object { $_.Name }
           Get-ChildItem "$root\lib" -Filter "TK*DE*.lib" | ForEach-Object { $_.Name }
           $env:OCCT_INCLUDE_DIR = "$root\include\opencascade"

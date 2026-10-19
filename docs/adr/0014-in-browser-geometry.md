@@ -68,6 +68,19 @@ For linking OCCT into the module:
   musl `libm` sources, already the basis of the `libm` crate our expression evaluator uses):
   Emscripten through link-time wrapping, Windows through a vcpkg overlay port with a forced-include
   header. That step is taken only if the measurement shows it is needed.
+
+  **Measured (2026-10-19)** and taken: with every transcendental call in our own code on the `libm`
+  crate and rotations passed as quaternions, 30 of 37 corpus parts were identical on Windows and in
+  the browser; the other 7 differed in the last bits of sin/cos results inside OpenCASCADE (amplified
+  to 1e-8..1e-6 in fitted fillet and blend surfaces), with identical topology and line counts. The
+  browser matched Linux (glibc) on several of them: the Microsoft C runtime rounds differently.
+  `third_party/musl-math` (musl 1.2.5's math, MIT) is therefore compiled into both builds and
+  `third_party/musl-math/include/tcad_math.h` is force-included into every OpenCASCADE and shim
+  source: on Windows through the vcpkg triplet `ci/vcpkg-triplets/x64-windows-tcad.cmake` (`/FI`, the
+  library on every DLL's link line; CI and the release use it), in the browser through
+  `tools/wasm/build-occt.sh` (`-include`, the library inside `occt.wasm`). The library gives identical
+  bits natively and in WebAssembly (checked over 200 000 arguments per function). Linux keeps
+  conda-forge's OpenCASCADE and glibc and reports its differences without failing.
 - **Licence check (LGPL-2.1 with the OCCT exception 1.0)**: OCCT stays a separately replaceable
   component in the browser (`occt.wasm`), its sources and our build script are published, and our
   own code is Apache-2.0 with complete sources, so a user can rebuild or relink with a modified OCCT.
