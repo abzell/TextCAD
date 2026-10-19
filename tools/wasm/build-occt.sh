@@ -19,7 +19,7 @@ src=$(echo "$work"/OCCT-*)
 # Same floating-point and exception model as the shim and Rust (.cargo/config.toml).
 flags="-fPIC -fwasm-exceptions -ffp-contract=off"
 emcmake cmake -S "$src" -B "$work/build" -G Ninja \
-  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
   -DCMAKE_C_FLAGS="$flags" -DCMAKE_CXX_FLAGS="$flags" \
   -DBUILD_LIBRARY_TYPE=Static \
   -DINSTALL_DIR="$out" -DCMAKE_INSTALL_PREFIX="$out" \
@@ -30,6 +30,10 @@ emcmake cmake -S "$src" -B "$work/build" -G Ninja \
   -DUSE_FREETYPE=OFF -DUSE_OPENGL=OFF -DUSE_GLES2=OFF -DUSE_FREEIMAGE=OFF \
   -DUSE_RAPIDJSON=OFF -DUSE_DRACO=OFF -DUSE_TBB=OFF -DUSE_VTK=OFF -DUSE_TK=OFF \
   -DUSE_FFMPEG=OFF -DUSE_OPENVR=OFF
+cmake --build "$work/build"
+# Recompile the few objects the compiler gets wrong (see repair-objects.mjs); the second build
+# re-archives the libraries that contain them.
+node "$(dirname "$(realpath "$0")")/repair-objects.mjs" "$work/build"
 cmake --build "$work/build"
 cmake --install "$work/build"
 

@@ -250,7 +250,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: occt-wasm
-          key: occt-wasm-8.0.1-emsdk-4.0.9-${{ hashFiles('tools/wasm/build-occt.sh') }}
+          key: occt-wasm-8.0.1-emsdk-4.0.9-${{ hashFiles('tools/wasm/build-occt.sh', 'tools/wasm/repair-objects.mjs') }}
       - name: Build OpenCASCADE for WebAssembly
         if: steps.occt-wasm.outputs.cache-hit != 'true'
         run: |
@@ -272,12 +272,6 @@ jobs:
           cargo build --release -p tcad-web --features occt --target wasm32-unknown-emscripten
           cp occt-wasm/occt.wasm target/wasm32-unknown-emscripten/release/
           ls -la target/wasm32-unknown-emscripten/release/ | grep -E 'tcad|occt'
-      # Diagnostic while the OpenCASCADE build has invalid functions (docs/adr/0014).
-      - name: Find invalid OpenCASCADE objects and probe compiler flags
-        continue-on-error: true
-        run: |
-          source "$RUNNER_TEMP/emsdk/emsdk_env.sh"
-          tools/wasm/probe-objects.sh occt-wasm
       - name: Validate the WebAssembly modules
         run: |
           node tools/wasm/validate.mjs occt-wasm/occt.wasm
