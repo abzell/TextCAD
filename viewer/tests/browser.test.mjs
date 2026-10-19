@@ -54,7 +54,10 @@ try {
   await page.waitForFunction((k) => window.__tcad.regenerations() > k, n, { timeout: 120000 });
   const second = await page.evaluate(() => window.__tcad.lastResult());
   assert.equal(second.ok, true);
-  assert.ok(second.result.volume_mm3 < first.result.volume_mm3, "a wider gap removes material");
+  // the outline is jaw_gap + 2 * jaw_thk high, so a wider gap widens the part; both volumes are
+  // the native build's (tcad props, OpenCASCADE 8.0.1)
+  assert.ok(Math.abs(first.result.volume_mm3 - 99954.747345) < 1e-5, `${first.result.volume_mm3}`);
+  assert.ok(Math.abs(second.result.volume_mm3 - 104754.747345) < 1e-5, `${second.result.volume_mm3}`);
 
   // a broken edit keeps the last model and names the problem
   const m = await page.evaluate(() => window.__tcad.regenerations());
