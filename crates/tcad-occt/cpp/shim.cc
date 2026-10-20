@@ -101,6 +101,7 @@
 #include <TopExp.hxx>
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
 #include <BRep_Tool.hxx>
+#include <gp_Quaternion.hxx>
 #include <gp_Trsf.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
@@ -150,10 +151,11 @@ gp_Pnt at(const Frame3& f, double x, double y) {
                 f.o.z + x * f.x.z + y * f.y.z);
 }
 
-gp_Ax2 axis_in(const Frame3& f, double cx, double cy, double theta) {
+// ct, st: cosine and sine of the x axis' angle in the frame, computed by the caller with the
+// portable libm (docs/adr/0014)
+gp_Ax2 axis_in(const Frame3& f, double cx, double cy, double ct, double st) {
   gp_Pnt c = at(f, cx, cy);
   gp_Dir z = D(f.z);
-  double ct = std::cos(theta), st = std::sin(theta);
   gp_Dir x(ct * f.x.x + st * f.y.x, ct * f.x.y + st * f.y.y, ct * f.x.z + st * f.y.z);
   return gp_Ax2(c, z, x);
 }
@@ -171,16 +173,18 @@ TopoDS_Edge make_edge(const Frame3& f, const Seg& s) {
       return BRepBuilderAPI_MakeEdge(arc.Value()).Edge();
     }
     case 2: {
-      gp_Circ c(axis_in(f, s.p[0], s.p[1], 0.0), s.p[2]);
+      gp_Circ c(axis_in(f, s.p[0], s.p[1], 1.0, 0.0), s.p[2]);
       return BRepBuilderAPI_MakeEdge(c).Edge();
     }
     case 3: {
-      double a = s.p[2], b = s.p[3], theta = s.p[4];
-      if (a < b) {  // OCCT wants the major radius first
+      double a = s.p[2], b = s.p[3], ct = s.p[4], st = s.p[5];
+      if (a < b) {  // OCCT wants the major radius first: turn the axis by 90 degrees
         std::swap(a, b);
-        theta += M_PI / 2.0;
+        double t = ct;
+        ct = -st;
+        st = t;
       }
-      gp_Elips e(axis_in(f, s.p[0], s.p[1], theta), a, b);
+      gp_Elips e(axis_in(f, s.p[0], s.p[1], ct, st), a, b);
       return BRepBuilderAPI_MakeEdge(e).Edge();
     }
     case 4: {
@@ -789,11 +793,15 @@ std::unique_ptr<Shape> translate(const Shape& sh, Vec3 v) {
   });
 }
 
-std::unique_ptr<Shape> rotate(const Shape& sh, Vec3 origin, Vec3 dir, double angle) {
+// q: the rotation as a unit quaternion (x, y, z, w), computed by the caller with the portable libm;
+// gp_Trsf::SetRotation(gp_Ax1, angle) would call the C library's cos and sin (docs/adr/0014).
+std::unique_ptr<Shape> rotate(const Shape& sh, Vec3 origin, Vec3 q, double w) {
   return guarded("rotate", [&]() {
-    gp_Trsf t;
-    t.SetRotation(gp_Ax1(P(origin), D(dir)), angle);
-    return moved(sh, t);
+    gp_Trsf to, r, back;
+    to.SetTranslation(gp_Vec(-origin.x, -origin.y, -origin.z));
+    r.SetRotation(gp_Quaternion(q.x, q.y, q.z, w));
+    back.SetTranslation(gp_Vec(origin.x, origin.y, origin.z));
+    return moved(sh, back * r * to);
   });
 }
 

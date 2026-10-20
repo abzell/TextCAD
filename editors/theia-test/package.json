@@ -1,0 +1,30 @@
+{
+  "name": "textcad-theia-test",
+  "private": true,
+  "description": "A minimal Eclipse Theia application that loads the TextCAD extension, for the end-to-end test in CI.",
+  "license": "Apache-2.0",
+  "theia": {
+    "target": "browser"
+  },
+  "scripts": {
+    "build": "theia build --mode development",
+    "start": "theia start",
+    "test": "node test.mjs"
+  },
+  "dependencies": {
+    "@theia/core": "1.76.0",
+    "@theia/editor": "1.76.0",
+    "@theia/filesystem": "1.76.0",
+    "@theia/markers": "1.76.0",
+    "@theia/messages": "1.76.0",
+    "@theia/monaco": "1.76.0",
+    "@theia/navigator": "1.76.0",
+    "@theia/plugin-ext": "1.76.0",
+    "@theia/plugin-ext-vscode": "1.76.0",
+    "@theia/workspace": "1.76.0"
+  },
+  "devDependencies": {
+    "@theia/cli": "1.76.0",
+    "playwright-core": "1.56.1"
+  }
+}

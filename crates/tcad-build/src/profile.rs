@@ -9,7 +9,7 @@ use tcad_kernel::geometry::{Frame, Loop, P2, Path, Profile, Segment};
 use tcad_model::{Geometry, SolvedEntity, SolvedSketch};
 
 fn dist(a: P2, b: P2) -> f64 {
-    (a[0] - b[0]).hypot(a[1] - b[1])
+    libm::hypot(a[0] - b[0], a[1] - b[1])
 }
 
 fn arc_mid(center: P2, start: P2, end: P2) -> P2 {
@@ -116,7 +116,7 @@ fn entity_segments_raw(e: &SolvedEntity) -> Option<(Vec<Segment>, bool)> {
         }
         Geometry::Slot { start, end, width } => {
             let (dx, dy) = (end[0] - start[0], end[1] - start[1]);
-            let len = dx.hypot(dy);
+            let len = libm::hypot(dx, dy);
             if len == 0.0 {
                 return None;
             }

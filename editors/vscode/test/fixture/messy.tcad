@@ -1,0 +1,5 @@
+tcad 0.1
+
+part p "P" {
+param   w=10 mm
+}

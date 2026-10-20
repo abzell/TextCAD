@@ -51,3 +51,24 @@ CARGO_TARGET_WASM32_WASIP1_RUNNER="python3 $PWD/corpus/tools/wasi_run.py" \
   cargo test --target wasm32-wasip1 -p tcad-syntax -p tcad-expr -p tcad-solver -p tcad-model
 ```
 After an intended change run `UPDATE_DETERMINISM=1 cargo test -p tcad-model --test determinism`.
+
+## Browser module (Phase 1b)
+
+Needs the official emsdk 4.0.9 (`emsdk install 4.0.9 && emsdk activate 4.0.9`), CMake and Ninja.
+
+```
+tools/wasm/build-occt.sh occt-wasm          # OpenCASCADE 8.0.1 for WebAssembly (~45 min)
+tools/wasm/link-occt.sh occt-wasm           # occt.wasm, the replaceable side module
+OCCT_INCLUDE_DIR=$PWD/occt-wasm/include/opencascade OCCT_LIB_DIR=$PWD/occt-wasm/lib \
+TCAD_OCCT_WASM=$PWD/occt-wasm/occt.wasm \
+  cargo build --release -p tcad-web --features occt --target wasm32-unknown-emscripten
+cp occt-wasm/occt.wasm target/wasm32-unknown-emscripten/release/
+node tools/wasm/gate.mjs target/wasm32-unknown-emscripten/release/tcad-web.js corpus
+tools/wasm/site.sh target/wasm32-unknown-emscripten/release site   # the in-browser viewer
+```
+
+The gate compares every corpus part's canonical B-rep with `corpus/brep-t1.txt`, which the Windows
+build writes (`UPDATE_BREP_T1=1 cargo test -p tcad-build --features occt --test corpus` on Windows
+with the `x64-windows-tcad` vcpkg triplet). `BREP_T1_DUMP=DIR` keeps the B-reps of either side for
+`python3 tools/brep-diff.py A B`.
+

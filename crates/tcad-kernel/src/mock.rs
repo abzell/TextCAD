@@ -150,7 +150,7 @@ impl Kernel for MockKernel {
                     a2 += w;
                     cx += (p[0] + q[0]) * w;
                     cy += (p[1] + q[1]) * w;
-                    per += (q[0] - p[0]).hypot(q[1] - p[1]);
+                    per += libm::hypot(q[0] - p[0], q[1] - p[1]);
                 }
                 let area = a2 / 2.0;
                 let c = [cx / (6.0 * area), cy / (6.0 * area)];

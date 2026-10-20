@@ -118,10 +118,30 @@ jobs:
         with:
           toolchain: 1.97.0
       - uses: Swatinem/rust-cache@v2
-      - name: Install OpenCASCADE
-        run: sudo apt-get update && sudo apt-get install -y libocct-foundation-dev libocct-modeling-data-dev libocct-modeling-algorithms-dev libocct-data-exchange-dev libocct-ocaf-dev g++
+      # OpenCASCADE 8.0.1 from conda-forge: the version the Windows job uses, so both check the
+      # same canonical B-rep hashes (corpus/brep-t1.txt, docs/adr/0014).
+      - uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-name: occt
+          create-args: occt=8.0.1
+          cache-environment: true
+          # the second micromamba step below cleans up the shell; a second cleanup fails
+          post-cleanup: none
+      - name: Point the build at OpenCASCADE 8.0.1
+        run: |
+          echo "OCCT_INCLUDE_DIR=$MAMBA_ROOT_PREFIX/envs/occt/include/opencascade" >> "$GITHUB_ENV"
+          echo "OCCT_LIB_DIR=$MAMBA_ROOT_PREFIX/envs/occt/lib" >> "$GITHUB_ENV"
+          echo "LD_LIBRARY_PATH=$MAMBA_ROOT_PREFIX/envs/occt/lib" >> "$GITHUB_ENV"
+          echo "BREP_T1_DUMP=$RUNNER_TEMP/brep-linux" >> "$GITHUB_ENV"
       - name: Test with OCCT
         run: cargo test --workspace --features tcad-cli/occt,tcad-build/occt,tcad-mcp/occt
+      - name: Keep the canonical B-reps (compare platforms line by line)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: brep-linux
+          path: ${{ runner.temp }}/brep-linux
+          if-no-files-found: ignore
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -185,11 +205,94 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - working-directory: editors/vscode
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.97.0
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build -p tcad-lsp
+      - name: Compile, bundle, and run the language server inside VS Code
+        working-directory: editors/vscode
         run: |
           npm ci
           npm run check
           npm run build
+          TCAD_LSP="$GITHUB_WORKSPACE/target/debug/tcad-lsp" xvfb-run -a npm test
+      - name: Run the extension and its language server inside Eclipse Theia
+        working-directory: editors/theia-test
+        run: |
+          npm ci
+          npm run build
+          npx playwright-core install --with-deps chromium
+          TCAD_LSP="$GITHUB_WORKSPACE/target/debug/tcad-lsp" npm test
+
+  # Phase 1b (docs/adr/0014): the build in WebAssembly with OpenCASCADE 8.0.1 as a side module.
+  # Gate: every measured corpus part regenerates with the canonical B-rep hash of the native builds.
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.97.0
+          targets: wasm32-unknown-emscripten
+      - uses: Swatinem/rust-cache@v2
+      # The official emsdk: its LLVM and binaryen are released together (conda-forge's emscripten
+      # 4.0.9 pairs with binaryen 117, which rejects the features that emcc passes to wasm-opt).
+      - name: Emscripten 4.0.9
+        run: |
+          git clone --depth 1 --branch 4.0.9 https://github.com/emscripten-core/emsdk "$RUNNER_TEMP/emsdk"
+          "$RUNNER_TEMP/emsdk/emsdk" install 4.0.9
+          "$RUNNER_TEMP/emsdk/emsdk" activate 4.0.9
+          sudo apt-get install -y ninja-build
+      - name: Restore OpenCASCADE for WebAssembly
+        id: occt-wasm
+        uses: actions/cache/restore@v4
+        with:
+          path: occt-wasm
+          key: occt-wasm-8.0.1-emsdk-4.0.9-${{ hashFiles('tools/wasm/build-occt.sh', 'tools/wasm/repair-objects.mjs', 'third_party/musl-math/**') }}
+      - name: Build OpenCASCADE for WebAssembly
+        if: steps.occt-wasm.outputs.cache-hit != 'true'
+        run: |
+          source "$RUNNER_TEMP/emsdk/emsdk_env.sh"
+          tools/wasm/build-occt.sh occt-wasm
+      - name: Save OpenCASCADE for WebAssembly
+        if: steps.occt-wasm.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: occt-wasm
+          key: ${{ steps.occt-wasm.outputs.cache-primary-key }}
+      - name: Build the browser module
+        run: |
+          source "$RUNNER_TEMP/emsdk/emsdk_env.sh"
+          tools/wasm/link-occt.sh occt-wasm
+          export OCCT_INCLUDE_DIR="$PWD/occt-wasm/include/opencascade"
+          export OCCT_LIB_DIR="$PWD/occt-wasm/lib"
+          export TCAD_OCCT_WASM="$PWD/occt-wasm/occt.wasm"
+          cargo build --release -p tcad-web --features occt --target wasm32-unknown-emscripten
+          cp occt-wasm/occt.wasm target/wasm32-unknown-emscripten/release/
+          ls -la target/wasm32-unknown-emscripten/release/ | grep -E 'tcad|occt'
+      - name: Validate the WebAssembly modules
+        run: |
+          node tools/wasm/validate.mjs occt-wasm/occt.wasm
+          node tools/wasm/validate.mjs target/wasm32-unknown-emscripten/release/tcad_web.wasm
+      - name: Regenerate the corpus in WebAssembly (T1 against the native builds)
+        run: BREP_T1_DUMP="$RUNNER_TEMP/brep-wasm" node tools/wasm/gate.mjs target/wasm32-unknown-emscripten/release/tcad-web.js corpus
+      - name: Keep the canonical B-reps (compare platforms line by line)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: brep-wasm
+          path: ${{ runner.temp }}/brep-wasm
+          if-no-files-found: ignore
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: In-browser viewer (edit, regenerate, highlight) in Chromium
+        run: |
+          (cd viewer && npm ci && npm run build)
+          tools/wasm/site.sh target/wasm32-unknown-emscripten/release site
+          (cd viewer && npx playwright-core install --with-deps chromium && node tests/browser.test.mjs ../site)
 
   build123d-crosscheck:
     runs-on: ubuntu-latest
@@ -201,8 +304,24 @@ jobs:
       - run: pip install build123d
       - run: python3 corpus/tools/compare_reference.py corpus
 
+  # Where the canonical B-reps of two platforms differ (docs/adr/0014), line by line.
+  brep-compare:
+    needs: [occt-linux, occt-windows, browser]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: breps
+      - name: Windows (A) against WebAssembly (B), the Phase 1b gate
+        run: python3 tools/brep-diff.py breps/brep-windows breps/brep-wasm
+      - name: Windows (A) against Linux (B)
+        run: python3 tools/brep-diff.py breps/brep-windows breps/brep-linux
+
   # The same tests as occt-linux, on Windows with OpenCASCADE from vcpkg (cached). Windows is the
-  # primary platform: every corpus part must build here and match expected.json.
+  # primary platform: every corpus part must build here and match expected.json, and its canonical
+  # B-reps are the reference of corpus/brep-t1.txt.
   occt-windows:
     runs-on: windows-latest
     timeout-minutes: 150
@@ -212,31 +331,45 @@ jobs:
         with:
           toolchain: 1.97.0
       - uses: Swatinem/rust-cache@v2
+      # The portable math library linked into every OpenCASCADE DLL (ci/vcpkg-triplets, docs/adr/0014).
+      - name: Math library
+        shell: pwsh
+        run: |
+          cmake -S third_party/musl-math -B build-tcad-math -A x64
+          cmake --build build-tcad-math --config Release
       - name: Restore OpenCASCADE
         id: occt-cache
         uses: actions/cache/restore@v4
         with:
           path: vcpkg_installed
-          key: occt-vcpkg-x64-windows-v1
+          key: occt-vcpkg-x64-windows-tcad-${{ hashFiles('ci/vcpkg-triplets/**', 'third_party/musl-math/**') }}
       - name: Install OpenCASCADE
         if: steps.occt-cache.outputs.cache-hit != 'true'
         shell: pwsh
-        run: vcpkg install "opencascade[core]:x64-windows" --x-install-root="$env:GITHUB_WORKSPACE\vcpkg_installed"
+        run: vcpkg install "opencascade[core]:x64-windows-tcad" --overlay-triplets=ci/vcpkg-triplets --x-install-root="$env:GITHUB_WORKSPACE\vcpkg_installed"
       # Saved right after the (very long) build, so a failing test run does not throw it away.
       - name: Save OpenCASCADE
         if: steps.occt-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: vcpkg_installed
-          key: occt-vcpkg-x64-windows-v1
+          key: occt-vcpkg-x64-windows-tcad-${{ hashFiles('ci/vcpkg-triplets/**', 'third_party/musl-math/**') }}
       - name: Test with OCCT
         shell: pwsh
         timeout-minutes: 40
         run: |
-          $root = "$env:GITHUB_WORKSPACE\vcpkg_installed\x64-windows"
+          $root = "$env:GITHUB_WORKSPACE\vcpkg_installed\x64-windows-tcad"
           Get-ChildItem "$root\lib" -Filter "TK*STEP*.lib" | ForEach-Object { $_.Name }
           Get-ChildItem "$root\lib" -Filter "TK*DE*.lib" | ForEach-Object { $_.Name }
           $env:OCCT_INCLUDE_DIR = "$root\include\opencascade"
           $env:OCCT_LIB_DIR = "$root\lib"
           $env:PATH = "$root\bin;$env:PATH"
+          $env:BREP_T1_DUMP = "$env:RUNNER_TEMP\brep-windows"
           cargo test --workspace --features tcad-cli/occt,tcad-build/occt,tcad-mcp/occt
+      - name: Keep the canonical B-reps (compare platforms line by line)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: brep-windows
+          path: ${{ runner.temp }}/brep-windows
+          if-no-files-found: ignore

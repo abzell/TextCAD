@@ -103,7 +103,7 @@ impl<K: Kernel> Cx<'_, K> {
                         "the chamfer angle must be between 0 and 90 degrees",
                     );
                 }
-                d1 * ang.tan()
+                d1 * libm::tan(ang)
             }
             (None, None) => d1,
         };
@@ -342,7 +342,7 @@ impl<K: Kernel> Cx<'_, K> {
         edges.push((q_first, first, "end0".into()));
         // a closing edge collapses when the centerline already touches the base
         for (a, b, n) in edges {
-            if (a[0] - b[0]).hypot(a[1] - b[1]) > 1e-9 {
+            if libm::hypot(a[0] - b[0], a[1] - b[1]) > 1e-9 {
                 segs.push(Segment::Line { a, b });
                 names.push(n);
             }

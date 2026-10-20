@@ -119,7 +119,7 @@ impl SolvedEntity {
             } => {
                 let phase = vertices
                     .first()
-                    .map_or(0.0, |v| (v[1] - center[1]).atan2(v[0] - center[0]));
+                    .map_or(0.0, |v| libm::atan2(v[1] - center[1], v[0] - center[0]));
                 [pt(center).to_vec(), vec![l(*r), (phase, true)]].concat()
             }
             Geometry::Slot { start, end, width } => {
@@ -763,7 +763,7 @@ impl<'a> Build<'a> {
             }
             Curve::Ellipse(_) => return None,
         };
-        let len = dir.0.hypot(dir.1);
+        let len = libm::hypot(dir.0, dir.1);
         if len == 0.0 {
             return None;
         }

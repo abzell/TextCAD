@@ -20,27 +20,33 @@ jobs:
         with:
           toolchain: 1.97.0
       - uses: Swatinem/rust-cache@v2
+      # The portable math library linked into every OpenCASCADE DLL (ci/vcpkg-triplets, docs/adr/0014).
+      - name: Math library
+        shell: pwsh
+        run: |
+          cmake -S third_party/musl-math -B build-tcad-math -A x64
+          cmake --build build-tcad-math --config Release
       - name: Restore OpenCASCADE
         id: occt-cache
         uses: actions/cache/restore@v4
         with:
           path: vcpkg_installed
-          key: occt-vcpkg-x64-windows-v1
+          key: occt-vcpkg-x64-windows-tcad-${{ hashFiles('ci/vcpkg-triplets/**', 'third_party/musl-math/**') }}
       - name: Install OpenCASCADE
         if: steps.occt-cache.outputs.cache-hit != 'true'
         shell: pwsh
-        run: vcpkg install "opencascade[core]:x64-windows" --x-install-root="$env:GITHUB_WORKSPACE\vcpkg_installed"
+        run: vcpkg install "opencascade[core]:x64-windows-tcad" --overlay-triplets=ci/vcpkg-triplets --x-install-root="$env:GITHUB_WORKSPACE\vcpkg_installed"
       # Saved right after the (very long) build, so a failing test run does not throw it away.
       - name: Save OpenCASCADE
         if: steps.occt-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: vcpkg_installed
-          key: occt-vcpkg-x64-windows-v1
+          key: occt-vcpkg-x64-windows-tcad-${{ hashFiles('ci/vcpkg-triplets/**', 'third_party/musl-math/**') }}
       - name: Build
         shell: pwsh
         run: |
-          $root = "$env:GITHUB_WORKSPACE\vcpkg_installed\x64-windows"
+          $root = "$env:GITHUB_WORKSPACE\vcpkg_installed\x64-windows-tcad"
           $env:OCCT_INCLUDE_DIR = "$root\include\opencascade"
           $env:OCCT_LIB_DIR = "$root\lib"
           $env:PATH = "$root\bin;$env:PATH"
@@ -48,7 +54,7 @@ jobs:
       - name: Stage
         shell: pwsh
         run: |
-          $root = "$env:GITHUB_WORKSPACE\vcpkg_installed\x64-windows"
+          $root = "$env:GITHUB_WORKSPACE\vcpkg_installed\x64-windows-tcad"
           New-Item -ItemType Directory -Force stage | Out-Null
           Copy-Item target\release\tcad.exe, target\release\tcad-mcp.exe, target\release\tcad-lsp.exe stage\
           # the OpenCASCADE and runtime libraries the executables load

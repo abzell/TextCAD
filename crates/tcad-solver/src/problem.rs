@@ -308,7 +308,7 @@ impl Problem {
     pub fn arc(&mut self, c: Point, s: Point, e: Point) -> Arc {
         let (cx, cy) = self.pt(c);
         let (sx, sy) = self.pt(s);
-        let r = self.var((sx - cx).hypot(sy - cy));
+        let r = self.var(libm::hypot(sx - cx, sy - cy));
         for p in [s, e] {
             self.push(Kind::PointCircle, vec![p.x, p.y, c.x, c.y, r], None);
         }
@@ -507,7 +507,7 @@ impl Problem {
                     y.circle().ok_or(Unsupported("tangent"))?,
                 );
                 let (p, q) = (self.pt(c1), self.pt(c2));
-                let d = (p.0 - q.0).hypot(p.1 - q.1);
+                let d = libm::hypot(p.0 - q.0, p.1 - q.1);
                 let (ra, rb) = (self.x0[r1], self.x0[r2]);
                 let (k, s) = if (d - (ra + rb)).abs() <= (d - (ra - rb).abs()).abs() {
                     (1.0, 1.0)

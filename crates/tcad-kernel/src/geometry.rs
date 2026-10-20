@@ -236,7 +236,7 @@ impl Segment {
                 // direction from the start through the middle
                 let ccw = wrap(am - a0) < wrap(a1 - a0) || wrap(a1 - a0) == 0.0;
                 let sweep = if ccw { wrap(a1 - a0) } else { -wrap(a0 - a1) };
-                let r = (start[0] - center[0]).hypot(start[1] - center[1]);
+                let r = libm::hypot(start[0] - center[0], start[1] - center[1]);
                 (0..=per_curve)
                     .map(|i| {
                         let t = a0 + sweep * i as f64 / per_curve as f64;
