@@ -142,6 +142,7 @@ jobs:
           name: brep-linux
           path: ${{ runner.temp }}/brep-linux
           if-no-files-found: ignore
+          retention-days: 3
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -285,6 +286,7 @@ jobs:
           name: brep-wasm
           path: ${{ runner.temp }}/brep-wasm
           if-no-files-found: ignore
+          retention-days: 3
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -373,3 +375,4 @@ jobs:
           name: brep-windows
           path: ${{ runner.temp }}/brep-windows
           if-no-files-found: ignore
+          retention-days: 3

@@ -32,3 +32,4 @@ jobs:
         with:
           name: fuzz-artifacts
           path: fuzz/artifacts
+          retention-days: 14
