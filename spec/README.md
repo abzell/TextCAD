@@ -25,5 +25,6 @@ Chapters marked *normative* are complete for their milestone; the others are stu
 | [naming.md](naming.md) | Persistent naming | M6 |
 | [io.md](io.md) | Import and export | M7 |
 | [viewer.md](viewer.md) | Viewer server, language server | M8 |
+| [assembly.md](assembly.md) | Assemblies, connectors, mates, BOM (draft) | Phase 2 |
 
 Examples live in [`examples/`](examples/); CI keeps them parseable and in canonical form.
