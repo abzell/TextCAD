@@ -210,4 +210,4 @@ Not done:
 
 Draft spec for assemblies (`spec/assembly.md`, ADR 0015: connectors owned by parts, explicit mate
 orientation, `bundle.lock`, kernel-free solving) and the remaining work split into GitHub issues
-#4-#67 (part gaps, Phase 2, Phase 3, Phase 5); index and order in `docs/phase2-plan.md`.
+#4-#88 (open Phase 1 requirements, part gaps, Phases 2-5, post-Phase-5 evaluations); index and order in `docs/phase2-plan.md`.

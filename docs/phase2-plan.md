@@ -1,4 +1,4 @@
-# Plan: remaining work after Phase 1b
+# Plan: remaining work
 
 Created 2026-11-25 from a review of what it takes to fully define parts and assemblies. Each item is a
 GitHub issue written so that a coding agent can complete it alone: spec text to write, syntax, rules,
@@ -17,8 +17,23 @@ The Phase 2 design is drafted in [`spec/assembly.md`](../spec/assembly.md) and
 | [#5](https://github.com/abzell/TextCAD/issues/5) | Phase 2: assemblies and BOM |
 | [#6](https://github.com/abzell/TextCAD/issues/6) | Phase 3: PMI, tolerances, GD&T |
 | [#7](https://github.com/abzell/TextCAD/issues/7) | Phase 5: sheet metal, weldments, surfacing |
+| [#68](https://github.com/abzell/TextCAD/issues/68) | Phase 1 requirements still open |
+| [#69](https://github.com/abzell/TextCAD/issues/69) | Phase 4: 2D drawings |
+| [#70](https://github.com/abzell/TextCAD/issues/70) | After Phase 5: evaluations and open-standard governance |
 
-Phase 4 (2D drawings) is not broken down yet.
+Every open item of `docs/TextCAD-Requirements.md` maps to one of these issues.
+
+## Phase 1 requirements still open (#68)
+
+| Issue | Requirement | Item |
+| --- | --- | --- |
+| #71 | §5, §10.1 | `tcad pack` / `unpack` (`.tcadz`) |
+| #72 | §7 | Sketch `project` (projected and converted edges) |
+| #73 | §7 | Splines in tangency and on-curve constraints |
+| #74 | §11.3 | 85% line coverage, measured in CI |
+| #75 | §12.1, §12.2 | Signed release artifacts, generated changelogs, protected `main` |
+| #76 | §14 | Spec and docs consistency sweep, acceptance evidence table |
+| #11, #13, #8, #26 | §7, §4.1, §7, §14 | Multi-body, `tcad migrate`, guided-loft docs, items for a person (listed under #4) |
 
 ## Part-modeling gaps (#4)
 
@@ -65,7 +80,19 @@ Order of work (each issue lists its own dependencies):
 feature control frames → #60 finish, notes, thread and weld callouts → #61 semantic AP242 export,
 validation (gate) and display.
 
+## Phase 4 (#69)
+
+#77 drawing spec, sheets, title blocks → #78 base/projected views with hidden-line removal → #79
+section, detail, auxiliary and broken views → #80 dimensions and annotations linked to model IDs
+(orphan detection) → #81 BOM tables and balloons → #82 PDF, DXF and SVG export → #83 viewer, LSP and
+MCP → **#84 drawing corpus gate**.
+
 ## Phase 5 (#7)
 
 #62 sheet-metal model and bends → #63 flanges, reliefs, hems, forming tools → #64 flat pattern and
 DXF (gate) · #65 weldment members and cut lists · #66 surfacing (gate) → #67 G2 blends.
+
+## After Phase 5 (#70)
+
+#85 conformance suite and governance (can start now; prerequisite for #87) · #86 native-format
+importers (evaluation) · #87 second kernel backend · #88 direct editing (evaluation).
