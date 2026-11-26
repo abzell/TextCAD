@@ -45,7 +45,7 @@ views → #46 standard-part library → #47 fastener stacks → #48 assembly fea
 ## Phase 3 (PMI)
 
 #56 chapter and core model → #57 size tolerances and fits → #58 datums → #59 feature control frames →
-#60 finish and notes → **#61 AP242 mapping, validated (gate)**.
+#60 finish and notes → **#61 PMI conformance corpus (gate)**.
 
 ## Phase 4 (drawings)
 

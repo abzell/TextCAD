@@ -408,7 +408,7 @@ weld w1 between=[gusset, base_plate] type=fillet size=6 mm length=all side=both
 A weld records a callout between two instances along their common edges (`length=all` or a length with
 `pitch=` for intermittent welds); with the flag `bead` it also adds a simplified bead solid (a swept
 triangle) to the assembly. `type` is `fillet`, `butt`, `plug`, `spot`. Welds appear in the BOM's weld
-table and in STEP as PMI notes from Phase 3. The parts welded into one item are listed with
+table and, from Phase 3, as PMI items of the assembly. The parts welded into one item are listed with
 `weldment=<name>` on the instances; the weldment is one BOM line with its members as a cut list.
 
 ## BOM

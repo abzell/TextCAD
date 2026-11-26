@@ -32,7 +32,8 @@ for mechanical design.
 2. Regenerate the same geometry in any conforming implementation (section 8).
 3. Be diffable and mergeable in git with meaningful, line-oriented diffs.
 4. Be easy for LLM agents to read, write, query and repair, with structured errors.
-5. Interoperate through STEP AP242 so users never get stranded.
+5. Carry everything tools need to exchange designs with other CAD systems (for example through STEP
+   AP242), so users never get stranded.
 6. Be governed as an open standard: open specification, conformance suite, any number of
    implementations.
 
@@ -260,9 +261,9 @@ holds.
    assembly chapter is normative and the conformance corpus holds independently computed results for
    every construct, including a 300-instance excavator boom-and-cylinder model.
 3. **Phase 3 — PMI, GD&T, MBD.** Datums, datum targets, feature control frames per ASME Y14.5-2018 and
-   ISO 1101, linear/angular tolerances, surface finish, notes, all tied to semantic IDs, with a mapping
-   to semantic PMI in AP242. Gate: conformance parts for every PMI kind, and the AP242 mapping
-   validated against an external checker.
+   ISO 1101, linear/angular tolerances, surface finish, notes, all tied to semantic IDs. Gate:
+   conformance parts for every PMI kind, with expected resolved targets, limits, datum reference
+   frames and validation diagnostics. (Exporting PMI, for example to STEP AP242, is a tool's job.)
 4. **Phase 4 — 2D drawings.** Drawing files derived from parts/assemblies: views, sections, details,
    auxiliary views, dimensions and annotations linked to model IDs, title blocks, BOM tables, balloons.
    Gate: a conformance drawing per hydraulic part with no orphaned dimensions after a parameter sweep.
