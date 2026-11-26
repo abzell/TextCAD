@@ -13,6 +13,7 @@ pub enum NodeKind {
     Block,
     Tolerance,
     Material,
+    Meta,
     Param,
     RangeClause,
     DocClause,

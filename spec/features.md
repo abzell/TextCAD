@@ -9,6 +9,46 @@ with a diagnostic naming it; it never skips or substitutes. A feature suppressed
 the active configuration is skipped. Unknown or misplaced arguments are `E5001`; a reference that is
 not the right kind of geometry is `E5002`.
 
+## Part metadata
+
+Format 0.2 (`spec/versioning.md`). Implemented by `tcad-model` (`meta.rs`).
+
+```
+part rod "Piston rod, 50 mm" {
+  material "AISI 1045" density=7.85 g/cm^3
+  meta number="HC-110-014" revision="B" kind=made mass=0.84 kg com=(0 mm, 0 mm, 12 mm) color=(0.7, 0.7, 0.72)
+  config heavy { meta.number = "HC-110-015" }
+}
+```
+
+The description of a part is the string after its name. `meta` adds:
+
+| Key | Value | Use |
+| --- | --- | --- |
+| `number` | string | part number: STEP product id, BOM (Phase 2), title blocks (Phase 4) |
+| `revision` | string | revision: STEP product version, BOM, `rev=` pins (spec/assembly.md) |
+| `kind` | `made` (default), `purchased`, `phantom` | BOM classification |
+| `vendor`, `vendor_number` | string | for purchased parts |
+| `mass` | mass, positive | overrides the computed mass (purchased parts modeled simplified) |
+| `com` | `(x, y, z)` lengths | overrides the center of mass; only together with `mass` |
+| `color` | `(r, g, b)`, numbers from 0 to 1 | display colour, **sRGB** |
+
+- Values are literals or parameters of the right type (`number=num` with `param num = "HC-1"`);
+  there is no string concatenation. Parameters must be declared before the `meta` statement.
+- `meta` may appear once (`E2303`), anywhere in the part body; `tcad fmt` does not move statements.
+  The keys are written in the order of the table.
+- A configuration overrides keys with `meta.<key> = <value>` (`E2401` for an unknown key). Keys
+  it does not override keep their base values.
+- Errors: unknown key, a flag, a repeated key or a key with several values `E5001`; `com` without
+  `mass` `E5001`; a value of the wrong type `E2202`; a non-positive mass or a colour component
+  outside 0..1 `E2301`; an unknown `kind` `E2501`.
+- With `mass`, `tcad props` reports that mass (and `com` if given, else the computed center) and
+  scales the unit-density inertia by `mass / volume`, i.e. the inertia of a uniform body of that
+  mass about the computed center of mass; the computed values are reported alongside. Without
+  `mass` the material density is used as before.
+- The metadata of the configuration that was built is stored in the cache manifest
+  (spec/bundle.md) and written to STEP, 3MF and GLB exports (spec/io.md).
+
 ## Reference geometry
 
 | Statement | Arguments | Result |

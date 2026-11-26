@@ -8,6 +8,7 @@ mod check;
 mod hints;
 pub mod ir;
 mod lower;
+pub mod meta;
 pub mod migrate;
 pub mod sketch;
 
@@ -18,6 +19,7 @@ pub use ir::{
     Sketch,
 };
 pub use lower::DEFAULT_TOLERANCE_MM;
+pub use meta::{MetaKind, PartMeta};
 pub use migrate::{MigrateError, Migration, migrate};
 pub use sketch::{Geometry, SolvedEntity, SolvedSketch};
 

@@ -28,6 +28,8 @@ pub struct Part {
     pub tolerance: f64,
     /// Material, if declared.
     pub material: Option<Material>,
+    /// Metadata (`meta`), if declared.
+    pub meta: Option<crate::meta::Meta>,
     /// Parameters in declaration order.
     pub params: Vec<Param>,
     /// Sketches, reference geometry, features, tags and imports in declaration order (the
@@ -157,6 +159,8 @@ pub struct Config {
     pub overrides: Vec<Override>,
     /// Features suppressed in this configuration.
     pub suppress: Vec<Reference>,
+    /// `meta.<key> = ...` overrides.
+    pub meta_overrides: Vec<crate::meta::MetaOverride>,
     /// Span.
     pub span: Span,
     /// Span of the name.
@@ -183,6 +187,8 @@ pub struct Resolved {
     pub params: Vec<(String, Value)>,
     /// Names of suppressed items.
     pub suppressed: BTreeSet<String>,
+    /// Metadata under this configuration.
+    pub meta: crate::meta::PartMeta,
 }
 
 impl Resolved {

@@ -136,6 +136,14 @@ pub struct StepMeta<'a> {
     pub configuration: Option<&'a str>,
     /// Material name and density (g/cm^3), if declared.
     pub material: Option<(&'a str, Option<f64>)>,
+    /// Part number (the product id; the part name when absent).
+    pub number: Option<&'a str>,
+    /// Revision (the product version).
+    pub revision: Option<&'a str>,
+    /// Description (the product description).
+    pub description: Option<&'a str>,
+    /// Display colour, sRGB components in 0..1.
+    pub color: Option<[f64; 3]>,
 }
 
 /// The triangles of one face. Indices refer to the face's own vertices.

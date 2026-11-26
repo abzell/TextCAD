@@ -19,6 +19,7 @@ struct Props;
 struct FaceRec;
 struct EdgeRec;
 struct MeshRec;
+struct StepInfo;
 
 struct Shape {
   TopoDS_Shape s;
@@ -53,8 +54,7 @@ rust::Vec<FaceRec> faces_of(const Shape& s);
 rust::Vec<EdgeRec> edges_of(const Shape& s);
 rust::Vec<uint32_t> lineage_inherited(const Shape& s);
 rust::Vec<uint32_t> lineage_created(const Shape& s);
-rust::Vec<uint8_t> export_step(const Shape& s, rust::Str name, rust::Str configuration,
-                               rust::Str material, double density_g_cm3);
+rust::Vec<uint8_t> export_step(const Shape& s, const StepInfo& info);
 std::unique_ptr<Shape> import_step(rust::Slice<const uint8_t> bytes);
 rust::Vec<MeshRec> mesh_of(const Shape& s, double linear, double angular);
 Props properties(const Shape& s);

@@ -1,8 +1,9 @@
-tcad 0.1
+tcad 0.2
 
 part manifold_4port "Four-port manifold block with cross-drilled galleries" {
   tolerance 1e-6 mm
   material "6061-T6" density=2.7 g/cm^3
+  meta number="TC-HYD-005" revision="A"
 
   param len = 120 mm range(110 mm, 160 mm)
   param wid = 60 mm range(50 mm, 80 mm)

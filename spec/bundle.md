@@ -45,8 +45,13 @@ the canonical text changes), the resolved configuration name, and the bytes of e
                   "thread"?, "topology"? } ],
   "result": { "solids", "faces", "edges", "vertices", "volume_mm3", "area_mm2",
               "center_of_mass_mm", "bbox_min_mm", "bbox_max_mm" },
-  "brep_sha256": "..." }
+  "brep_sha256": "...",
+  "meta"?: { "number"?, "revision"?, "description"?, "kind", "vendor"?, "vendor_number"?,
+             "mass_kg"?, "com_mm"?, "color"? } }
 ```
+
+`meta` is present when the part has a description or a `meta` statement; it holds the metadata of
+the configuration that was built (spec/features.md § Part metadata). Absent keys are not written.
 
 ## Invalidation
 

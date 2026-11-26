@@ -221,6 +221,40 @@ pub struct Manifest {
     pub result: ResultEntry,
     /// SHA-256 of `brep.brep`.
     pub brep_sha256: String,
+    /// Part metadata (`meta` and the description), if the part has any.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meta: Option<MetaEntry>,
+}
+
+/// Part metadata in the manifest (`spec/bundle.md`). Absent keys are not written.
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub struct MetaEntry {
+    /// Part number.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub number: Option<String>,
+    /// Revision.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub revision: Option<String>,
+    /// The description (the string after the part's name).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    /// `made`, `purchased` or `phantom`.
+    pub kind: String,
+    /// Vendor.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub vendor: Option<String>,
+    /// The vendor's part number.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub vendor_number: Option<String>,
+    /// Mass that overrides the computed one (kg).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mass_kg: Option<f64>,
+    /// Center of mass that overrides the computed one (mm).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub com_mm: Option<[f64; 3]>,
+    /// Display colour (sRGB, 0..1).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub color: Option<[f64; 3]>,
 }
 
 /// Name of the exact STEP result in the cache directory.
@@ -302,6 +336,7 @@ mod tests {
                 inertia_mm5: None,
             },
             brep_sha256: sha256_hex(brep),
+            meta: None,
         }
     }
 

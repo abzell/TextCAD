@@ -39,7 +39,11 @@
 #include <TopLoc_Location.hxx>
 #include <XCAFApp_Application.hxx>
 #include <XCAFDoc_DocumentTool.hxx>
+#include <XCAFDoc_ColorTool.hxx>
 #include <XCAFDoc_MaterialTool.hxx>
+#include <Quantity_Color.hxx>
+#include <StepBasic_Product.hxx>
+#include <StepBasic_ProductDefinitionFormation.hxx>
 #include <XCAFDoc_ShapeTool.hxx>
 #include <filesystem>
 #include <fstream>
@@ -1053,8 +1057,14 @@ struct Scratch {
 
 }  // namespace
 
-rust::Vec<uint8_t> export_step(const Shape& sh, rust::Str name, rust::Str configuration,
-                               rust::Str material, double density_g_cm3) {
+rust::Vec<uint8_t> export_step(const Shape& sh, const StepInfo& info) {
+  const std::string part(info.name.data(), info.name.size());
+  const std::string configuration(info.configuration.data(), info.configuration.size());
+  const std::string material(info.material.data(), info.material.size());
+  const std::string number(info.number.data(), info.number.size());
+  const std::string revision(info.revision.data(), info.revision.size());
+  const std::string description(info.description.data(), info.description.size());
+  const double density_g_cm3 = info.density_g_cm3;
   return guarded("export_step", [&]() {
     std::lock_guard<std::mutex> lock(step_mutex());
     trace("export: locked");
@@ -1068,12 +1078,16 @@ rust::Vec<uint8_t> export_step(const Shape& sh, rust::Str name, rust::Str config
     BRepBuilderAPI_Copy copy(sh.s);
     trace("export: copied");
     TDF_Label label = st->AddShape(copy.Shape(), Standard_False);
-    std::string part(name.data(), name.size());
     TDataStd_Name::Set(label, TCollection_ExtendedString(part.c_str()));
+    if (info.has_color) {
+      // the components are written to the file as given (sRGB display colour, spec/io.md)
+      Handle(XCAFDoc_ColorTool) ct = XCAFDoc_DocumentTool::ColorTool(doc->Main());
+      ct->SetColor(label, Quantity_Color(info.color.x, info.color.y, info.color.z, Quantity_TOC_RGB),
+                   XCAFDoc_ColorGen);
+    }
     if (material.size() > 0) {
-      std::string mat(material.data(), material.size());
       Handle(XCAFDoc_MaterialTool) mt = XCAFDoc_DocumentTool::MaterialTool(doc->Main());
-      TDF_Label m = mt->AddMaterial(new TCollection_HAsciiString(mat.c_str()),
+      TDF_Label m = mt->AddMaterial(new TCollection_HAsciiString(material.c_str()),
                                     new TCollection_HAsciiString(""), density_g_cm3,
                                     new TCollection_HAsciiString("density"),
                                     new TCollection_HAsciiString("g/cm^3"));
@@ -1086,14 +1100,31 @@ rust::Vec<uint8_t> export_step(const Shape& sh, rust::Str name, rust::Str config
     STEPCAFControl_Writer writer;
     writer.SetNameMode(Standard_True);
     writer.SetMaterialMode(Standard_True);
+    writer.SetColorMode(Standard_True);
     trace("export: writer");
     if (!writer.Transfer(doc, STEPControl_AsIs)) throw std::runtime_error("STEP transfer failed");
     trace("export: transferred");
     Handle(StepData_StepModel) model = writer.ChangeWriter().Model();
     if (!model.IsNull()) {
+      // part number -> product id, description -> product description, revision -> version
+      for (Standard_Integer i = 1; i <= model->NbEntities(); i++) {
+        Handle(Standard_Transient) ent = model->Value(i);
+        Handle(StepBasic_Product) product = Handle(StepBasic_Product)::DownCast(ent);
+        if (!product.IsNull()) {
+          if (!number.empty()) product->SetId(new TCollection_HAsciiString(number.c_str()));
+          if (!description.empty()) {
+            product->SetDescription(new TCollection_HAsciiString(description.c_str()));
+          }
+        }
+        Handle(StepBasic_ProductDefinitionFormation) version =
+            Handle(StepBasic_ProductDefinitionFormation)::DownCast(ent);
+        if (!version.IsNull() && !revision.empty()) {
+          version->SetId(new TCollection_HAsciiString(revision.c_str()));
+        }
+      }
       APIHeaderSection_MakeHeader header(model);
       std::string desc = "TextCAD part " + part;
-      if (configuration.size() > 0) desc += ", configuration " + std::string(configuration.data(), configuration.size());
+      if (configuration.size() > 0) desc += ", configuration " + configuration;
       header.SetDescriptionValue(1, new TCollection_HAsciiString(desc.c_str()));
     }
     trace("export: header");

@@ -229,3 +229,17 @@ meaning; ADR 0016. Every corpus part migrates by changing its header only (test)
 Finding: inside a sketch with an entity of the same name as a clashing parameter, a bare word means
 the entity in point positions and the parameter in expressions; text alone cannot decide, so
 migrate refuses that case. The verification step caught the first, wrong implementation.
+
+## Part metadata (#9, 2026-11-26)
+
+Done: `meta` in parts and `meta.<key>` overrides in configurations (format 0.2), checked and
+evaluated per configuration in `tcad-model` (`meta.rs`); manifest `meta`; STEP product id, version,
+description and colour (OpenCASCADE shim, `StepInfo` bridge struct); 3MF and GLB metadata and
+colours; `tcad props` mass/center overrides; LSP completion; MCP `read_part` and `set_meta`. The
+hydraulic corpus parts and the rod clevis example carry part numbers (`TC-HYD-001`..`006`); their
+geometry is unchanged, their canonical-text digests in `corpus/determinism.txt` changed.
+
+Verified only in CI (no OpenCASCADE in the authoring container): the STEP side, by
+`crates/tcad-occt/tests/io.rs` (product id, version, `COLOUR_RGB`) and the FreeCAD job, which now
+checks that each hydraulic STEP file carries its part number and revision. FreeCAD labels objects by
+product name, so the number is checked in the file text rather than in FreeCAD's tree.

@@ -44,6 +44,9 @@ pub enum Edit {
     SetParam { name: String, value: String },
     /// Add an entity or constraint line inside a sketch.
     AddToSketch { sketch: String, text: String },
+    /// Set a `meta` key (format 0.2): `number`, `revision`, `kind`, `vendor`, `vendor_number`,
+    /// `mass`, `com`, `color`. `value` is source text (`"HC-1"`, `purchased`, `0.8 kg`).
+    SetMeta { key: String, value: String },
 }
 
 fn str_field(v: &Value, key: &str) -> Option<String> {
@@ -100,9 +103,13 @@ impl Edit {
                 sketch: required(v, "sketch", op)?,
                 text: required(v, "text", op)?,
             },
+            "set_meta" => Edit::SetMeta {
+                key: required(v, "key", op)?,
+                value: required(v, "value", op)?,
+            },
             other => {
                 return Err(format!(
-                    "unknown edit `{other}`; edits are add_statement, replace_statement, remove_statement, set_arg, remove_arg, add_param, set_param, add_to_sketch"
+                    "unknown edit `{other}`; edits are add_statement, replace_statement, remove_statement, set_arg, remove_arg, add_param, set_param, add_to_sketch, set_meta"
                 ));
             }
         })
@@ -280,6 +287,45 @@ pub fn apply(src: &str, edit: &Edit) -> Result<String, String> {
                 &src[p.expr.span.end..]
             ))
         }
+        Edit::SetMeta { key, value } => {
+            if !tcad_model::meta::META_KEYS.contains(&key.as_str()) {
+                return Err(format!(
+                    "`{key}` is not a `meta` key; keys: {}",
+                    tcad_model::meta::META_KEYS.join(", ")
+                ));
+            }
+            if tcad_syntax::parse(src).version.is_some_and(|v| v < (0, 2)) {
+                return Err("`meta` needs format 0.2; run `tcad migrate` on the file first".into());
+            }
+            let new = format!("{key}={value}");
+            match &m.part.meta {
+                Some(meta) => match meta.args.iter().find(|a| &a.name == key) {
+                    Some(a) => Ok(format!(
+                        "{}{}{}",
+                        &src[..a.span.start],
+                        new,
+                        &src[a.span.end..]
+                    )),
+                    None => {
+                        let at = meta.args.last().map_or(meta.span.start + 4, |a| a.span.end);
+                        Ok(format!("{} {}{}", &src[..at], new, &src[at..]))
+                    }
+                },
+                None => {
+                    // a new `meta` line after `material` / `tolerance`, else first in the body
+                    let at = src.find('{').ok_or("the source has no part body")? + 1;
+                    let at = m
+                        .part
+                        .params
+                        .first()
+                        .map(|p| line_start(src, p.span.start))
+                        .or_else(|| m.part.items.first().map(|i| line_start(src, i.span.start)))
+                        .filter(|p| *p > at)
+                        .unwrap_or_else(|| src[at..].find('\n').map_or(at, |i| at + i + 1));
+                    Ok(format!("{}  meta {new}\n{}", &src[..at], &src[at..]))
+                }
+            }
+        }
         Edit::AddToSketch { sketch, text } => {
             let item = m
                 .part
@@ -379,5 +425,51 @@ mod tests {
             .collect();
         assert_eq!(names, ["a", "b", "c"], "{text}");
         assert!(text.contains("range(10 mm, 60 mm)"), "{text}");
+    }
+
+    #[test]
+    fn set_meta_adds_and_replaces_keys() {
+        let src = "tcad 0.2\n\npart p \"P\" {\n  tolerance 1e-6 mm\n  param a = 1 mm\n}\n";
+        let set = |src: &str, key: &str, value: &str| {
+            apply(
+                src,
+                &Edit::SetMeta {
+                    key: key.into(),
+                    value: value.into(),
+                },
+            )
+            .unwrap()
+        };
+        let one = set(src, "number", "\"HC-1\"");
+        assert!(one.contains("  meta number=\"HC-1\"\n  param a"), "{one}");
+        let two = set(&one, "kind", "purchased");
+        assert!(two.contains("meta number=\"HC-1\" kind=purchased"), "{two}");
+        let three = set(&two, "number", "\"HC-2\"");
+        assert!(
+            three.contains("meta number=\"HC-2\" kind=purchased"),
+            "{three}"
+        );
+        assert!(!analyze(&three).has_errors());
+        assert!(
+            apply(
+                START,
+                &Edit::SetMeta {
+                    key: "number".into(),
+                    value: "\"X\"".into()
+                }
+            )
+            .unwrap_err()
+            .contains("tcad migrate")
+        );
+        assert!(
+            apply(
+                src,
+                &Edit::SetMeta {
+                    key: "part_no".into(),
+                    value: "\"X\"".into()
+                }
+            )
+            .is_err()
+        );
     }
 }

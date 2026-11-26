@@ -609,6 +609,10 @@ impl Parser {
                     p.expr()
                 }),
                 "material" => self.statement(NodeKind::Material, |p| p.material()),
+                "meta" => self.statement(NodeKind::Meta, |p| {
+                    p.bump();
+                    p.args(false)
+                }),
                 "param" => self.statement(NodeKind::Param, |p| p.param()),
                 "import" => self.statement(NodeKind::Import, |p| p.import()),
                 "tag" => self.statement(NodeKind::Tag, |p| p.tag()),
@@ -639,6 +643,19 @@ impl Parser {
                     }
                     Ok(())
                 }),
+                "meta" if self.look(1).kind == K::Dot => {
+                    let since = kw::introduced_in("meta").unwrap_or(kw::LATEST);
+                    if since > self.version {
+                        self.too_new(since);
+                        return;
+                    }
+                    // `meta.<key> = expr`: the key is a reference node before the value
+                    self.statement(NodeKind::ConfigOverride, |p| {
+                        p.reference()?;
+                        p.expect(K::Eq, "`=`", Some(" = "))?;
+                        p.expr()
+                    });
+                }
                 _ if t.kind == K::Ident => self.statement(NodeKind::ConfigOverride, |p| {
                     p.bump();
                     p.expect(K::Eq, "`=`", Some(" = "))?;

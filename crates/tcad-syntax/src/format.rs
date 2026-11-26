@@ -43,6 +43,16 @@ pub fn format_tree(root: &Node) -> String {
 fn arg_order(head: &str, key: &str) -> Option<usize> {
     let order: &[&str] = match head {
         "material" => &["density"],
+        "meta" => &[
+            "number",
+            "revision",
+            "kind",
+            "vendor",
+            "vendor_number",
+            "mass",
+            "com",
+            "color",
+        ],
         "point" => &["at"],
         "line" => &["start", "end"],
         "arc" => &["center", "start", "end", "through", "tangent_to", "r"],

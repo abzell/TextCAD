@@ -317,6 +317,13 @@ impl<P: Provider> Server<P> {
             let head: Vec<&str> = prefix.split('.').collect();
             let owner = head[..head.len() - 1].join(".");
             let first = head[0];
+            // `meta.<key> = ...` in a configuration
+            if first == "meta" && head.len() == 2 && version_of(text) >= (0, 2) {
+                for k in tcad_model::meta::META_KEYS {
+                    out.push(item(k, 10, "meta key"));
+                }
+                return json!(out);
+            }
             if let Some(m) = &model
                 && let Some(sk) =
                     m.part
@@ -399,15 +406,35 @@ impl<P: Provider> Server<P> {
         let words_before = before.trim_start();
         let at_statement_start =
             !words_before.contains(char::is_whitespace) || words_before.is_empty();
+        // inside `meta ...`: its keys, and the values of `kind=`
+        if !in_sketch && words_before.starts_with("meta ") && version_of(text) >= (0, 2) {
+            if words_before.ends_with("kind=") {
+                for k in tcad_model::meta::KINDS {
+                    out.push(item(k, 20, "meta kind"));
+                }
+            } else {
+                for k in tcad_model::meta::META_KEYS {
+                    out.push(item(&format!("{k}="), 10, "meta key"));
+                }
+            }
+            return json!(out);
+        }
         if at_statement_start {
             let list: Vec<&str> = if in_sketch {
                 kw::ENTITY_KW.iter().copied().chain(["constrain"]).collect()
             } else {
+                let version = version_of(text);
                 kw::DECL_KW
                     .iter()
                     .chain(kw::FEATURE_KW)
                     .chain(kw::REF_GEOM_KW)
                     .copied()
+                    .chain(
+                        kw::VERSIONED_PART_KW
+                            .iter()
+                            .filter(|(_, since, supported)| *supported && *since <= version)
+                            .map(|(w, _, _)| *w),
+                    )
                     .filter(|k| *k != "part" && *k != "constrain")
                     .collect()
             };
@@ -760,8 +787,16 @@ impl<P: Provider> Server<P> {
 
 /// True if token `n` sits directly in a `config name { ... }` block, where `name = value` entries
 /// refer to parameters.
+/// The format version a document declares (the newest if its header is broken).
+fn version_of(text: &str) -> kw::Version {
+    tcad_syntax::parse(text).version.unwrap_or(kw::LATEST)
+}
+
 fn keyword_help(word: &str) -> &'static str {
     match word {
+        "meta" => {
+            "part metadata (format 0.2): `meta number=\"HC-110-014\" revision=\"B\" kind=made|purchased|phantom vendor= vendor_number= mass= com= color=(r, g, b)`"
+        }
         "param" => "a named, typed value: `param w = 10 mm range(5 mm, 20 mm)`",
         "sketch" => "a 2D drawing with constraints on a plane or planar face",
         "extrude" => {

@@ -4,8 +4,8 @@ use serde_json::{Value, json};
 use std::io::Write;
 use std::path::PathBuf;
 use tcad_cache::{
-    FeatureEntry, GLB_FILE, Manifest, ResultEntry, STEP_FILE, TopologyEntry, cache_dir, is_fresh,
-    load_bundle, sha256_hex, source_hash, write_cache, write_extra,
+    FeatureEntry, GLB_FILE, Manifest, MetaEntry, ResultEntry, STEP_FILE, TopologyEntry, cache_dir,
+    is_fresh, load_bundle, sha256_hex, source_hash, write_cache, write_extra,
 };
 use tcad_diag::{Diagnostic, render_json, render_text};
 use tcad_io::{FaceLabel, ModelInfo};
@@ -218,26 +218,22 @@ pub(crate) fn regenerate<K: Kernel>(k: &K, s: &Source) -> Result<Fresh, Failure>
             inertia_mm5: props.inertia_com,
         },
         brep_sha256: sha256_hex(&brep),
+        meta: meta_entry(&built.meta, built.description.as_deref()),
     };
     // the exact result and the viewer mesh; a kernel that cannot produce them (the mock) skips them
-    let meta = StepMeta {
-        name: &model.part.name,
-        configuration: built.config.as_deref(),
-        material: built
+    let meta = step_meta(
+        &manifest,
+        built
             .material
             .as_ref()
             .map(|(n, d)| (n.as_str(), d.map(|d| d * 1e6))),
-    };
+    );
     let step = k.export_step(shape, &meta).ok();
     let glb = k
         .mesh(shape, LINEAR_DEFLECTION_MM, ANGULAR_DEFLECTION_RAD)
         .ok()
         .map(|mesh| {
-            let info = ModelInfo {
-                name: &model.part.name,
-                configuration: built.config.as_deref(),
-                material: built.material.as_ref().map(|(n, _)| n.as_str()),
-            };
+            let info = model_info(&manifest, built.material.as_ref().map(|(n, _)| n.as_str()));
             tcad_io::glb(&mesh, &face_labels(&manifest.features), &info)
         });
     Ok(Fresh {
@@ -308,22 +304,114 @@ pub(crate) fn report_failure(
     }
 }
 
+/// The manifest's metadata: `None` if the part has neither `meta` nor a description.
+pub(crate) fn meta_entry(m: &tcad_model::PartMeta, description: Option<&str>) -> Option<MetaEntry> {
+    if m.is_empty() && description.is_none() {
+        return None;
+    }
+    Some(MetaEntry {
+        number: m.number.clone(),
+        revision: m.revision.clone(),
+        description: description.map(str::to_string),
+        kind: m.kind.as_str().to_string(),
+        vendor: m.vendor.clone(),
+        vendor_number: m.vendor_number.clone(),
+        mass_kg: m.mass_kg,
+        com_mm: m.com_mm,
+        color: m.color,
+    })
+}
+
+/// What a STEP export records, from the manifest.
+pub(crate) fn step_meta<'a>(
+    m: &'a Manifest,
+    material: Option<(&'a str, Option<f64>)>,
+) -> StepMeta<'a> {
+    let meta = m.meta.as_ref();
+    StepMeta {
+        name: &m.part,
+        configuration: m.config.as_deref(),
+        material,
+        number: meta.and_then(|x| x.number.as_deref()),
+        revision: meta.and_then(|x| x.revision.as_deref()),
+        description: meta.and_then(|x| x.description.as_deref()),
+        color: meta.and_then(|x| x.color),
+    }
+}
+
+/// What mesh exports record, from the manifest.
+pub(crate) fn model_info<'a>(m: &'a Manifest, material: Option<&'a str>) -> ModelInfo<'a> {
+    let meta = m.meta.as_ref();
+    ModelInfo {
+        name: &m.part,
+        configuration: m.config.as_deref(),
+        material,
+        number: meta.and_then(|x| x.number.as_deref()),
+        revision: meta.and_then(|x| x.revision.as_deref()),
+        color: meta.and_then(|x| x.color),
+    }
+}
+
+/// Mass properties as reported: from the material density, or from `meta mass` (and `com`),
+/// which override the computed values. With an override the inertia is that of a body of uniform
+/// density `mass / volume`, about the computed center of mass.
+pub(crate) struct MassReport {
+    /// Mass from the material density (kg), if there is one.
+    pub(crate) computed_kg: Option<f64>,
+    /// The mass to report (kg): the override, else the computed mass.
+    pub(crate) mass_kg: Option<f64>,
+    /// The density that scales the unit-density inertia (kg/mm^3).
+    pub(crate) density: Option<f64>,
+    /// The center of mass to report (mm).
+    pub(crate) center_mm: [f64; 3],
+    /// True if `meta` overrides the mass.
+    pub(crate) overridden: bool,
+}
+
+pub(crate) fn mass_report(m: &Manifest, density: Option<f64>) -> MassReport {
+    let r = &m.result;
+    let computed_kg = density.map(|d| r.volume_mm3 * d);
+    let meta = m.meta.as_ref();
+    match meta.and_then(|x| x.mass_kg) {
+        Some(mass) => MassReport {
+            computed_kg,
+            mass_kg: Some(mass),
+            density: (r.volume_mm3 > 0.0).then(|| mass / r.volume_mm3),
+            center_mm: meta.and_then(|x| x.com_mm).unwrap_or(r.center_of_mass_mm),
+            overridden: true,
+        },
+        None => MassReport {
+            computed_kg,
+            mass_kg: computed_kg,
+            density,
+            center_mm: r.center_of_mass_mm,
+            overridden: false,
+        },
+    }
+}
+
 fn result_json(m: &Manifest, density: Option<f64>) -> Value {
     let r = &m.result;
+    let mass = mass_report(m, density);
     let mut v = json!({
         "solids": r.solids, "faces": r.faces, "edges": r.edges, "vertices": r.vertices,
         "volume_mm3": r.volume_mm3, "area_mm2": r.area_mm2,
-        "center_of_mass_mm": r.center_of_mass_mm,
+        "center_of_mass_mm": mass.center_mm,
         "bbox_min_mm": r.bbox_min_mm, "bbox_max_mm": r.bbox_max_mm,
     });
     if let Some(i) = r.inertia_mm5 {
         v["inertia_unit_density_mm5"] = json!(i);
     }
-    if let Some(d) = density {
-        v["mass_kg"] = json!(r.volume_mm3 * d);
-        if let Some(i) = r.inertia_mm5 {
-            v["inertia_kg_mm2"] = json!(i.map(|row| row.map(|x| x * d)));
-        }
+    if let Some(kg) = mass.mass_kg {
+        v["mass_kg"] = json!(kg);
+    }
+    if mass.overridden {
+        v["mass_source"] = json!("meta");
+        v["computed_mass_kg"] = json!(mass.computed_kg);
+        v["computed_center_of_mass_mm"] = json!(r.center_of_mass_mm);
+    }
+    if let (Some(d), Some(i)) = (mass.density, r.inertia_mm5) {
+        v["inertia_kg_mm2"] = json!(i.map(|row| row.map(|x| x * d)));
     }
     v
 }
@@ -394,7 +482,7 @@ pub fn props_command<K: Kernel>(
     if o.json {
         let v = json!({
             "command": "props", "ok": true, "part": m.part, "config": m.config,
-            "kernel": m.kernel, "material": p.material,
+            "kernel": m.kernel, "material": p.material, "meta": m.meta,
             "result": result_json(m, p.density),
             "features": m.features.iter().map(|f| json!({
                 "name": f.name, "keyword": f.keyword, "solids": f.solids,
@@ -420,12 +508,32 @@ pub fn props_command<K: Kernel>(
     );
     let _ = writeln!(out, "volume    {:.6} mm^3", r.volume_mm3);
     let _ = writeln!(out, "area      {:.6} mm^2", r.area_mm2);
-    if let (Some(d), Some(mat)) = (p.density, &p.material) {
-        let _ = writeln!(out, "mass      {:.9} kg ({mat})", r.volume_mm3 * d);
+    let mass = mass_report(m, p.density);
+    if mass.overridden {
+        let computed = match (mass.computed_kg, &p.material) {
+            (Some(kg), Some(mat)) => format!("computed {kg:.9} kg from {mat}"),
+            _ => "no material".to_string(),
+        };
+        let _ = writeln!(
+            out,
+            "mass      {:.9} kg (meta; {computed})",
+            mass.mass_kg.unwrap_or_default()
+        );
+    } else if let (Some(kg), Some(mat)) = (mass.mass_kg, &p.material) {
+        let _ = writeln!(out, "mass      {kg:.9} kg ({mat})");
     }
-    let c = r.center_of_mass_mm;
-    let _ = writeln!(out, "center    ({:.6}, {:.6}, {:.6}) mm", c[0], c[1], c[2]);
-    if let (Some(i), Some(d)) = (r.inertia_mm5, p.density) {
+    let c = mass.center_mm;
+    let source = if m.meta.as_ref().is_some_and(|x| x.com_mm.is_some()) {
+        " (meta)"
+    } else {
+        ""
+    };
+    let _ = writeln!(
+        out,
+        "center    ({:.6}, {:.6}, {:.6}) mm{source}",
+        c[0], c[1], c[2]
+    );
+    if let (Some(i), Some(d)) = (r.inertia_mm5, mass.density) {
         let _ = writeln!(out, "inertia   about the center of mass, kg mm^2:");
         for row in i {
             let _ = writeln!(

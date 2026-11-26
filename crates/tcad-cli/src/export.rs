@@ -1,10 +1,9 @@
 //! `tcad export`: STEP, STL, 3MF and GLB from the (cached) result.
 
-use crate::geom::{Options, face_labels, produce, report_failure};
+use crate::geom::{self, Options, face_labels, produce, report_failure};
 use serde_json::json;
 use std::io::Write;
-use tcad_io::ModelInfo;
-use tcad_kernel::{Kernel, StepMeta};
+use tcad_kernel::Kernel;
 
 /// Options of `export`.
 pub struct ExportOptions<'a> {
@@ -59,23 +58,17 @@ pub fn export_command<K: Kernel>(
             return 2;
         }
     };
-    let info = ModelInfo {
-        name: &m.part,
-        configuration: m.config.as_deref(),
-        material: p.material.as_deref(),
-    };
+    let info = geom::model_info(m, p.material.as_deref());
     let bytes: Result<Vec<u8>, String> = match ext {
         "step" => k
             .export_step(
                 &shape,
-                &StepMeta {
-                    name: &m.part,
-                    configuration: m.config.as_deref(),
-                    material: p
-                        .material
+                &geom::step_meta(
+                    m,
+                    p.material
                         .as_deref()
                         .map(|n| (n, p.density.map(|d| d * 1e6))),
-                },
+                ),
             )
             .map_err(|e| e.to_string()),
         _ => k

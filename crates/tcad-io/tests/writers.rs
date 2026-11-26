@@ -48,6 +48,7 @@ fn threemf_is_a_zip_with_the_model() {
             name: "tet & co",
             configuration: Some("heavy"),
             material: Some("steel"),
+            ..Default::default()
         },
     );
     assert_eq!(&b[..4], b"PK\x03\x04");
@@ -79,6 +80,7 @@ fn glb_carries_face_ids_in_extras() {
             name: "tet",
             configuration: None,
             material: Some("steel"),
+            ..Default::default()
         },
     );
     assert_eq!(&b[..4], b"glTF");
@@ -98,6 +100,45 @@ fn glb_carries_face_ids_in_extras() {
     let bin_len = doc["buffers"][0]["byteLength"].as_u64().unwrap() as usize;
     assert_eq!(&b[20 + json_len + 4..20 + json_len + 8], b"BIN\0");
     assert_eq!(b.len(), 20 + json_len + 8 + bin_len);
+}
+
+#[test]
+fn part_metadata_in_3mf_and_glb() {
+    let info = ModelInfo {
+        name: "tet",
+        configuration: None,
+        material: None,
+        number: Some("TC-1"),
+        revision: Some("B"),
+        color: Some([1.0, 0.5, 0.0]),
+    };
+    let b = threemf(&tetra(), &info);
+    let text = String::from_utf8_lossy(&b);
+    assert!(
+        text.contains("<metadata name=\"PartNumber\">TC-1</metadata>"),
+        "{text}"
+    );
+    assert!(text.contains("<metadata name=\"Revision\">B</metadata>"));
+    assert!(
+        text.contains("<base name=\"default\" displaycolor=\"#FF8000\"/>"),
+        "{text}"
+    );
+    let g = glb(&tetra(), &[], &info);
+    let json_len = u32::from_le_bytes(g[12..16].try_into().unwrap()) as usize;
+    let doc: Value = serde_json::from_slice(&g[20..20 + json_len]).unwrap();
+    assert_eq!(doc["meshes"][0]["extras"]["number"], "TC-1");
+    assert_eq!(doc["meshes"][0]["extras"]["revision"], "B");
+    let c = doc["materials"][0]["pbrMetallicRoughness"]["baseColorFactor"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|x| x.as_f64().unwrap())
+        .collect::<Vec<_>>();
+    // sRGB 0.5 is about 0.214 in linear light
+    assert_eq!(c[0], 1.0);
+    assert!((c[1] - 0.214_041).abs() < 1e-5, "{c:?}");
+    assert_eq!(c[2], 0.0);
+    assert_eq!(c[3], 1.0);
 }
 
 #[test]

@@ -71,6 +71,8 @@ These statements are added to **parts** (spec/features.md links here).
 
 ### `meta`
 
+**Normative in [features.md](features.md) § Part metadata** (implemented, #9); summary:
+
 ```
 meta number="HC-110-014" revision="B" kind=made vendor="" mass=0.84 kg color=(0.7, 0.7, 0.72)
 ```

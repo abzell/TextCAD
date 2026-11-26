@@ -35,6 +35,27 @@ pub struct ModelInfo<'a> {
     pub configuration: Option<&'a str>,
     /// Material name.
     pub material: Option<&'a str>,
+    /// Part number.
+    pub number: Option<&'a str>,
+    /// Revision.
+    pub revision: Option<&'a str>,
+    /// Display colour, sRGB components in 0..1.
+    pub color: Option<[f64; 3]>,
+}
+
+/// `#RRGGBB` for an sRGB colour with components in 0..1.
+pub(crate) fn hex_color(c: [f64; 3]) -> String {
+    let byte = |x: f64| (x.clamp(0.0, 1.0) * 255.0).round() as u8;
+    format!("#{:02X}{:02X}{:02X}", byte(c[0]), byte(c[1]), byte(c[2]))
+}
+
+/// An sRGB component (0..1) in linear light, as glTF's `baseColorFactor` expects.
+pub(crate) fn srgb_to_linear(c: f64) -> f64 {
+    if c <= 0.04045 {
+        c / 12.92
+    } else {
+        libm::pow((c + 0.055) / 1.055, 2.4)
+    }
 }
 
 #[cfg(test)]

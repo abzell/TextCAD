@@ -324,14 +324,23 @@ impl Kernel for OcctKernel {
 
     fn export_step(&self, s: &OcctShape, meta: &StepMeta<'_>) -> KResult<Vec<u8>> {
         let (material, density) = meta.material.unwrap_or(("", None));
-        ffi::export_step(
-            &s.0,
-            meta.name,
-            meta.configuration.unwrap_or(""),
-            material,
-            density.unwrap_or(0.0),
-        )
-        .map_err(err)
+        let c = meta.color.unwrap_or([0.0; 3]);
+        let info = ffi::StepInfo {
+            name: meta.name.to_string(),
+            configuration: meta.configuration.unwrap_or("").to_string(),
+            material: material.to_string(),
+            density_g_cm3: density.unwrap_or(0.0),
+            number: meta.number.unwrap_or("").to_string(),
+            revision: meta.revision.unwrap_or("").to_string(),
+            description: meta.description.unwrap_or("").to_string(),
+            has_color: meta.color.is_some(),
+            color: ffi::Vec3 {
+                x: c[0],
+                y: c[1],
+                z: c[2],
+            },
+        };
+        ffi::export_step(&s.0, &info).map_err(err)
     }
 
     fn import_step(&self, bytes: &[u8]) -> KResult<OcctShape> {

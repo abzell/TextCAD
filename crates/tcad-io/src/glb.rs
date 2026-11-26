@@ -77,6 +77,17 @@ pub fn glb(mesh: &Mesh, labels: &[FaceLabel], info: &ModelInfo<'_>) -> Vec<u8> {
     if let Some(c) = info.configuration {
         model["configuration"] = json!(c);
     }
+    if let Some(n) = info.number {
+        model["number"] = json!(n);
+    }
+    if let Some(r) = info.revision {
+        model["revision"] = json!(r);
+    }
+    let base_color = info.color.map_or(vec![0.7, 0.72, 0.75, 1.0], |c| {
+        let mut v: Vec<f64> = c.iter().map(|x| crate::srgb_to_linear(*x)).collect();
+        v.push(1.0);
+        v
+    });
     let doc = json!({
         "asset": {"version": "2.0", "generator": "TextCAD"},
         "scene": 0,
@@ -85,7 +96,7 @@ pub fn glb(mesh: &Mesh, labels: &[FaceLabel], info: &ModelInfo<'_>) -> Vec<u8> {
         "meshes": [{"name": info.name, "primitives": primitives, "extras": model}],
         "materials": [{
             "name": info.material.unwrap_or("default"),
-            "pbrMetallicRoughness": {"baseColorFactor": [0.7, 0.72, 0.75, 1.0], "metallicFactor": 0.4, "roughnessFactor": 0.5},
+            "pbrMetallicRoughness": {"baseColorFactor": base_color, "metallicFactor": 0.4, "roughnessFactor": 0.5},
         }],
         "buffers": [{"byteLength": bin.len()}],
         "bufferViews": views,

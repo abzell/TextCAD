@@ -1,8 +1,9 @@
-tcad 0.1
+tcad 0.2
 
 part rod_eye "Rod eye with a spherical bearing bore" {
   tolerance 1e-6 mm
   material "AISI 1045" density=7.85 g/cm^3
+  meta number="TC-HYD-002" revision="A"
 
   param eye_od = 50 mm range(40 mm, 80 mm)
   param eye_w = 20 mm range(12 mm, 40 mm)

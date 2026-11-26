@@ -39,6 +39,7 @@ Errors carry `error` and, where there are any, `diagnostics` in the format of `t
 | `add_param` | `name`, `value`, `range?`, `doc?`, `after?` |
 | `set_param` | `name`, `value` |
 | `add_to_sketch` | `sketch`, `text` |
+| `set_meta` | `key` (`number`, `revision`, `kind`, `vendor`, `vendor_number`, `mass`, `com`, `color`), `value` (source text, e.g. `"HC-110-014"`, `purchased`, `0.84 kg`); format 0.2 files only |
 
 The edits apply in order. The result must analyze without errors and, unless `validate_geometry` is
 false, must regenerate (so references still resolve and features still build). If any step fails, the

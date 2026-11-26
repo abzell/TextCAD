@@ -55,6 +55,13 @@ All notable changes are recorded here. Format follows [Keep a Changelog](https:/
   not implemented yet: `E0001`); `E0103` for a newer construct under an older header, with a fix
   hint; `tcad migrate [--to] [--check] [--json]` (`tcad_model::migrate`) rewrites the header and
   renames clashing names, verified to keep every configuration's meaning; ADR 0016.
+- Part metadata (#9, format 0.2): `meta number= revision= kind=made|purchased|phantom vendor=
+  vendor_number= mass= com= color=` and `meta.<key> = ...` in configurations
+  (`spec/features.md` § Part metadata); stored in the manifest (`meta`); STEP product id, version,
+  description and colour; 3MF `PartNumber`/`Revision` and display colour; GLB mesh extras and base
+  colour; `tcad props` uses `meta mass`/`com` and reports the computed values alongside; LSP
+  completion; MCP `read_part` returns it and `apply_edit` has `set_meta`. The six hydraulic parts
+  and `spec/examples/rod_clevis.tcad` are format 0.2 with part numbers.
 - Draft Phase 2 spec (`spec/assembly.md`, ADR 0015) and the plan of the remaining work
   (`docs/phase2-plan.md`).
 

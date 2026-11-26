@@ -47,6 +47,7 @@ chapters [sketch.md](sketch.md) and [features.md](features.md) as those are writ
 | Keyword | Argument order |
 | --- | --- |
 | material | density |
+| meta | number, revision, kind, vendor, vendor_number, mass, com, color |
 | point | at |
 | line | start, end |
 | arc | center, start, end, through, tangent_to, r |

@@ -134,7 +134,8 @@ pub fn tool_definitions() -> Vec<Value> {
             "Apply structured edits and, if the result is valid (and builds), write it. Edits: \
              {op:add_statement,text,after?,before?} {op:replace_statement,name,text} {op:remove_statement,name} \
              {op:set_arg,name,entity?,arg,value} {op:remove_arg,name,entity?,arg} \
-             {op:add_param,name,value,range?,doc?,after?} {op:set_param,name,value} {op:add_to_sketch,sketch,text}. \
+             {op:add_param,name,value,range?,doc?,after?} {op:set_param,name,value} {op:add_to_sketch,sketch,text} \
+             {op:set_meta,key,value} (format 0.2: number, revision, kind, vendor, vendor_number, mass, com, color). \
              A rejected edit leaves the files untouched and returns the diagnostics.",
             json!({
                 "path": path,
@@ -487,6 +488,14 @@ impl<K: Kernel> Server<K> {
                 "tolerance_mm": m.part.tolerance,
                 "material": m.part.material.as_ref().map(|x| x.name.clone()),
             });
+            if let Ok(r) = m.resolve(m.default_config().map(|c| c.name.as_str())) {
+                let x = &r.meta;
+                data["part"]["meta"] = json!({
+                    "number": x.number, "revision": x.revision, "kind": x.kind.as_str(),
+                    "vendor": x.vendor, "vendor_number": x.vendor_number,
+                    "mass_kg": x.mass_kg, "com_mm": x.com_mm, "color": x.color,
+                });
+            }
             data["parameters"] = json!(
                 m.part
                     .params

@@ -449,6 +449,35 @@ impl Checker<'_> {
         for c in &part.configs {
             self.check_config(c);
         }
+        self.check_meta();
+    }
+
+    fn check_meta(&mut self) {
+        let part = self.part;
+        let overrides: Vec<(&str, &crate::meta::MetaOverride)> = part
+            .configs
+            .iter()
+            .flat_map(|c| c.meta_overrides.iter().map(move |o| (c.name.as_str(), o)))
+            .collect();
+        let mut ds = Vec::new();
+        crate::meta::check_structure(part.meta.as_ref(), &overrides, &mut ds);
+        for d in ds {
+            self.flag(d);
+        }
+        let none = HashMap::new();
+        let kinds = Some(crate::meta::KINDS);
+        if let Some(m) = &part.meta {
+            for a in &m.args {
+                let allowed = if a.name == "kind" { kinds } else { None };
+                for v in &a.values {
+                    self.check_expr(v, m.span.start, &none, 0, allowed);
+                }
+            }
+        }
+        for (_, o) in overrides {
+            let allowed = if o.key == "kind" { kinds } else { None };
+            self.check_expr(&o.expr, usize::MAX, &none, 0, allowed);
+        }
     }
 
     fn check_item(&mut self, item: &Item) {
@@ -696,10 +725,24 @@ fn resolve_part_with(
         }
     }
 
+    let mut meta_diags = Vec::new();
+    let meta = crate::meta::evaluate(
+        part.meta.as_ref(),
+        config.map_or(&[][..], |c| &c.meta_overrides[..]),
+        &penv,
+        &mut meta_diags,
+    );
+    for d in meta_diags {
+        if !flagged.contains(&(d.span.start, d.span.end)) {
+            report(d, diags);
+        }
+    }
+
     Resolved {
         config: config.map(|c| c.name.clone()),
         params: ordered,
         suppressed,
+        meta,
     }
 }
 

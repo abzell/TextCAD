@@ -106,6 +106,53 @@ fn props_reports_mass_from_the_material() {
 }
 
 #[test]
+fn meta_mass_overrides_the_material_and_lands_in_the_manifest() {
+    let d = Dir::new("meta");
+    let src = part("4 mm")
+        .replace("tcad 0.1", "tcad 0.2")
+        .replace("part blk {", "part blk \"Block\" {")
+        .replace(
+            "  param h",
+            "  meta number=\"TC-1\" revision=\"C\" kind=purchased mass=0.5 kg com=(1 mm, 2 mm, 3 mm)\n  param h",
+        )
+        .replace("{ h = 40 mm }", "{ h = 40 mm; meta.number = \"TC-1-TALL\" }");
+    let f = d.write("blk.tcad", &src);
+    let (code, out, err) = exec("props", &f, Some("tall"), true);
+    assert_eq!(code, 0, "{err}{out}");
+    let v: Value = serde_json::from_str(&out).expect("json");
+    let r = &v["result"];
+    assert_eq!(r["mass_kg"], 0.5);
+    assert_eq!(r["mass_source"], "meta");
+    let computed = r["computed_mass_kg"].as_f64().expect("computed");
+    assert!((computed - 240.0 * 7.85e-6).abs() < 1e-12, "{computed}");
+    assert_eq!(r["center_of_mass_mm"], serde_json::json!([1.0, 2.0, 3.0]));
+    assert_eq!(
+        v["meta"]["number"], "TC-1-TALL",
+        "the configuration's number"
+    );
+    assert_eq!(v["meta"]["revision"], "C");
+    assert_eq!(v["meta"]["kind"], "purchased");
+    assert_eq!(v["meta"]["description"], "Block");
+    // the manifest on disk carries it too
+    let manifest: Value = serde_json::from_str(
+        &std::fs::read_to_string(d.0.join(".cache/blk/manifest.json")).expect("manifest"),
+    )
+    .expect("json");
+    assert_eq!(manifest["meta"]["number"], "TC-1-TALL");
+    let (_, text, _) = exec("props", &f, Some("tall"), false);
+    assert!(
+        text.contains("mass      0.500000000 kg (meta; computed"),
+        "{text}"
+    );
+    assert!(text.contains("(meta)"), "{text}");
+    // without meta, no `meta` key in the manifest
+    let g = d.write("plain.tcad", &part("4 mm"));
+    let (_, out, _) = exec("props", &g, None, true);
+    let v: Value = serde_json::from_str(&out).expect("json");
+    assert!(v["meta"].is_null(), "{v}");
+}
+
+#[test]
 fn bundles_are_found_through_bundle_toml() {
     let d = Dir::new("bundle");
     d.write(

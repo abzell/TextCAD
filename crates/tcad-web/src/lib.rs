@@ -126,6 +126,9 @@ pub fn regenerate<K: Kernel>(k: &K, src: &str, config: Option<&str>) -> Output {
                 name: &model.part.name,
                 configuration: built.config.as_deref(),
                 material,
+                number: built.meta.number.as_deref(),
+                revision: built.meta.revision.as_deref(),
+                color: built.meta.color,
             };
             tcad_io::glb(&mesh, &labels, &info)
         });

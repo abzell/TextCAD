@@ -12,8 +12,9 @@ fn esc(s: &str) -> String {
         .replace('"', "&quot;")
 }
 
-/// A 3MF package with the mesh as one object, the part name as title and the material name as a
-/// base material.
+/// A 3MF package with the mesh as one object, the part name as title, the part number and
+/// revision as metadata and the material name (with the part's display colour) as a base
+/// material.
 pub fn threemf(mesh: &Mesh, info: &ModelInfo<'_>) -> Vec<u8> {
     let mut xml = String::new();
     xml.push_str("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -30,13 +31,22 @@ pub fn threemf(mesh: &Mesh, info: &ModelInfo<'_>) -> Vec<u8> {
             esc(c)
         );
     }
+    if let Some(n) = info.number {
+        let _ = writeln!(xml, " <metadata name=\"PartNumber\">{}</metadata>", esc(n));
+    }
+    if let Some(r) = info.revision {
+        let _ = writeln!(xml, " <metadata name=\"Revision\">{}</metadata>", esc(r));
+    }
     xml.push_str(" <metadata name=\"Application\">TextCAD</metadata>\n <resources>\n");
-    let material = info.material.is_some();
-    if let Some(m) = info.material {
+    let material = info.material.is_some() || info.color.is_some();
+    if material {
+        let color = info
+            .color
+            .map_or_else(|| "#B4B4B4".to_string(), crate::hex_color);
         let _ = writeln!(
             xml,
-            "  <basematerials id=\"1\"><base name=\"{}\" displaycolor=\"#B4B4B4\"/></basematerials>",
-            esc(m)
+            "  <basematerials id=\"1\"><base name=\"{}\" displaycolor=\"{color}\"/></basematerials>",
+            esc(info.material.unwrap_or("default"))
         );
     }
     let pid = if material {

@@ -91,6 +91,10 @@ pub struct Built<S> {
     pub config: Option<String>,
     /// Every face/edge reference that was resolved, in order.
     pub refs: Vec<RefRecord>,
+    /// Part metadata (`meta`) under the configuration that was built.
+    pub meta: tcad_model::PartMeta,
+    /// The part's description (the string after its name).
+    pub description: Option<String>,
 }
 
 /// Regenerates `model` under a configuration (`None`: the default configuration if the part has
@@ -184,6 +188,8 @@ pub fn build_with<K: Kernel>(
                 .map(|m| (m.name.clone(), m.density)),
             config: resolved.config,
             refs: cx.refs,
+            meta: resolved.meta,
+            description: model.part.display_name.clone(),
         }),
         refs,
     )

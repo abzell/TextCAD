@@ -408,6 +408,7 @@ dependencies = [
 name = "tcad-io"
 version = "0.0.1"
 dependencies = [
+ "libm",
  "serde_json",
  "tcad-kernel",
 ]

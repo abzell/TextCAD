@@ -99,6 +99,7 @@ impl Lowerer {
             name_span: name_tok.span,
             tolerance: DEFAULT_TOLERANCE_MM,
             material: None,
+            meta: None,
             params: Vec::new(),
             items: Vec::new(),
             configs: Vec::new(),
@@ -176,6 +177,21 @@ impl Lowerer {
                     }
                     part.material = Some(Material { name, density });
                 }
+                N::Meta => {
+                    if part.meta.is_some() {
+                        self.diags.push(Diagnostic::error(
+                            codes::E2303,
+                            span_of(s),
+                            "`meta` is declared more than once",
+                        ));
+                        continue;
+                    }
+                    let args = self.args(s);
+                    part.meta = Some(crate::meta::Meta {
+                        args,
+                        span: span_of(s),
+                    });
+                }
                 N::Param => part.params.extend(self.param(s)),
                 N::Config => part.configs.extend(self.config(s)),
                 N::Sketch => part.items.extend(self.sketch(s)),
@@ -228,8 +244,22 @@ impl Lowerer {
         let block = n.node_of(N::Block)?;
         let mut overrides = Vec::new();
         let mut suppress = Vec::new();
+        let mut meta_overrides = Vec::new();
         for s in block.nodes() {
             match s.kind {
+                N::ConfigOverride if matches!(s.children.first(), Some(Child::Node(r)) if r.kind == N::Reference) =>
+                {
+                    // `meta.<key> = expr`: a reference, then the value
+                    let mut nodes = s.nodes();
+                    let key_ref = nodes.next().map(|r| self.reference(r))?;
+                    let key = key_ref.segments.get(1).map(|seg| seg.name.clone())?;
+                    let expr = nodes.next().and_then(|e| self.expr(e))?;
+                    meta_overrides.push(crate::meta::MetaOverride {
+                        key,
+                        expr,
+                        span: span_of(s),
+                    });
+                }
                 N::ConfigOverride => {
                     let param = ident_after(s, 0)?.text.clone();
                     let expr = s.nodes().next().and_then(|e| self.expr(e))?;
@@ -254,6 +284,7 @@ impl Lowerer {
             is_default,
             overrides,
             suppress,
+            meta_overrides,
             span: span_of(n),
             name_span: name.span,
         })

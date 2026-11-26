@@ -16,6 +16,10 @@ It records:
 | part name | the product name of the shape |
 | material | a material with name and density (g/cm^3), if the part declares one |
 | configuration | the file description of the header (`TextCAD part <name>, configuration <config>`) |
+| part number | the product id (`PRODUCT('<number>', ...)`); without `meta number` the part name |
+| description | the product description |
+| revision | the id of the product definition formation (the product version) |
+| colour | an XCAF colour of the shape (`COLOUR_RGB`), components as written in `meta color` |
 
 The header carries a time stamp, so two exports differ in that line only; compare geometry, not bytes.
 The cache holds the same export as `.cache/<part>/result.step`.
@@ -30,14 +34,18 @@ outside). Tolerances: `--linear <mm>` chordal deflection (default 0.05) and `--a
 ## 3MF
 
 A 3MF package (`3D/3dmodel.model`, unit `millimeter`) with one object, the part name as `Title`, the
-configuration as metadata and the material name as a base material. The ZIP is written without
+configuration, part number (`PartNumber`) and revision (`Revision`) as metadata and the material name
+as a base material whose `displaycolor` is `meta color` (`#RRGGBB`, default `#B4B4B4`; with a colour
+and no material the base material is called `default`). The ZIP is written without
 compression and with a fixed date, so equal meshes give equal bytes.
 
 ## GLB
 
 Binary glTF 2.0 for the viewer: **one primitive per face**, each with `extras` `{ "face", "id",
 "aliases"? }` where `id` is the face's primary semantic ID (spec/naming.md) and `face` its index. The
-node and mesh carry the part name and configuration. `.cache/<part>/mesh.glb` is written by `tcad build`
+node and mesh carry the part name and configuration; the mesh `extras` also carry `number` and
+`revision`, and the material's `baseColorFactor` is `meta color` converted from sRGB to linear light
+(glTF's convention). `.cache/<part>/mesh.glb` is written by `tcad build`
 with the default tolerances.
 
 ## STEP import

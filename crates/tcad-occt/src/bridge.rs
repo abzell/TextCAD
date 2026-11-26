@@ -10,6 +10,21 @@ pub mod ffi {
         z: f64,
     }
 
+    /// What a STEP export records besides the geometry (spec/io.md). Empty strings are absent.
+    #[derive(Clone, Debug, Default)]
+    struct StepInfo {
+        name: String,
+        configuration: String,
+        material: String,
+        density_g_cm3: f64,
+        number: String,
+        revision: String,
+        description: String,
+        has_color: bool,
+        /// sRGB components in 0..1.
+        color: Vec3,
+    }
+
     /// An orthonormal frame.
     #[derive(Clone, Copy, Debug, Default)]
     struct Frame3 {
@@ -163,13 +178,7 @@ pub mod ffi {
         fn edges_of(s: &Shape) -> Result<Vec<EdgeRec>>;
         fn lineage_inherited(s: &Shape) -> Vec<u32>;
         fn lineage_created(s: &Shape) -> Vec<u32>;
-        fn export_step(
-            s: &Shape,
-            name: &str,
-            configuration: &str,
-            material: &str,
-            density_g_cm3: f64,
-        ) -> Result<Vec<u8>>;
+        fn export_step(s: &Shape, info: &StepInfo) -> Result<Vec<u8>>;
         fn import_step(bytes: &[u8]) -> Result<UniquePtr<Shape>>;
         fn mesh_of(s: &Shape, linear: f64, angular: f64) -> Result<Vec<MeshRec>>;
         fn properties(s: &Shape) -> Result<Props>;

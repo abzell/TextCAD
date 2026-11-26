@@ -53,7 +53,7 @@ keywords are **gated by the header**:
 
 | Keyword | Context | Introduced | Chapter | Implemented |
 | --- | --- | --- | --- | --- |
-| `meta` | part | 0.2 | [assembly.md](assembly.md) § `meta` | not yet (#9) |
+| `meta` | part | 0.2 | [features.md](features.md) § Part metadata | yes (#9); also `meta.<key> = ...` in configurations |
 | `connector` | part | 0.2 | [assembly.md](assembly.md) § `connector` | not yet (#28) |
 | `publish` | part | 0.2 | [assembly.md](assembly.md) § `publish` | not yet (#28) |
 | `uses` | part | 0.2 | [assembly.md](assembly.md) § Skeleton | not yet (#41) |

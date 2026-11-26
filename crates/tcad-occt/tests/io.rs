@@ -45,6 +45,10 @@ fn step_round_trip_keeps_the_geometry() {
                 name: "bracket",
                 configuration: Some("heavy"),
                 material: Some(("AISI 1045", Some(7.85))),
+                number: Some("HC-110-014"),
+                revision: Some("B"),
+                description: Some("Mounting bracket"),
+                color: Some([1.0, 0.5, 0.0]),
             },
         )
         .unwrap();
@@ -58,6 +62,29 @@ fn step_round_trip_keeps_the_geometry() {
     assert!(text.contains("bracket"), "part name");
     assert!(text.contains("AISI 1045"), "material");
     assert!(text.contains("configuration heavy"), "configuration");
+    // part metadata: product id and description, product version, colour
+    assert!(
+        text.contains("PRODUCT('HC-110-014','bracket','Mounting bracket'"),
+        "product id/name/description:\n{}",
+        text.lines()
+            .filter(|l| l.contains("PRODUCT("))
+            .collect::<Vec<_>>()
+            .join("\n")
+    );
+    assert!(
+        text.lines()
+            .any(|l| l.contains("PRODUCT_DEFINITION_FORMATION") && l.contains("'B'")),
+        "product version:\n{}",
+        text.lines()
+            .filter(|l| l.contains("PRODUCT_DEFINITION_FORMATION"))
+            .collect::<Vec<_>>()
+            .join("\n")
+    );
+    let colour = text
+        .lines()
+        .find(|l| l.contains("COLOUR_RGB"))
+        .unwrap_or_else(|| panic!("no COLOUR_RGB in the STEP file"));
+    assert!(colour.contains("1.") && colour.contains("0.5"), "{colour}");
     let b = k.import_step(&bytes).unwrap();
     let (pa, pb) = (k.properties(&a).unwrap(), k.properties(&b).unwrap());
     assert!((pa.volume - pb.volume).abs() <= 1e-6 * pa.volume);

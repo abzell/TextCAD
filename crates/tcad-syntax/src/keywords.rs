@@ -15,7 +15,7 @@ pub const LATEST: Version = (0, 2);
 /// and whether this implementation supports the statement yet (`false`: reported as not yet
 /// supported, `E0001`). The spec chapter of each is named in `spec/versioning.md`.
 pub const VERSIONED_PART_KW: &[(&str, Version, bool)] = &[
-    ("meta", (0, 2), false),
+    ("meta", (0, 2), true),
     ("connector", (0, 2), false),
     ("publish", (0, 2), false),
     ("uses", (0, 2), false),

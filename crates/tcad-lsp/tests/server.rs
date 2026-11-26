@@ -196,3 +196,37 @@ fn framing_round_trip() {
     assert!(text.starts_with("Content-Length: "));
     assert!(text.contains("\"renameProvider\":true"));
 }
+
+fn labels_at(src: &str, line: u32, character: u32) -> Vec<String> {
+    let (mut s, _) = open(src);
+    let r = req(
+        &mut s,
+        "textDocument/completion",
+        json!({"textDocument":td(),"position":{"line":line,"character":character}}),
+    );
+    r["result"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|i| i["label"].as_str().unwrap().to_string())
+        .collect()
+}
+
+#[test]
+fn completion_knows_meta_in_format_0_2_only() {
+    let new = "tcad 0.2\n\npart p {\n  \n}\n";
+    assert!(labels_at(new, 3, 2).contains(&"meta".to_string()));
+    let old = "tcad 0.1\n\npart p {\n  \n}\n";
+    assert!(!labels_at(old, 3, 2).contains(&"meta".to_string()));
+    // keys after `meta `, kinds after `kind=`
+    let keys = labels_at("tcad 0.2\n\npart p {\n  meta \n}\n", 3, 7);
+    assert!(
+        keys.contains(&"number=".to_string()) && keys.contains(&"color=".to_string()),
+        "{keys:?}"
+    );
+    let kinds = labels_at("tcad 0.2\n\npart p {\n  meta kind=\n}\n", 3, 12);
+    assert_eq!(kinds, ["made", "purchased", "phantom"]);
+    // `meta.` in a configuration
+    let cfg = labels_at("tcad 0.2\n\npart p {\n  config c { meta. }\n}\n", 3, 18);
+    assert!(cfg.contains(&"revision".to_string()), "{cfg:?}");
+}
