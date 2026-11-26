@@ -211,3 +211,9 @@ Not done:
 Draft spec for assemblies (`spec/assembly.md`, ADR 0015: connectors owned by parts, explicit mate
 orientation, `bundle.lock`, kernel-free solving) and the remaining work split into GitHub issues
 #4-#88 (open Phase 1 requirements, part gaps, Phases 2-5, post-Phase-5 evaluations); index and order in `docs/phase2-plan.md`.
+
+## Phase gating removed (2026-11-26)
+
+By the product owner's decision, a phase may start before the previous phase's gate passes
+(`docs/TextCAD-Requirements.md` §0, §13); each gate must still pass in CI before its phase is done.
+Items that need a person are collected in issue #90 and do not block agent work.

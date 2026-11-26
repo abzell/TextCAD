@@ -4,14 +4,14 @@ Oct 18, 2026 · Adam
 
 ## 0. Instructions for the coding agent
 
-Build Phase 1 end to end, autonomously, in a new GitHub repository; do not start Phase 2 until every Phase 1 acceptance criterion (section 14) passes in CI.
+Build the phases end to end, autonomously. A phase may start before the previous phase's gate passes; items that need a person (tags, certificates, manual checks in commercial CAD, reviews) are tracked in a GitHub issue and do not block the work.
 
 - **Source of truth.** This document is the requirement. Where it is silent or ambiguous, pick the most reasonable option and keep going; do not stop to ask.
 - **Decision records.** Log every non-trivial choice as an Architecture Decision Record in `docs/adr/NNNN-title.md` (context, options, decision, consequences). Locked decisions in section 2 may not be overturned by an ADR.
 - **Spec first, code second.** Every language construct is defined in `spec/` (normative prose plus grammar) before it is implemented. Implementation and spec must never disagree; if they do, fix one and log an ADR.
 - **Small, green steps.** Work in milestones (M1–M8, section 14). Each milestone ends with passing CI, an updated `CHANGELOG.md` and a short `docs/progress.md` entry.
 - **Working name.** The format is called **TextCAD**, extension `.tcad`, bundle extension `.tcadz` for archived bundles. Keep the name in one constant per crate and in `spec/name.md` so it can be renamed later.
-- **Out of scope until its phase.** Do not implement Phase 2+ features, but the grammar must reserve their keywords (section 4.8) so Phase 1 files stay valid later.
+- **Phases may overlap.** Work on a later phase may begin while an earlier phase is still open, as long as the earlier phase's files stay valid; the grammar reserves later keywords (section 4.8) so files stay valid as features arrive. Each gate is still met and verified in CI before its phase is called done.
 
 ## 1. Vision, goals and non-goals
 
@@ -340,7 +340,7 @@ Shipped targets are Windows x86_64 and WASM; Linux may be used for development a
 
 ## 13. Roadmap
 
-Each phase starts only when the previous phase's gate passes in CI; each phase begins by extending the spec, then the corpus, then the code.
+A phase may start before the previous phase's gate passes, but a phase is complete only when its own gate passes in CI. Within each phase the order stays: extend the spec, then the corpus, then the code.
 
 1. **Phase 1 — Parts.** Everything in sections 4–12. Gate: section 14 passes.
 2. **Phase 1b — In-browser geometry.** OCCT in WASM, live regeneration in the viewer. Gate: all corpus parts regenerate in the browser at T1 against the Windows build.
