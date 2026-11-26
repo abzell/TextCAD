@@ -4,8 +4,8 @@ use serde_json::{Value, json};
 use std::io::Write;
 use std::path::PathBuf;
 use tcad_cache::{
-    FeatureEntry, GLB_FILE, Manifest, MetaEntry, ResultEntry, STEP_FILE, TopologyEntry, cache_dir,
-    is_fresh, load_bundle, sha256_hex, source_hash, write_cache, write_extra,
+    FeatureEntry, GLB_FILE, Manifest, MetaEntry, ResultEntry, TopologyEntry, cache_dir, is_fresh,
+    load_bundle, sha256_hex, source_hash, write_cache, write_extra,
 };
 use tcad_diag::{Diagnostic, render_json, render_text};
 use tcad_io::{FaceLabel, ModelInfo};
@@ -37,6 +37,9 @@ pub(crate) enum Failure {
     /// Anything else (I/O, missing bundle), exit code 2.
     Other(String),
 }
+
+/// The STEP copy older versions wrote into the cache; removed when the cache is rewritten.
+const LEGACY_STEP_FILE: &str = "result.step";
 
 /// Default tessellation for the cached viewer mesh and for exports.
 pub const LINEAR_DEFLECTION_MM: f64 = 0.05;
@@ -104,7 +107,6 @@ pub(crate) struct Source {
 pub(crate) struct Fresh {
     pub(crate) manifest: Manifest,
     pub(crate) brep: Vec<u8>,
-    pub(crate) step: Option<Vec<u8>>,
     pub(crate) glb: Option<Vec<u8>>,
     /// Every face/edge reference that was resolved, in order.
     pub(crate) refs: Vec<tcad_build::RefRecord>,
@@ -220,15 +222,8 @@ pub(crate) fn regenerate<K: Kernel>(k: &K, s: &Source) -> Result<Fresh, Failure>
         brep_sha256: sha256_hex(&brep),
         meta: meta_entry(&built.meta, built.description.as_deref()),
     };
-    // the exact result and the viewer mesh; a kernel that cannot produce them (the mock) skips them
-    let meta = step_meta(
-        &manifest,
-        built
-            .material
-            .as_ref()
-            .map(|(n, d)| (n.as_str(), d.map(|d| d * 1e6))),
-    );
-    let step = k.export_step(shape, &meta).ok();
+    // the viewer mesh; a kernel that cannot produce it (the mock) skips it. STEP is not written
+    // here: only `tcad export --to step` produces it, on request (spec/io.md).
     let glb = k
         .mesh(shape, LINEAR_DEFLECTION_MM, ANGULAR_DEFLECTION_RAD)
         .ok()
@@ -239,7 +234,6 @@ pub(crate) fn regenerate<K: Kernel>(k: &K, s: &Source) -> Result<Fresh, Failure>
     Ok(Fresh {
         manifest,
         brep,
-        step,
         glb,
         refs,
     })
@@ -261,9 +255,8 @@ pub(crate) fn produce<K: Kernel>(k: &K, o: &Options<'_>) -> Result<Produced, Fai
     let f = regenerate(k, &s)?;
     write_cache(&s.dir, &f.manifest, &f.brep)
         .map_err(|e| Failure::Other(format!("cannot write the cache {}: {e}", s.dir.display())))?;
-    if let Some(step) = &f.step {
-        let _ = write_extra(&s.dir, STEP_FILE, step);
-    }
+    // a STEP file left by an older version of the tool would describe an older build
+    let _ = std::fs::remove_file(s.dir.join(LEGACY_STEP_FILE));
     if let Some(glb) = &f.glb {
         let _ = write_extra(&s.dir, GLB_FILE, glb);
     }

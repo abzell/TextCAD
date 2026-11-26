@@ -160,7 +160,6 @@ rod_clevis/                 # bundle directory
   .cache/                   # derived; git-ignored by default, committable for consumers
     rod_clevis/
       brep.brep             # OCCT native B-rep of the result
-      result.step           # AP242 export of the result
       mesh.glb              # display mesh
       manifest.json         # hashes, kernel id+version, per-feature topology map
 ```
@@ -168,7 +167,7 @@ rod_clevis/                 # bundle directory
 - **Archive form.** `tcad pack` zips a bundle into a single `.tcadz` for email and PLM; `tcad unpack` reverses it.
 - **Source hash.** SHA-256 of the canonical text plus imported file bytes plus resolved config. Stored in `manifest.json`.
 - **Invalidation.** A cache entry is valid only if source hash and kernel id/version both match; otherwise it is regenerated.
-- **Consumers without a kernel** (viewer, PLM, LLM agents) read `result.step`/`mesh.glb` directly; this is the "recipe plus result" guarantee.
+- **Consumers without a kernel** (viewer, PLM, LLM agents) read `mesh.glb` and `manifest.json` directly; this is the "recipe plus result" guarantee. STEP is generated only on request (`tcad export --to step`), never on every build or save; a bundle that must carry STEP for consumers without the tool includes an exported file explicitly.
 - **Drift check.** `tcad verify` regenerates and compares to the cached result using the determinism tiers in section 8.
 
 ## 6. Persistent naming

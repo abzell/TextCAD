@@ -257,9 +257,6 @@ pub struct MetaEntry {
     pub color: Option<[f64; 3]>,
 }
 
-/// Name of the exact STEP result in the cache directory.
-pub const STEP_FILE: &str = "result.step";
-
 /// Name of the viewer mesh in the cache directory.
 pub const GLB_FILE: &str = "mesh.glb";
 

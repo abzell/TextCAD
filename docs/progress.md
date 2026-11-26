@@ -243,3 +243,10 @@ Verified only in CI (no OpenCASCADE in the authoring container): the STEP side, 
 `crates/tcad-occt/tests/io.rs` (product id, version, `COLOUR_RGB`) and the FreeCAD job, which now
 checks that each hydraulic STEP file carries its part number and revision. FreeCAD labels objects by
 product name, so the number is checked in the file text rather than in FreeCAD's tree.
+
+## STEP on request only (2026-11-26)
+
+By the product owner's decision, STEP files are produced only when asked for (`tcad export --to
+step`, the MCP `export` tool), not on every build or save. `tcad build` no longer writes
+`.cache/<part>/result.step` (and removes a stale one); the cache keeps `brep.brep`, `manifest.json`
+and `mesh.glb`. Spec (`io.md`, `bundle.md`) and requirements §5 updated.

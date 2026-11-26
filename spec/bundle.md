@@ -15,7 +15,6 @@ rod_clevis/                 bundle directory
     rod_clevis/
       brep.brep             the result in the kernel's canonical serialization
       manifest.json         hashes, kernel id and version, per-feature topology
-      result.step           the exact result as STEP AP242 (spec/io.md)
       mesh.glb              the viewer mesh, one primitive per face with its semantic ID
 ```
 
@@ -52,6 +51,10 @@ the canonical text changes), the resolved configuration name, and the bytes of e
 
 `meta` is present when the part has a description or a `meta` statement; it holds the metadata of
 the configuration that was built (spec/features.md § Part metadata). Absent keys are not written.
+
+The cache never holds STEP: STEP is produced only on request (`tcad export --to step`,
+spec/io.md). A `result.step` left by an older version of the tool is deleted when the cache entry is
+rewritten.
 
 ## Invalidation
 

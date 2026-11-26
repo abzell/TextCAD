@@ -153,6 +153,22 @@ fn meta_mass_overrides_the_material_and_lands_in_the_manifest() {
 }
 
 #[test]
+fn builds_never_write_step_and_remove_a_stale_copy() {
+    let d = Dir::new("nostep");
+    let f = d.write("blk.tcad", &part("4 mm"));
+    let stale = d.0.join(".cache/blk/result.step");
+    std::fs::create_dir_all(stale.parent().expect("dir")).expect("mkdir");
+    std::fs::write(&stale, b"ISO-10303-21; from an older version").expect("write");
+    let (code, _, err) = exec("build", &f, None, true);
+    assert_eq!(code, 0, "{err}");
+    assert!(d.0.join(".cache/blk/manifest.json").is_file());
+    assert!(
+        !stale.exists(),
+        "STEP is produced only by `tcad export --to step`"
+    );
+}
+
+#[test]
 fn bundles_are_found_through_bundle_toml() {
     let d = Dir::new("bundle");
     d.write(
@@ -302,13 +318,14 @@ mod with_occt {
     const PLATE: &str = "tcad 0.1\n\npart plate {\n  material \"steel\" density=7.85 g/cm^3\n  param w = 30 mm\n  sketch s on plane.XY {\n    rect r corner=(0 mm, 0 mm) w=w h=20 mm\n  }\n  extrude body from s.r distance=10 mm\n  hole bore on=body.cap_end at=(10 mm, 10 mm) d=6 mm end=through_all\n}\n";
 
     #[test]
-    fn exports_in_every_format_and_the_cache_has_step_and_glb() {
+    fn exports_in_every_format_and_the_cache_has_glb_but_no_step() {
         let d = Dir::new("export");
         let f = d.write("plate.tcad", PLATE);
         let path = f.display().to_string();
         let (code, _, err) = tcad(&["build", &path]);
         assert_eq!(code, 0, "{err}");
-        assert!(d.0.join(".cache/plate/result.step").is_file());
+        // STEP is written only on request (`tcad export --to step`), never by a build
+        assert!(!d.0.join(".cache/plate/result.step").exists());
         assert!(d.0.join(".cache/plate/mesh.glb").is_file());
         for (fmt, magic) in [
             ("step", &b"ISO-10303"[..]),

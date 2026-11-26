@@ -22,7 +22,12 @@ It records:
 | colour | an XCAF colour of the shape (`COLOUR_RGB`), components as written in `meta color` |
 
 The header carries a time stamp, so two exports differ in that line only; compare geometry, not bytes.
-The cache holds the same export as `.cache/<part>/result.step`.
+
+**STEP is written only on request**: by `tcad export --to step`, the MCP `export` tool, or an
+application built on the same crates when its user asks for it. Building or saving a part never
+writes STEP, and the cache holds no STEP copy (spec/bundle.md). The geometry is always regenerated
+from the `.tcad` text; STEP is an interchange output, never an input to that regeneration (except a
+STEP file a part brings in with `import`).
 
 ## STL
 

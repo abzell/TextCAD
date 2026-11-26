@@ -66,6 +66,9 @@ All notable changes are recorded here. Format follows [Keep a Changelog](https:/
   (`docs/phase2-plan.md`).
 
 ### Changed
+- STEP is generated only on request (`tcad export --to step`, MCP `export`): `tcad build` no longer
+  writes `.cache/<part>/result.step` and deletes one left by an older version (`spec/io.md`,
+  `spec/bundle.md`, requirements §5).
 - Phases may start before the previous phase's gate passes (`docs/TextCAD-Requirements.md` §0, §13);
   items that need a person are tracked in issue #90.
 - The newest format version is 0.2: a missing header is fixed with `tcad 0.2` and the MCP server's
