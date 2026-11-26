@@ -10,8 +10,8 @@ Changes to the TextCAD format, its specification and its conformance corpus. For
   command lines, caches, exports, the language server, the agent interface and the viewer were removed
   from `spec/` (the chapters `mcp.md` and `viewer.md` entirely), and the implementation and its tests
   were removed. `kernel.md` is now "Geometric semantics", with T2 as the conformance criterion between
-  implementations; `bundle.md` keeps the layout, archive and source hash; `io.md` keeps `import` and
-  gains an informative STEP export mapping; `diagnostics.md` defines validity and the standard codes;
+  implementations; `bundle.md` keeps the layout, archive and source hash; `io.md` keeps only `import` (exports
+  are a tool's concern); `diagnostics.md` defines validity and the standard codes;
   the requirements document is now about the format (section numbers unchanged).
 - STEP is never required by the format; tools produce it on request.
 - Phases may overlap; a phase is complete when its gate holds.

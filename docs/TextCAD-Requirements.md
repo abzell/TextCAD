@@ -207,8 +207,7 @@ The spec defines what each operation must produce; no geometry kernel's behaviou
 
 - **Import STEP:** `import body = step("imports/x.step")` brings in a dead solid; its faces get IDs
   `body.face#n` ordered by the kernel-independent rule in 6.1; usable as a boolean tool or reference.
-- **Export:** the format recommends how part data maps to STEP AP242 (`spec/io.md`) so exports from
-  different tools agree. Producing exports is a tool's job.
+- **Export:** exporting to STEP or other formats is a tool's job and is not defined by the format.
 
 ## 10. Requirements on tools (informative)
 

@@ -318,7 +318,7 @@ config long default {
 
 As in parts (spec/parameters.md), plus `<instance>.config = <name>` and suppression of instances,
 pattern copies and mates. A suppressed instance is absent from the solve, the BOM, mass properties and
-exports; mates that reference it are suppressed with it (`I6202` lists them). `suppress if <expr>` on
+checks; mates that reference it are suppressed with it (`I6202` lists them). `suppress if <expr>` on
 `instance` and `mate` works as on features. A **pose** is a configuration that only changes driving
 parameters; tools use poses to show or check the assembly in a given state.
 
@@ -367,8 +367,7 @@ extrude relief from=asm_sketch.r op=subtract through_all affects=[weldment]
 - The cut applies to those instances **in this assembly only**. Their part files are unchanged; the
   modified solids exist only in the assembly's regenerated result, and their new faces are named by
   spec/naming.md with the assembly feature as the creator (`dowel.p1.wall`).
-- The BOM keeps the part number and marks the line "machined in assembly". Exports should write the
-  modified solids as separate products named `<part>@<assembly>`.
+- The BOM keeps the part number and marks the line "machined in assembly".
 
 ## Fastener stacks
 
@@ -460,15 +459,8 @@ explode service {
 ```
 
 Exploded views are named, ordered lists of displacements applied after solving. They do not change the
-solved transforms, the BOM or the checks; viewers and exports use them.
+solved transforms, the BOM or the checks; tools use them to show the assembly.
 (`view` is reserved for drawings in Phase 4.)
-
-## Export mapping (informative)
-
-Tools that export an assembly to STEP AP242 are encouraged to write one product per BOM line, one
-`NEXT_ASSEMBLY_USAGE_OCCURRENCE` per instance with its transform, sub-assemblies as nested products, and
-names and part numbers from `meta` (spec/io.md). Mirrored copies are exported as mirrored products,
-since a reflection is not a valid placement.
 
 ## Diagnostics (E6xxx)
 

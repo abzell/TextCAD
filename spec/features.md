@@ -45,8 +45,6 @@ The description of a part is the string after its name. `meta` adds:
   center), and its inertia is the unit-density inertia scaled by `mass / volume`, i.e. that of a
   uniform body of that mass about the computed center of mass. Without `mass` the material density
   is used. Tools should report the computed values alongside an override.
-- Exports should carry the metadata of the configuration they describe (spec/io.md, informative
-  mapping).
 
 ## Reference geometry
 

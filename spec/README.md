@@ -24,7 +24,7 @@ here first, recorded as ADRs in [`../docs/adr/`](../docs/adr/), and covered by c
 | [naming.md](naming.md) | Persistent naming | normative |
 | [kernel.md](kernel.md) | Geometric semantics, conformance tiers | normative |
 | [bundle.md](bundle.md) | Bundle layout, archive, source hash | normative |
-| [io.md](io.md) | STEP import; recommended export mapping | normative / informative |
+| [io.md](io.md) | STEP import | normative |
 | [diagnostics.md](diagnostics.md) | Validity and standard diagnostic codes | normative |
 | [assembly.md](assembly.md) | Assemblies, connectors, mates, BOM | draft (Phase 2) |
 
