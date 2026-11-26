@@ -436,7 +436,8 @@ impl<K: Kernel> Server<K> {
                 let title = title
                     .map(|t| format!(" \"{}\"", t.replace('"', "'")))
                     .unwrap_or_default();
-                format!("tcad 0.1\n\npart {name}{title} {{\n  tolerance 1e-6 mm\n}}\n")
+                let (major, minor) = tcad_syntax::keywords::LATEST;
+                format!("tcad {major}.{minor}\n\npart {name}{title} {{\n  tolerance 1e-6 mm\n}}\n")
             }
         };
         let a = analyze(&text);

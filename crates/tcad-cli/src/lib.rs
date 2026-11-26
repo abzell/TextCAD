@@ -37,14 +37,16 @@ Commands:
   verify  Regenerate and compare with the cache: T1 identical, T2 equivalent, T3 failed
   diff    Semantic difference between two versions of a part (two paths)
   serve   Local web viewer: feature tree, source and 3D view linked both ways (--port N)
+  migrate Move files to a newer format version (--to MAJOR.MINOR, default the newest), renaming
+          names that clash with new keywords; with --check only report what would change
 
 Options:
   --json     Machine-readable output
-  --check    (fmt) do not write, exit 1 if any file would change
+  --check    (fmt, migrate) do not write, exit 1 if any file would change
   --solve    (fmt) also write solved sketch coordinates as @hint(...)
   --config NAME  (build, props) build a configuration instead of the default one
   --force    (build, props) rebuild even if the cache is up to date
-  --to FMT   (export) step, stl, 3mf or glb
+  --to FMT   (export) step, stl, 3mf or glb; (migrate) the target version, e.g. 0.2
   --out FILE (export) output file (default: <part>.<format> in the current directory)
   --linear MM    (export stl/3mf/glb) chordal tolerance, default 0.05
   --angular DEG  (export stl/3mf/glb) angular tolerance, default 10
@@ -153,15 +155,40 @@ fn run_impl(
     }
     if !matches!(
         command,
-        "check" | "fmt" | "build" | "props" | "refs" | "export" | "verify" | "diff" | "serve"
+        "check"
+            | "fmt"
+            | "build"
+            | "props"
+            | "refs"
+            | "export"
+            | "verify"
+            | "diff"
+            | "serve"
+            | "migrate"
     ) {
         let _ = writeln!(err, "tcad: unknown command `{command}`\n\n{USAGE}");
         return 2;
     }
-    if check_only && command != "fmt" {
-        let _ = writeln!(err, "tcad: --check only applies to `fmt`");
+    if check_only && !matches!(command, "fmt" | "migrate") {
+        let _ = writeln!(err, "tcad: --check only applies to `fmt` and `migrate`");
         return 2;
     }
+    let target = if command == "migrate" {
+        match to.map(parse_version) {
+            None => tcad_syntax::keywords::LATEST,
+            Some(Some(v)) => v,
+            Some(None) => {
+                let _ = writeln!(
+                    err,
+                    "tcad migrate: --to needs a version like 0.2, not `{}`",
+                    to.unwrap_or_default()
+                );
+                return 2;
+            }
+        }
+    } else {
+        tcad_syntax::keywords::LATEST
+    };
     if command == "serve" {
         if paths.len() != 1 {
             let _ = writeln!(err, "tcad serve: expected exactly one bundle or part path");
@@ -289,8 +316,35 @@ fn run_impl(
                 continue;
             }
         };
+        let mut renames: Option<Value> = None;
+        let mut refusal: Option<String> = None;
         let (status, diags) = match command {
             "check" => check_file(&src),
+            "migrate" => match migrate_file(file, &src, target, check_only) {
+                Ok(MigrateOutcome::Done(status, list)) => {
+                    renames = Some(json!(
+                        list.iter()
+                            .map(|(a, b)| json!({ "from": a, "to": b }))
+                            .collect::<Vec<_>>()
+                    ));
+                    if !json {
+                        for (a, b) in &list {
+                            let _ = writeln!(out, "{name}: renamed `{a}` to `{b}`");
+                        }
+                    }
+                    (status, Vec::new())
+                }
+                Ok(MigrateOutcome::Invalid(diags)) => ("error", diags),
+                Ok(MigrateOutcome::Refused(why)) => {
+                    refusal = Some(why);
+                    ("refused", Vec::new())
+                }
+                Err(e) => {
+                    let _ = writeln!(err, "tcad: cannot write {name}: {e}");
+                    io_error = true;
+                    continue;
+                }
+            },
             _ => match fmt_file(file, &src, check_only, solve) {
                 Ok(r) => r,
                 Err(e) => {
@@ -300,18 +354,32 @@ fn run_impl(
                 }
             },
         };
-        let bad = has_errors(&diags) || status == "would_change";
+        let bad = has_errors(&diags) || status == "would_change" || status == "refused";
         failed |= bad;
         if json {
             let mut r = render_json(&name, &src, &diags);
             r["status"] = json!(status);
+            if let Some(list) = renames {
+                r["renames"] = list;
+            }
+            if let Some(why) = &refusal {
+                r["message"] = json!(why);
+            }
             reports.push(r);
         } else {
             let _ = write!(err, "{}", render_text(&name, &src, &diags));
+            if let Some(why) = &refusal {
+                let _ = writeln!(err, "{name}: not migrated: {why}");
+            }
+            let verb = if command == "migrate" {
+                ("would migrate", "migrated")
+            } else {
+                ("would reformat", "formatted")
+            };
             if status == "would_change" {
-                let _ = writeln!(out, "{name}: would reformat");
-            } else if status == "formatted" {
-                let _ = writeln!(out, "{name}: formatted");
+                let _ = writeln!(out, "{name}: {}", verb.0);
+            } else if status == "formatted" || status == "migrated" {
+                let _ = writeln!(out, "{name}: {}", verb.1);
             }
         }
     }
@@ -438,6 +506,39 @@ fn fmt_file(
     }
 }
 
+/// `0.2` → `(0, 2)`.
+fn parse_version(text: &str) -> Option<(u32, u32)> {
+    let (a, b) = text.split_once('.')?;
+    Some((a.parse().ok()?, b.parse().ok()?))
+}
+
+enum MigrateOutcome {
+    /// `unchanged`, `would_change` or `migrated`, with the renamed names.
+    Done(&'static str, Vec<(String, String)>),
+    /// The file has errors.
+    Invalid(Vec<Diagnostic>),
+    /// The migration is not possible; the reason.
+    Refused(String),
+}
+
+fn migrate_file(
+    path: &Path,
+    src: &str,
+    to: (u32, u32),
+    check_only: bool,
+) -> Result<MigrateOutcome, std::io::Error> {
+    match tcad_model::migrate(src, to) {
+        Err(tcad_model::MigrateError::Invalid(diags)) => Ok(MigrateOutcome::Invalid(diags)),
+        Err(e) => Ok(MigrateOutcome::Refused(e.to_string())),
+        Ok(m) if !m.changed() => Ok(MigrateOutcome::Done("unchanged", m.renames)),
+        Ok(m) if check_only => Ok(MigrateOutcome::Done("would_change", m.renames)),
+        Ok(m) => {
+            std::fs::write(path, &m.text)?;
+            Ok(MigrateOutcome::Done("migrated", m.renames))
+        }
+    }
+}
+
 fn collect_files(paths: &[&str]) -> Result<Vec<PathBuf>, String> {
     let mut files = Vec::new();
     for p in paths {
@@ -508,6 +609,43 @@ mod tests {
 
     const GOOD: &str = "tcad 0.1\n\npart p {\n  param a = 1 mm\n}\n";
     const UGLY: &str = "tcad 0.1\npart p {\nparam a=1.0mm\n}\n";
+
+    #[test]
+    fn migrate_renames_and_rewrites_the_header() {
+        let d = Dir::new("migrate");
+        let f = d.write(
+            "a.tcad",
+            "tcad 0.1\n\npart p {\n  param meta = 1 mm\n  param b = 2 * meta\n}\n",
+        );
+        // --check reports without writing
+        let (code, out, _) = run_args(&["migrate", "--check", &f]);
+        assert_eq!(code, 1, "{out}");
+        assert!(out.contains("would migrate"), "{out}");
+        assert!(
+            std::fs::read_to_string(&f)
+                .expect("read")
+                .contains("tcad 0.1")
+        );
+        // a real run writes, reports the rename, and a second run is a no-op
+        let (code, out, err) = run_args(&["migrate", "--to", "0.2", &f]);
+        assert_eq!(code, 0, "{out}{err}");
+        assert!(out.contains("renamed `meta` to `meta_1`"), "{out}");
+        assert_eq!(
+            std::fs::read_to_string(&f).expect("read"),
+            "tcad 0.2\n\npart p {\n  param meta_1 = 1 mm\n  param b = 2 * meta_1\n}\n"
+        );
+        let (code, out, _) = run_args(&["migrate", "--json", &f]);
+        assert_eq!(code, 0);
+        let v: Value = serde_json::from_str(&out).expect("json");
+        assert_eq!(v["files"][0]["status"], "unchanged");
+        // refusals and usage errors
+        let g = d.write("b.tcad", "tcad 0.2\n\npart p { }\n");
+        let (code, out, _) = run_args(&["migrate", "--json", "--to", "0.1", &g]);
+        assert_eq!(code, 1);
+        let v: Value = serde_json::from_str(&out).expect("json");
+        assert_eq!(v["files"][0]["status"], "refused");
+        assert_eq!(run_args(&["migrate", "--to", "zero", &g]).0, 2);
+    }
 
     #[test]
     fn check_ok_and_error() {

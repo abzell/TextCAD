@@ -15,6 +15,7 @@ use serde_json::{Value, json};
 use std::collections::HashMap;
 use std::io::{BufRead, Write};
 use tcad_diag::{Diagnostic, Severity, Span};
+use tcad_model::migrate::in_config;
 use tcad_model::{ItemKind, Model, analyze};
 use tcad_syntax::token::{Token, TokenKind};
 use tcad_syntax::{format_source, keywords as kw, lexer};
@@ -759,21 +760,6 @@ impl<P: Provider> Server<P> {
 
 /// True if token `n` sits directly in a `config name { ... }` block, where `name = value` entries
 /// refer to parameters.
-fn in_config(tokens: &[Token], n: usize) -> bool {
-    let mut depth = 0usize;
-    for i in (0..n).rev() {
-        match tokens[i].kind {
-            TokenKind::RBrace => depth += 1,
-            TokenKind::LBrace if depth > 0 => depth -= 1,
-            TokenKind::LBrace => {
-                return i >= 2 && tokens[i - 2].text == "config";
-            }
-            _ => {}
-        }
-    }
-    false
-}
-
 fn keyword_help(word: &str) -> &'static str {
     match word {
         "param" => "a named, typed value: `param w = 10 mm range(5 mm, 20 mm)`",

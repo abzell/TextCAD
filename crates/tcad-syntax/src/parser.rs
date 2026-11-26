@@ -10,8 +10,9 @@ use crate::lexer::lex;
 use crate::token::{Token, TokenKind as K};
 use tcad_diag::{Diagnostic, Edit, FixHint, Span, codes};
 
-/// The format version this implementation reads and writes.
-pub const SUPPORTED_VERSION: (u32, u32) = (0, 1);
+/// The newest format version this implementation reads (`spec/versioning.md`). Files declare
+/// their own version in the header; older minor versions are read with their own keyword set.
+pub const SUPPORTED_VERSION: (u32, u32) = kw::LATEST;
 
 /// Result of parsing.
 #[derive(Debug)]
@@ -20,6 +21,10 @@ pub struct Parse {
     pub root: Node,
     /// Lexical and syntax diagnostics in source order of discovery.
     pub diagnostics: Vec<Diagnostic>,
+    /// The format version declared by the header, if the header is well formed.
+    pub version: Option<kw::Version>,
+    /// Span of the version number in the header, if the header is well formed.
+    pub version_span: Option<Span>,
 }
 
 impl Parse {
@@ -43,6 +48,8 @@ pub fn parse(src: &str) -> Parse {
             children: Vec::new(),
         }],
         diags: Vec::new(),
+        version: SUPPORTED_VERSION,
+        declared: None,
     };
     p.file();
     diags.append(&mut p.diags);
@@ -54,6 +61,8 @@ pub fn parse(src: &str) -> Parse {
             children: frame.children,
         },
         diagnostics: diags,
+        version: p.declared.map(|(v, _)| v),
+        version_span: p.declared.map(|(_, s)| s),
     }
 }
 
@@ -81,6 +90,10 @@ struct Parser {
     prev_end: usize,
     stack: Vec<Frame>,
     diags: Vec<Diagnostic>,
+    /// The version whose keywords apply: the header's, or the newest if the header is broken.
+    version: kw::Version,
+    /// The version and its span as written in the header.
+    declared: Option<(kw::Version, Span)>,
 }
 
 impl Parser {
@@ -268,7 +281,7 @@ impl Parser {
             return self.error_expected("a name", None);
         }
         let t = self.peek().clone();
-        if kw::is_keyword(&t.text, self.ctx == Ctx::Sketch) {
+        if kw::is_keyword_in(&t.text, self.ctx == Ctx::Sketch, self.version) {
             self.diags.push(Diagnostic::error(
                 codes::E1104,
                 t.span,
@@ -404,6 +417,10 @@ impl Parser {
             .and_then(|(a, b)| Some((a.parse::<u32>().ok()?, b.parse::<u32>().ok()?)));
         if let (true, Some((major, minor))) = (ok, parsed) {
             self.bump_raw();
+            self.declared = Some(((major, minor), version.span));
+            if major == SUPPORTED_VERSION.0 {
+                self.version = (major, minor.min(SUPPORTED_VERSION.1));
+            }
             if major != SUPPORTED_VERSION.0 {
                 self.diags.push(Diagnostic::error(
                     codes::E0101,
@@ -460,14 +477,51 @@ impl Parser {
 
     fn reserved(&mut self) {
         let t = self.peek().clone();
-        self.diags.push(Diagnostic::error(
-            codes::E0001,
-            t.span,
-            format!(
+        let message = match kw::introduced_in(&t.text) {
+            Some((major, minor)) => format!(
+                "feature not yet supported: `{}` belongs to format {major}.{minor} but is not implemented yet",
+                t.text
+            ),
+            None => format!(
                 "feature not yet supported: `{}` is reserved for a later phase",
                 t.text
             ),
-        ));
+        };
+        self.diags
+            .push(Diagnostic::error(codes::E0001, t.span, message));
+        self.skip_statement();
+    }
+
+    /// A statement that starts with a keyword of a newer format version than the header
+    /// declares (`E0103`, with a fix hint that updates the header).
+    fn too_new(&mut self, since: kw::Version) {
+        let t = self.peek().clone();
+        let mut d = Diagnostic::error(
+            codes::E0103,
+            t.span,
+            format!(
+                "`{}` requires format {}.{}; the file header declares {}.{}",
+                t.text, since.0, since.1, self.version.0, self.version.1
+            ),
+        );
+        if let Some((_, span)) = self.declared {
+            d = d.with_hint(FixHint {
+                message: format!(
+                    "change the header to `tcad {}.{}` (run `tcad migrate` to rename clashing names)",
+                    since.0, since.1
+                ),
+                edits: vec![Edit {
+                    span,
+                    replacement: format!("{}.{}", since.0, since.1),
+                }],
+            });
+        }
+        self.diags.push(d);
+        self.skip_statement();
+    }
+
+    /// Consumes a statement (and a balanced `{ }` block in it) as a [`NodeKind::Reserved`] node.
+    fn skip_statement(&mut self) {
         self.statement(NodeKind::Reserved, |p| {
             let mut braces = 0u32;
             loop {
@@ -536,6 +590,18 @@ impl Parser {
         } else {
             ""
         };
+        if ctx == Ctx::Part
+            && let Some(since) = kw::introduced_in(word)
+        {
+            if since > self.version {
+                self.too_new(since);
+                return;
+            }
+            if kw::is_pending(word, self.version) {
+                self.reserved();
+                return;
+            }
+        }
         match ctx {
             Ctx::Part => match word {
                 "tolerance" => self.statement(NodeKind::Tolerance, |p| {

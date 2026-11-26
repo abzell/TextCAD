@@ -34,9 +34,10 @@ The registry lives in `crates/tcad-diag/src/codes.rs`; a test keeps it unique an
 
 | Code | Meaning |
 | --- | --- |
-| E0001 | feature not yet supported (a keyword reserved for a later phase) |
+| E0001 | feature not yet supported (a keyword reserved for a later phase, or introduced by the declared format version but not implemented yet) |
 | E0101 | unsupported format major version |
 | W0102 | format minor version is newer than supported |
+| E0103 | a statement starts with a keyword of a newer format version than the header declares (hint: update the header; `tcad migrate`) |
 | E1001 | unexpected character |
 | E1002 | unterminated string |
 | E1003 | unterminated block comment |

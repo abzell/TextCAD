@@ -10,12 +10,17 @@ const NOTES: &[(&str, &str, &str)] = &[
     (
         "E0101",
         "The file header names a format version whose major number this tool does not know.",
-        "Write `tcad 0.1` on the first line, or run `tcad migrate`.",
+        "Write `tcad 0.2` (the newest version) on the first line.",
     ),
     (
         "W0102",
         "The file was written for a newer minor version of the format.",
         "Update tcad, or lower the version if the file does not use newer constructs.",
+    ),
+    (
+        "E0103",
+        "The statement starts with a keyword that a newer format version introduced; the file header declares an older version, where the word is an ordinary name.",
+        "Run `tcad migrate <file>` (it updates the header and renames any of your names that clash with new keywords), or apply the fix hint that changes the header.",
     ),
     (
         "E1001",
@@ -50,7 +55,7 @@ const NOTES: &[(&str, &str, &str)] = &[
     (
         "E1101",
         "The first line must be `tcad <major>.<minor>`.",
-        "Add `tcad 0.1` as the first line.",
+        "Add `tcad 0.2` as the first line.",
     ),
     (
         "E1102",

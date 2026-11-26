@@ -50,6 +50,17 @@ All notable changes are recorded here. Format follows [Keep a Changelog](https:/
   implementation of the transcendental functions on Windows and in the browser), cross-platform
   B-rep comparison (`tools/brep-diff.py`), ADR 0014.
 - CI: the language server inside VS Code and Eclipse Theia (job `editors`).
+- Format 0.2 (#13): schema-evolution rules in `spec/versioning.md`; keywords gated by the file
+  header (`meta`, `connector`, `publish`, `uses` are names in 0.1 files and keywords from 0.2 on,
+  not implemented yet: `E0001`); `E0103` for a newer construct under an older header, with a fix
+  hint; `tcad migrate [--to] [--check] [--json]` (`tcad_model::migrate`) rewrites the header and
+  renames clashing names, verified to keep every configuration's meaning; ADR 0016.
+- Draft Phase 2 spec (`spec/assembly.md`, ADR 0015) and the plan of the remaining work
+  (`docs/phase2-plan.md`).
 
 ### Changed
+- Phases may start before the previous phase's gate passes (`docs/TextCAD-Requirements.md` §0, §13);
+  items that need a person are tracked in issue #90.
+- The newest format version is 0.2: a missing header is fixed with `tcad 0.2` and the MCP server's
+  `create_part` writes 0.2. Files keep the version they declare; `tcad fmt` never changes it.
 - Replaced the MIT `LICENSE` with Apache-2.0 (locked decision, requirements section 2).

@@ -43,6 +43,7 @@ registry! {
     E0001 = "E0001", "feature not yet supported";
     E0101 = "E0101", "unsupported format major version";
     W0102 = "W0102", "format minor version is newer than supported";
+    E0103 = "E0103", "construct requires a newer format version than the file header declares";
     E1001 = "E1001", "unexpected character";
     E1002 = "E1002", "unterminated string";
     E1003 = "E1003", "unterminated block comment";

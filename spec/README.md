@@ -13,7 +13,7 @@ Chapters marked *normative* are complete for their milestone; the others are stu
 | [lexical.md](lexical.md) | Lexical structure | M2 |
 | [canonical-form.md](canonical-form.md) | Canonical formatting | M2 |
 | [diagnostics.md](diagnostics.md) | Error codes and output | M2 |
-| [versioning.md](versioning.md) | Versioning and migration | M2 (header), later migrations |
+| [versioning.md](versioning.md) | Versioning and migration | M2 (header), format 0.2 (rules, keyword gating, `tcad migrate`) |
 | [reserved.md](reserved.md) | Reserved keywords | M2 |
 | [units.md](units.md) | Values and units | M3 |
 | [expressions.md](expressions.md) | Expressions | M3 |

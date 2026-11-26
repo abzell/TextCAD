@@ -290,3 +290,63 @@ fn and_or_followed_by_equals_are_argument_names() {
         "{once}"
     );
 }
+
+#[test]
+fn versioned_keywords_are_names_in_older_files() {
+    for (kw, since, _) in tcad_syntax::keywords::VERSIONED_PART_KW {
+        let (major, minor) = *since;
+        // A 0.1 file may use the word as a name.
+        let old = format!("tcad 0.1\npart p {{\n  param {kw} = 3 mm\n  tag t = {kw}\n}}\n");
+        assert!(codes_of(&old).is_empty(), "{kw} as a name in 0.1");
+        // From its version on it is a keyword.
+        let new = format!("tcad {major}.{minor}\npart p {{\n  param {kw} = 3 mm\n}}\n");
+        assert_eq!(
+            codes_of(&new),
+            ["E1104"],
+            "{kw} as a name in {major}.{minor}"
+        );
+    }
+}
+
+#[test]
+fn newer_constructs_under_an_older_header() {
+    for (kw, since, supported) in tcad_syntax::keywords::VERSIONED_PART_KW {
+        let old = format!("tcad 0.1\npart p {{\n  {kw} a=1\n  param b = 1\n}}\n");
+        let p = parse(&old);
+        assert_eq!(codes_of(&old), ["E0103"], "{kw} under 0.1");
+        // The fix hint rewrites the version number in the header.
+        let hint = p.diagnostics[0].hint.as_ref().expect("fix hint");
+        assert_eq!(hint.edits.len(), 1);
+        let edit = &hint.edits[0];
+        assert_eq!(&old[edit.span.start..edit.span.end], "0.1");
+        assert_eq!(edit.replacement, format!("{}.{}", since.0, since.1));
+        let mut fixed = old.clone();
+        fixed.replace_range(edit.span.start..edit.span.end, &edit.replacement);
+        let after = codes_of(&fixed);
+        if *supported {
+            assert!(after.is_empty(), "{kw}: {after:?}");
+        } else {
+            assert_eq!(after, ["E0001"], "{kw} is known but not implemented yet");
+        }
+    }
+}
+
+#[test]
+fn header_version_is_reported_and_kept_by_fmt() {
+    let p = parse("tcad 0.1\npart p { }\n");
+    assert_eq!(p.version, Some((0, 1)));
+    assert_eq!(parse("part p { }\n").version, None);
+    for src in [
+        "tcad 0.1\n\npart p {\n  param a = 1\n}\n",
+        "tcad 0.2\n\npart p {\n  param a = 1\n}\n",
+    ] {
+        assert_eq!(fmt(src), src, "fmt never changes the header");
+    }
+    // A missing header is fixed with the newest version.
+    let missing = parse("part p { }\n");
+    let hint = missing.diagnostics[0].hint.as_ref().expect("hint");
+    assert!(
+        hint.edits[0].replacement.starts_with("tcad 0.2"),
+        "{hint:?}"
+    );
+}

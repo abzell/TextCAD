@@ -15,7 +15,9 @@
 (* ---------- file ---------- *)
 
 file            = header , { top_item } ;
-header          = "tcad" , VERSION , NEWLINE ;                  (* VERSION = INT "." INT, e.g. 0.1 *)
+header          = "tcad" , VERSION , NEWLINE ;                  (* VERSION = INT "." INT, e.g. 0.2 *)
+(* The header's version selects the keyword set: keywords added in a later minor version are
+   ordinary identifiers in older files (spec/versioning.md). *)
 top_item        = part_decl | reserved_stmt ;
 
 

@@ -217,3 +217,15 @@ orientation, `bundle.lock`, kernel-free solving) and the remaining work split in
 By the product owner's decision, a phase may start before the previous phase's gate passes
 (`docs/TextCAD-Requirements.md` §0, §13); each gate must still pass in CI before its phase is done.
 Items that need a person are collected in issue #90 and do not block agent work.
+
+## Format 0.2: versioning rules and `tcad migrate` (#13, 2026-11-26)
+
+Done: normative `spec/versioning.md` (what minor and major versions may change, keyword gating by
+the header, `tcad migrate`); `VERSIONED_PART_KW` in `tcad-syntax` (`meta`, `connector`, `publish`,
+`uses`: names in 0.1, keywords from 0.2, not implemented yet); `E0103` with a header fix hint;
+`tcad_model::migrate` and `tcad migrate` with verification that every configuration keeps its
+meaning; ADR 0016. Every corpus part migrates by changing its header only (test).
+
+Finding: inside a sketch with an entity of the same name as a clashing parameter, a bare word means
+the entity in point positions and the parameter in expressions; text alone cannot decide, so
+migrate refuses that case. The verification step caught the first, wrong implementation.

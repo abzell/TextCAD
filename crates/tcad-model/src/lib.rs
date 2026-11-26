@@ -8,6 +8,7 @@ mod check;
 mod hints;
 pub mod ir;
 mod lower;
+pub mod migrate;
 pub mod sketch;
 
 pub use check::{Analysis, analyze};
@@ -17,6 +18,7 @@ pub use ir::{
     Sketch,
 };
 pub use lower::DEFAULT_TOLERANCE_MM;
+pub use migrate::{MigrateError, Migration, migrate};
 pub use sketch::{Geometry, SolvedEntity, SolvedSketch};
 
 /// Working name of the format. Defined once per crate so it can be renamed later
