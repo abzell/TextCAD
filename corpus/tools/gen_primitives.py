@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Regenerates the eight primitive corpus parts (sources, analytic expectations, build123d references).
 
-Usage: python3 corpus/tools/gen_primitives.py   (then: tcad fmt corpus)
+Usage: python3 corpus/tools/gen_primitives.py   (then bring the files into canonical form, spec/canonical-form.md)
 
 The expected values are closed-form, computed here, never read back from a kernel.
 """

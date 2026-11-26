@@ -1,105 +1,71 @@
-# TextCAD Format — Requirements Specification
+# TextCAD Format — Requirements
 
-Oct 18, 2026 · Adam
+Oct 18, 2026 · Adam (revised Nov 26, 2026: the format is separated from its implementations)
 
-## 0. Instructions for the coding agent
+## 0. How this document is used
 
-Build the phases end to end, autonomously. A phase may start before the previous phase's gate passes; items that need a person (tags, certificates, manual checks in commercial CAD, reviews) are tracked in a GitHub issue and do not block the work.
+This document states what the **TextCAD format** must achieve. The normative definition is the
+specification in `spec/`; this document is its source of requirements, and spec chapters cite its
+section numbers. It says nothing about how any program implements the format: tools that read, check,
+regenerate, view or export TextCAD files are separate products with their own requirements.
 
-- **Source of truth.** This document is the requirement. Where it is silent or ambiguous, pick the most reasonable option and keep going; do not stop to ask.
-- **Decision records.** Log every non-trivial choice as an Architecture Decision Record in `docs/adr/NNNN-title.md` (context, options, decision, consequences). Locked decisions in section 2 may not be overturned by an ADR.
-- **Spec first, code second.** Every language construct is defined in `spec/` (normative prose plus grammar) before it is implemented. Implementation and spec must never disagree; if they do, fix one and log an ADR.
-- **Small, green steps.** Work in milestones (M1–M8, section 14). Each milestone ends with passing CI, an updated `CHANGELOG.md` and a short `docs/progress.md` entry.
-- **Working name.** The format is called **TextCAD**, extension `.tcad`, bundle extension `.tcadz` for archived bundles. Keep the name in one constant per crate and in `spec/name.md` so it can be renamed later.
-- **Phases may overlap.** Work on a later phase may begin while an earlier phase is still open, as long as the earlier phase's files stay valid; the grammar reserves later keywords (section 4.8) so files stay valid as features arrive. Each gate is still met and verified in CI before its phase is called done.
+- **Spec first.** Every construct is defined in `spec/` (prose plus grammar) and covered by
+  conformance cases in `corpus/` before tools are expected to support it.
+- **Decision records.** Every non-trivial decision about the format is an ADR in `docs/adr/`.
+  Decisions in section 2 are locked.
+- **Ambiguity.** Where this document is silent, choose the most reasonable option, record an ADR and
+  keep going.
+- **Phases may overlap.** Work on a later phase may begin while an earlier one is open, as long as files
+  valid in the earlier phase stay valid; keywords of later phases are reserved (section 4.8). A phase
+  is complete when its gate (section 13) holds.
 
 ## 1. Vision, goals and non-goals
 
-TextCAD is an open, human- and LLM-readable text format that carries full parametric design intent and can, by Phase 5, replace proprietary native CAD formats (.prt, .sldprt, .ipt, Parasolid-native files) for mechanical design.
+TextCAD is an open, human- and LLM-readable text format that carries full parametric design intent and
+can, by Phase 5, replace proprietary native CAD formats (.prt, .sldprt, .ipt, Parasolid-native files)
+for mechanical design.
 
 **Goals**
 
-1. Store the complete design recipe: parameters, sketches, constraints, feature tree, references, configurations.
-2. Regenerate the same geometry on any conforming kernel implementation (section 8).
+1. Store the complete design recipe: parameters, sketches, constraints, feature tree, references,
+   configurations.
+2. Regenerate the same geometry in any conforming implementation (section 8).
 3. Be diffable and mergeable in git with meaningful, line-oriented diffs.
 4. Be easy for LLM agents to read, write, query and repair, with structured errors.
-5. Interoperate through STEP AP242 and mesh formats so users never get stranded.
-6. Be governed as an open standard: open spec, conformance suite, reference implementation.
+5. Interoperate through STEP AP242 so users never get stranded.
+6. Be governed as an open standard: open specification, conformance suite, any number of
+   implementations.
 
-**Non-goals for Phase 1**
+**Non-goals**
 
-- Importing native proprietary files (.prt, .sldprt). Requires licensed SDKs; revisit after Phase 5.
-- A full interactive modeling GUI. Phase 1 ships a text-driven viewer only.
+- Describing how a tool works (its user interface, caches, file exports, performance). Tools are
+  separate products.
+- Importing native proprietary files; revisit after Phase 5.
 - Simulation (FEA/CFD), CAM toolpaths, ECAD.
-- Bit-identical results across different kernels (see tiered determinism, section 8).
+- Bit-identical results across different implementations (see the determinism tiers, section 8).
 
 ## 2. Locked decisions
 
-These were decided by the product owner and may not be changed by the agent.
-
 | Topic | Decision |
 | --- | --- |
-| Kernel strategy | Kernel-agnostic spec; reference backend on OpenCASCADE (OCCT) |
+| Kernel independence | The format never encodes the behaviour of a particular geometry kernel |
 | Syntax | Custom declarative DSL; no general-purpose code, guaranteed termination |
-| Reference implementation | Rust core, OCCT via C++ FFI |
 | Persistent naming | Hybrid: semantic IDs from history + user tags + geometric queries as fallback |
-| On-disk layout | Directory bundle: one text file per part/assembly + cache folder |
+| On-disk layout | Directory bundle: one text file per part/assembly |
 | Units | Explicit unit on every dimensional value; file declares modeling tolerance |
-| Constraint solver | Written in-house in Rust (no GPL dependencies) |
-| Determinism | Tiered: bit-identical on the same kernel build; property-equivalent across kernels |
-| Phase 1 scope | Spec, parser/validator, single parametric parts, STEP/mesh I/O |
-| Phase 1 tooling | CLI, LSP, web/Theia 3D viewer, MCP server |
-| Verification | Golden corpus with known properties, cross-checked against build123d |
-| Platforms | Windows x86_64 and WASM (browser) |
-| Repository | New GitHub repo, Claude Code agent, GitHub Actions CI |
-| Licensing | Open spec and open implementation, Apache-2.0 |
-| Ambiguity policy | Agent decides and records an ADR |
+| Determinism | Tiered: identical within one implementation; property-equivalent across implementations |
+| Verification | Conformance corpus with known properties, cross-checked against an independent modeler (build123d) |
+| Separation | This repository holds the format only; implementations live elsewhere |
+| Licensing | Open specification under Apache-2.0 |
+| Ambiguity policy | Decide and record an ADR |
 
-## 3. Architecture
+## 3. Scope of this repository
 
-A Cargo workspace splits the system so everything except geometry evaluation is pure Rust and compiles to WASM; only `tcad-occt` links C++.
-
-```mermaid
-flowchart LR
-  subgraph Tools
-    CLI[CLI]
-    LSP[Language server]
-    MCP[MCP server]
-    VIEW[Viewer - web, Theia]
-  end
-  subgraph Core["Pure-Rust core, compiles to WASM"]
-    SYN[Parse + format<br/>tcad-syntax] --> MOD[Model + units<br/>tcad-model, tcad-expr]
-    MOD --> SOL[Sketch solver<br/>tcad-solver]
-    SOL --> NAM[Naming<br/>tcad-naming]
-  end
-  Tools --> Core
-  NAM --> KER[Kernel trait<br/>tcad-kernel]
-  KER --> OCCT[OCCT backend<br/>C++ via FFI]
-  OCCT --> CACHE[Cache<br/>B-rep, mesh, hashes]
-  CACHE --> IO[Exports<br/>STEP, STL, 3MF, GLB]
-```
-
-Text flows left to right through the core, then down through the kernel trait to OCCT, and out to the cache and exports.
-
-| Crate / package | Responsibility | WASM |
-| --- | --- | --- |
-| `tcad-syntax` | Lexer, parser, lossless concrete syntax tree, canonical formatter | Yes |
-| `tcad-model` | Typed intermediate representation (IR): parameters, feature graph, references, units | Yes |
-| `tcad-expr` | Expression evaluation, unit algebra, dependency graph | Yes |
-| `tcad-solver` | 2D sketch constraint solver | Yes |
-| `tcad-naming` | Persistent naming: semantic IDs, tags, query resolution | Yes |
-| `tcad-kernel` | Kernel trait (abstract operation set) + determinism contract | Yes (trait only) |
-| `tcad-occt` | OCCT backend implementing `tcad-kernel` via `cxx` FFI | Phase 1b |
-| `tcad-cache` | Bundle cache: B-rep, meshes, hashes, invalidation | Yes |
-| `tcad-io` | STEP AP242 export, STEP import, STL/3MF/GLB export | Partial |
-| `tcad-cli` | `tcad` command-line tool | No |
-| `tcad-lsp` | Language server | Yes (core) |
-| `tcad-mcp` | MCP server for agents | No |
-| `viewer/` | TypeScript web viewer + Eclipse Theia extension (three.js) | Yes |
-| `spec/` | Normative specification (Markdown + EBNF grammar) | n/a |
-| `corpus/` | Golden test parts with expected properties | n/a |
-
-Data flow: text → CST → IR → resolved expressions → solved sketches → kernel operations → B-rep → cache and exports. Every stage is a pure function of its inputs plus the declared kernel version, which makes caching and determinism testable.
+| Path | Content |
+| --- | --- |
+| `spec/` | The normative specification (Markdown and EBNF grammar) and examples |
+| `corpus/` | The conformance corpus: source bundles with expected results and independent reference models |
+| `docs/` | These requirements, the roadmap and the ADRs |
 
 ## 4. Language requirements
 
@@ -108,7 +74,7 @@ The language is a declarative description of a feature graph; it must always ter
 **4.1 File header and versioning**
 
 - Line 1 is `tcad <major>.<minor>`. Parsers reject unknown major versions and warn on newer minors.
-- Schema evolution rules live in `spec/versioning.md`; every breaking change ships a migration in `tcad migrate`.
+- Schema evolution rules live in `spec/versioning.md`; every breaking change is published with the rules of its migration.
 
 **4.2 Lexical rules**
 
@@ -126,7 +92,7 @@ The language is a declarative description of a feature graph; it must always ter
 - Every length, angle, mass or density literal carries a unit: `25 mm`, `1.5 in`, `30 deg`, `0.5 rad`. Bare numbers are allowed only for dimensionless quantities (counts, ratios).
 - Supported units Phase 1: mm, cm, m, in, ft, deg, rad, kg, g, lb, kg/m^3, g/cm^3.
 - Expressions: + − × ÷ ^, parentheses, comparisons, `min max abs sqrt sin cos tan asin acos atan atan2 floor ceil round`. Unit mismatches are compile errors.
-- The file declares `tolerance <value> <unit>` (default 1e-6 mm); this is the modeling tolerance passed to the kernel.
+- The file declares `tolerance <value> <unit>` (default 1e-6 mm); this is the modeling tolerance of the geometry.
 
 **4.5 Parameters and configurations**
 
@@ -135,44 +101,39 @@ The language is a declarative description of a feature graph; it must always ter
 
 **4.6 Canonical form**
 
-- `tcad fmt` produces one canonical layout: fixed indentation (2 spaces), sorted key=value arguments in spec order, normalized numbers and units. Round-tripping `fmt` twice is a no-op.
-- Canonical form is what makes git diffs and merges meaningful; CI enforces it on the corpus.
+- Every valid file has one canonical layout: fixed indentation (2 spaces), sorted key=value arguments in spec order, normalized numbers and units. Formatting twice is a no-op.
+- Canonical form is what makes git diffs and merges meaningful; the examples and the corpus are in canonical form.
 
 **4.7 Diagnostics**
 
-- Every error has a stable code (`E1203`), a span, a message, and a machine-readable fix hint where possible. Errors are emitted as text and as JSON for agents.
+- Every error has a stable code (`E1203`), a span, a message, and a machine-readable fix hint where possible, so that every tool, person and agent names a problem the same way.
 
 **4.8 Reserved for later phases**
 
-The grammar must parse and reject-with-message (`feature not yet supported`) these keywords: `assembly`, `instance`, `mate`, `skeleton`, `bom`, `pmi`, `datum_feature`, `gdt`, `drawing`, `view`, `section`, `surface`, `boundary`, `fill`, `sheet_metal`, `flange`, `bend`, `flat_pattern`, `weldment`, `direct_edit`.
+The grammar parses and rejects with a message (`feature not yet supported`) these keywords: `assembly`, `instance`, `mate`, `skeleton`, `bom`, `pmi`, `datum_feature`, `gdt`, `drawing`, `view`, `section`, `surface`, `boundary`, `fill`, `sheet_metal`, `flange`, `bend`, `flat_pattern`, `weldment`, `direct_edit`.
 
-## 5. Bundle layout and cache
+## 5. Bundle layout
 
-A design is a directory: the `.tcad` text files are the source of truth, and everything under `.cache/` is derived and may be deleted.
+A design is a directory: the `.tcad` text files are the source of truth.
 
 ```
 rod_clevis/                 # bundle directory
-  bundle.toml               # format version, default units, entry part, license, metadata
+  bundle.toml               # bundle layout version, default units, entry part, license, metadata
   parts/
     rod_clevis.tcad         # one part per file
   imports/
     bushing_vendor.step     # imported non-parametric solids (section 9)
-  .cache/                   # derived; git-ignored by default, committable for consumers
-    rod_clevis/
-      brep.brep             # OCCT native B-rep of the result
-      mesh.glb              # display mesh
-      manifest.json         # hashes, kernel id+version, per-feature topology map
 ```
 
-- **Archive form.** `tcad pack` zips a bundle into a single `.tcadz` for email and PLM; `tcad unpack` reverses it.
-- **Source hash.** SHA-256 of the canonical text plus imported file bytes plus resolved config. Stored in `manifest.json`.
-- **Invalidation.** A cache entry is valid only if source hash and kernel id/version both match; otherwise it is regenerated.
-- **Consumers without a kernel** (viewer, PLM, LLM agents) read `mesh.glb` and `manifest.json` directly; this is the "recipe plus result" guarantee. STEP is generated only on request (`tcad export --to step`), never on every build or save; a bundle that must carry STEP for consumers without the tool includes an exported file explicitly.
-- **Drift check.** `tcad verify` regenerates and compares to the cached result using the determinism tiers in section 8.
+- **Archive form.** A bundle may be zipped into a single `.tcadz` file.
+- **Source hash.** SHA-256 of the canonical text plus imported file bytes plus resolved configuration;
+  it identifies a source exactly (lock files, caches).
+- **Derived data.** Tools may keep regenerated geometry, meshes and exports next to the sources; such
+  data is never part of the format and never read as source. STEP is produced on request.
 
 ## 6. Persistent naming
 
-Every reference to a face, edge or vertex must survive upstream parameter edits; this is the highest-risk requirement and gets its own spec chapter (`spec/naming.md`) and test suite.
+Every reference to a face, edge or vertex must survive upstream parameter edits; this is the highest-risk requirement and gets its own spec chapter (`spec/naming.md`) and conformance parts.
 
 **6.1 Semantic IDs (primary)**
 
@@ -192,9 +153,8 @@ Every reference to a face, edge or vertex must survive upstream parameter edits;
 
 **6.4 Resolution and failure**
 
-- Resolution order: tag → semantic ID → query. On an edit, the resolver records a topology map per feature in `manifest.json`.
+- Resolution order: tag → semantic ID → query.
 - If a reference no longer resolves, regeneration stops at that feature with a diagnostic that lists the nearest candidates and a suggested rewrite. It never silently picks one.
-- `tcad refs <file>` prints every reference and what it resolves to, for humans and agents.
 
 ## 7. Phase 1 modeling features
 
@@ -213,171 +173,117 @@ Phase 1 must model typical machined and cast single parts (brackets, clevises, r
 
 Thread specs (e.g. `M20x2.5`, `1/2-13 UNC`, SAE O-ring ports) are stored as metadata on the hole; cosmetic threads only in Phase 1.
 
-**7.1 Sketch constraint solver**
+**7.1 Sketch constraints**
 
-- Pure-Rust solver in `tcad-solver`; no GPL code may be used or ported.
-- Method: Newton–Raphson with Levenberg–Marquardt fallback on a sparse system; decompose into independent clusters first.
-- Must report degrees of freedom per entity, and detect over- and under-constrained sketches with the conflicting constraints named.
-- Solution stability: the solver starts from the stored coordinates in the file, so small parameter changes produce the nearest solution, never a flipped one.
-- The solved coordinates are written back by `tcad fmt --solve` as hint values (`@hint`), making regeneration fast and branch selection deterministic.
-- Target: solve a 200-entity sketch in under 50 ms on a laptop.
+- Degrees of freedom are defined per entity; over- and under-constrained sketches are detectable, and a
+  conflict is reported by naming the conflicting constraints.
+- Solution stability: solving starts from the stored coordinates in the file, so small parameter
+  changes produce the nearest solution, never a flipped one.
+- Solved coordinates may be written back as hint values (`@hint`), making branch selection explicit in
+  the text.
 
-## 8. Kernel abstraction and determinism
+## 8. Geometric semantics and determinism
 
-The spec defines what each operation must produce; OCCT is one implementation of that contract, and the format must never encode OCCT-specific behavior.
+The spec defines what each operation must produce; no geometry kernel's behaviour is part of the format.
 
-**8.1 Kernel trait**
+**8.1 Operations**
 
-- `tcad-kernel` defines an abstract operation set (make plane, extrude profile, revolve, sweep, loft, boolean, fillet, chamfer, shell, draft, pattern transform, query topology, mass properties, export).
-- Each operation's spec entry states inputs, output topology roles (for naming), tolerance handling, and failure modes.
-- Backends declare an id and version (`occt-7.9.x`); this string is stored in the cache manifest.
-- A mock backend (analytic primitives only) exists for fast unit tests and for WASM builds before Phase 1b.
+- The format's geometric operations (extrude, revolve, sweep, loft, boolean, fillet, chamfer, shell,
+  draft, pattern transform, mass properties) are specified by inputs, result, output topology roles
+  (for naming), tolerance handling and failure modes (`spec/kernel.md`).
 
 **8.2 Determinism tiers**
 
 | Tier | Applies when | Requirement |
 | --- | --- | --- |
-| T1 Identical | Same backend id/version, same platform build | Canonical B-rep serialization hash is bit-identical across runs and across Windows/WASM builds |
-| T2 Equivalent | Different backend version or different kernel | Same topology counts per feature role; volume, area, center of mass within tolerance; Hausdorff distance below 10× modeling tolerance |
-| T3 Failed | Neither holds | `tcad verify` fails with a per-feature report |
+| T1 Identical | Same implementation, version and platform | Identical results every time |
+| T2 Equivalent | Different implementations or versions | Same topology counts per feature role; volume, area, center of mass within tolerance; Hausdorff distance below 10× modeling tolerance |
+| T3 Failed | Neither holds | Non-conforming |
 
-- Property tolerances for T2: volume and area relative 1e-6, center of mass absolute 10× modeling tolerance.
-- No floating-point non-determinism: no parallel reductions in geometry paths, fixed iteration orders, no hash-map iteration order in outputs.
+- Property tolerances for T2: volume and area relative 1e-6, center of mass absolute 10× modeling
+  tolerance.
 
-## 9. Import and export
+## 9. Import and interchange
 
-Phase 1 exports exact and mesh geometry and imports STEP as a referenceable solid; native proprietary import is out of scope.
+- **Import STEP:** `import body = step("imports/x.step")` brings in a dead solid; its faces get IDs
+  `body.face#n` ordered by the kernel-independent rule in 6.1; usable as a boolean tool or reference.
+- **Export:** the format recommends how part data maps to STEP AP242 (`spec/io.md`) so exports from
+  different tools agree. Producing exports is a tool's job.
 
-| Path | Requirement |
-| --- | --- |
-| Export STEP AP242 | Exact B-rep, units, part name, material, configuration name; one body per solid; must open cleanly in Creo, NX, SolidWorks and FreeCAD (manual spot check documented in `docs/interop.md`) |
-| Export STL | Binary; chordal and angular tolerance as CLI options |
-| Export 3MF | With units and material name |
-| Export GLB | For the viewer; per-face IDs in mesh extras so the viewer can highlight semantic IDs |
-| Import STEP | `import body = step("imports/x.step")`: brings in a dead solid; its faces get IDs `body.face#n` ordered by the kernel-independent rule in 6.1; usable as a boolean tool or reference |
+## 10. Requirements on tools (informative)
 
-## 10. Tooling
+The format is designed so that tools can offer, without guessing: precise diagnostics with stable codes
+and fix hints; a canonical formatter; completion and navigation by names; structured edits for agents;
+and regeneration that never silently picks a different entity. Whether and how a tool does so is up to
+the tool.
 
-All four tools are thin layers over the same crates, so behavior is identical whether a human, an editor or an agent drives it.
+## 11. Conformance corpus
 
-**10.1 CLI (`tcad`)**
-
-| Command | Does |
-| --- | --- |
-| `tcad check <path>` | Parse, type-check, resolve units and references; no geometry |
-| `tcad build <path> [--config c]` | Regenerate and fill the cache |
-| `tcad export <path> --to step\|stl\|3mf\|glb` | Write exports |
-| `tcad fmt [--check] [--solve]` | Canonical formatting; optionally write solver hints |
-| `tcad props <path>` | Mass properties, bounding box, per-feature topology counts |
-| `tcad refs <path>` | All references and what they resolve to |
-| `tcad verify <path>` | Regenerate and compare to cache (determinism tiers) |
-| `tcad diff <a> <b>` | Semantic diff: parameters, features, references changed, geometric delta |
-| `tcad migrate`, `pack`, `unpack` | Versioning and archive |
-
-All commands support `--json` output for agents and non-zero exit codes on failure.
-
-**10.2 Language server (`tcad-lsp`)**
-
-- Diagnostics, completion (keywords, parameters, semantic IDs, tags), hover (resolved value with unit, entity a reference resolves to), go-to-definition, rename, formatting, code actions from fix hints.
-- Runs natively and as WASM inside the browser and Theia.
-
-**10.3 Viewer (web + Theia extension)**
-
-- three.js viewer that renders `mesh.glb`, shows the feature tree, highlights the entity under the cursor in text ↔ model both ways, and re-renders on save.
-- Ships as a standalone web page and an Eclipse Theia extension; geometry evaluation in Phase 1 happens in a local `tcad` process, in-browser regeneration in Phase 1b.
-
-**10.4 MCP server (`tcad-mcp`)**
-
-- Tools: `create_part`, `read_part`, `apply_edit` (structured feature-level edits, not raw text), `set_param`, `build`, `get_properties`, `query_topology`, `resolve_reference`, `export`, `render_view` (PNG of a named view), `explain_error`.
-- Every tool returns structured results and diagnostics; edits are validated before writing, and rejected edits leave files untouched.
-
-## 11. Verification and golden corpus
-
-Geometry is accepted only when it matches independently computed properties; the agent builds a corpus of about 40 parts, from primitives up to real hydraulic components.
+Geometry is accepted only when it matches independently computed properties.
 
 **11.1 Corpus contents** (`corpus/`, each part = `.tcad` bundle + `expected.json`)
 
-1. Primitives (8): block, cylinder, cone, sphere-by-revolve, torus, wedge, tube, hex prism. Expected properties computed analytically.
-2. Sketch stress (6): fully constrained, under-constrained, over-constrained (must fail with named conflict), tangent chains, splines, 200-entity sketch.
-3. Features (14): each Phase 1 feature at least once, including every extrude end condition, holes of all four types, variable fillet, shell with removed faces, loft with guides, patterns with skips.
-4. Naming robustness (6): parts whose upstream parameters are swept across a range (e.g. 10 values) while downstream fillets, holes and tags must keep resolving to the same semantic entities.
-5. Hydraulic parts (6): cylinder rod clevis, rod eye with spherical-bearing bore, cylinder end cap with SAE O-ring port, tie-rod cylinder head, 4-port manifold block with cross-drilled galleries, pin with grease groove and cross-hole.
+1. Primitives (8): block, cylinder, cone, sphere-by-revolve, torus, wedge, tube, hex prism. Expected
+   properties computed analytically.
+2. Sketch stress (6): fully constrained, under-constrained, over-constrained (must fail with named
+   conflict), tangent chains, splines, 200-entity sketch.
+3. Features (14+): each feature at least once, including every extrude end condition, holes of all four
+   types, variable fillet, shell with removed faces, loft with guides, patterns with skips.
+4. Naming robustness (6): parts whose upstream parameters are swept across a range while downstream
+   fillets, holes and tags must keep resolving to the same semantic entities.
+5. Hydraulic parts (6): cylinder rod clevis, rod eye with spherical-bearing bore, cylinder end cap with
+   SAE O-ring port, tie-rod cylinder head, 4-port manifold block with cross-drilled galleries, pin with
+   grease groove and cross-hole.
 
-**11.2 Checks per part**
+**11.2 Expected results per part**
 
-- Volume, surface area, center of mass, bounding box, and topology counts (solids, faces, edges) against `expected.json`.
-- Cross-check: an independent build123d script in `corpus/<part>/reference.py` builds the same part; CI compares properties at T2 tolerance. The build123d scripts run in CI only, never in the shipped product.
-- Determinism: build twice and on both targets; canonical B-rep hash must match (T1).
-- Round-trip: export STEP, re-import as dead solid, properties within T2.
+- Volume, surface area, center of mass, bounding box and topology counts in `expected.json`; for
+  sketches, solved coordinates, degrees of freedom and diagnostics.
+- Cross-check: an independent build123d model in `corpus/<part>/reference.py` builds the same part, and
+  the expected values are checked against it at T2.
+- All sources are valid and in canonical form.
 
-**11.3 Other test layers**
+## 12. Licensing and contributions
 
-- Unit tests per crate; property-based tests for expressions and units; fuzzing of the parser (`cargo-fuzz`) with no panics allowed.
-- `tcad fmt` idempotence on every corpus file.
-- Coverage target: 85% lines in pure-Rust crates.
-
-## 12. Platforms, build, CI and licensing
-
-Shipped targets are Windows x86_64 and WASM; Linux may be used for development and CI convenience but is not a release target.
-
-**12.1 Targets**
-
-- **Windows x86_64:** full stack (CLI, LSP, MCP, OCCT backend). OCCT built via vcpkg and linked dynamically. Signed release `.zip` plus an MSI installer by end of Phase 1.
-- **WASM:** `tcad-syntax`, `tcad-model`, `tcad-expr`, `tcad-solver`, `tcad-naming`, LSP core and the viewer in Phase 1; in-browser OCCT regeneration (Emscripten build of OCCT bridged to the Rust WASM module) is Phase 1b. The agent records the bridging approach in an ADR before starting 1b.
-- Rust stable, MSRV pinned in `rust-toolchain.toml`; Node LTS for the viewer and Theia extension.
-
-**12.2 CI (GitHub Actions)**
-
-- Jobs: fmt and clippy (deny warnings), unit tests, corpus on `windows-latest`, WASM build and headless browser tests, build123d cross-check (Python on Linux runner), fuzz smoke run (5 min), docs build.
-- Every PR must be green; `main` is protected. Releases are tagged `vX.Y.Z` with generated changelogs.
-
-**12.3 Licensing**
-
-- Spec and implementation: Apache-2.0, with a `NOTICE` file and DCO sign-off on commits.
-- Dependency policy enforced by `cargo-deny`: allow Apache-2.0, MIT, BSD, ISC, Zlib, MPL-2.0; LGPL only for OCCT and only dynamically linked; GPL and AGPL forbidden.
-- The OCCT linking approach for the WASM target must be checked against OCCT's LGPL-2.1 + exception and recorded in an ADR.
+- The specification, examples and corpus are licensed under Apache-2.0, with a `NOTICE` file and DCO
+  sign-off on commits. Anyone may implement the format, in open or closed tools.
 
 ## 13. Roadmap
 
-A phase may start before the previous phase's gate passes, but a phase is complete only when its own gate passes in CI. Within each phase the order stays: extend the spec, then the corpus, then the code.
+Each phase starts by extending the spec, then the conformance corpus. A phase is complete when its gate
+holds.
 
-1. **Phase 1 — Parts.** Everything in sections 4–12. Gate: section 14 passes.
-2. **Phase 1b — In-browser geometry.** OCCT in WASM, live regeneration in the viewer. Gate: all corpus parts regenerate in the browser at T1 against the Windows build.
-3. **Phase 2 — Assemblies and BOM.** Assembly files referencing part files by path and version hash; instances with transforms; mates (coincident, concentric, distance, angle, parallel, tangent, gear/rack, slider, hinge, pin-slot) solved by a 3D assembly solver; skeleton/top-down references; flexible sub-assemblies; configurations; exploded views; BOM with quantities and properties; interference check. Gate: a 300-part excavator boom-and-cylinder assembly opens, solves and exports to STEP AP242 assembly structure in under 10 s.
-4. **Phase 3 — PMI, GD&T, MBD.** Datums, datum targets, feature control frames per ASME Y14.5-2018 and ISO 1101, linear/angular tolerances, surface finish, notes, all tied to semantic IDs; exported as semantic PMI in AP242. Gate: AP242 PMI validates in an external checker and imports into one commercial CAD with semantic PMI intact.
-5. **Phase 4 — 2D drawings.** Drawing files derived from parts/assemblies: views, sections, details, auxiliary views, dimensions and annotations linked to model IDs, title blocks, BOM tables, balloons; export PDF and DXF. Gate: a corpus drawing per hydraulic part with no orphaned dimensions after a parameter sweep.
-6. **Phase 5 — Surfacing and sheet metal.** Boundary, fill, ruled, offset and trim/extend surfaces, thicken, knit, curvature-continuous blends (G2); sheet metal base/edge/miter flanges, bends with K-factor and bend tables, forming tools, flat pattern export to DXF; weldments with structural member profiles and cut lists. Gate: flat-pattern lengths match analytic bend allowance within 0.01 mm; surface corpus passes T2.
+1. **Phase 1 — Parts.** Sections 4–11. Gate: section 14.
+2. **Phase 2 — Assemblies and BOM.** Assembly files referencing part files by path and version hash;
+   instances with transforms; mates (coincident, concentric, distance, angle, parallel, tangent,
+   gear/rack, slider, hinge, pin-slot); skeleton/top-down references; flexible sub-assemblies;
+   configurations; exploded views; BOM with quantities and properties; interference check. Gate: the
+   assembly chapter is normative and the conformance corpus holds independently computed results for
+   every construct, including a 300-instance excavator boom-and-cylinder model.
+3. **Phase 3 — PMI, GD&T, MBD.** Datums, datum targets, feature control frames per ASME Y14.5-2018 and
+   ISO 1101, linear/angular tolerances, surface finish, notes, all tied to semantic IDs, with a mapping
+   to semantic PMI in AP242. Gate: conformance parts for every PMI kind, and the AP242 mapping
+   validated against an external checker.
+4. **Phase 4 — 2D drawings.** Drawing files derived from parts/assemblies: views, sections, details,
+   auxiliary views, dimensions and annotations linked to model IDs, title blocks, BOM tables, balloons.
+   Gate: a conformance drawing per hydraulic part with no orphaned dimensions after a parameter sweep.
+5. **Phase 5 — Surfacing and sheet metal.** Boundary, fill, ruled, offset and trim/extend surfaces,
+   thicken, knit, curvature-continuous blends (G2); sheet metal base/edge/miter flanges, bends with
+   K-factor and bend tables, forming tools, flat patterns; weldments with structural member profiles and
+   cut lists. Gate: flat-pattern lengths in the corpus match analytic bend allowance within 0.01 mm;
+   surface corpus defined at T2.
 
-After Phase 5, evaluate: native-format importers via licensed SDKs, direct editing, and a second kernel backend to prove kernel independence.
+After Phase 5, evaluate: native-format import, direct editing, and conformance of a second independent
+implementation.
 
-## 14. Phase 1 milestones and acceptance criteria
-
-Phase 1 is done when every box below is checked and verified by CI, not by the agent's own claim.
-
-**Milestones (in order)**
-
-1. **M1 Repo and spec skeleton.** Workspace, CI, licensing, `cargo-deny`, ADR template, spec chapters stubbed, EBNF grammar draft.
-2. **M2 Parser and formatter.** Lossless CST, canonical `fmt`, diagnostics with codes, fuzzing.
-3. **M3 Model, expressions, units.** IR, unit algebra, parameters, configurations, `tcad check`.
-4. **M4 Sketch solver.** All constraints, DOF reporting, conflict detection, hints.
-5. **M5 OCCT backend and core solids.** Kernel trait, mock backend, OCCT backend, reference geometry, extrude/revolve/sweep/loft/booleans, cache.
-6. **M6 Naming, detail features, patterns.** Semantic IDs, tags, queries, holes, fillets, chamfers, shell, draft, rib, patterns, naming-robustness corpus.
-7. **M7 I/O and properties.** STEP/STL/3MF/GLB export, STEP import, mass properties, `verify`, `diff`.
-8. **M8 Tooling.** LSP, viewer and Theia extension, MCP server, Windows installer, full corpus green.
-
-**Acceptance criteria**
+## 14. Phase 1 completion criteria
 
 - [ ] Spec chapters complete for every Phase 1 construct, with grammar, examples and naming roles
-- [ ] All ~40 corpus parts build on Windows and match `expected.json` and build123d at T2
-- [ ] Every corpus part is T1-deterministic across two runs and across Windows and WASM (non-geometry crates)
-- [ ] Naming-robustness sweeps resolve every reference at every swept value
-- [ ] Over-constrained and broken-reference cases fail with the named diagnostics, never silently
-- [ ] STEP exports of the 6 hydraulic parts open in FreeCAD in CI and are logged as spot-checked in one commercial CAD
-- [ ] `tcad fmt` is idempotent on the whole corpus; parser fuzzing finds no panics in 1 hour
-- [ ] LSP works in VS Code and Theia; viewer highlights text ↔ geometry both ways
-- [ ] MCP server lets an agent create the rod clevis from a text prompt end to end using only MCP tools (scripted test)
-- [ ] `cargo-deny` passes; no GPL dependencies; ADR log covers every non-trivial decision
-- [ ] Windows release artifacts published from a tagged build
+- [x] About 40 conformance parts with expected results, cross-checked against build123d at T2
+- [x] Naming-robustness sweeps defined for the naming parts
+- [x] Over-constrained and broken-reference cases with the expected named diagnostics
+- [x] Examples and corpus in canonical form
+- [ ] ADR log covers every non-trivial format decision
 
 ## 15. Illustrative syntax (non-normative)
 

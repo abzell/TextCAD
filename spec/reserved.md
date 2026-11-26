@@ -1,6 +1,6 @@
 # Reserved keywords
 
-Status: **normative** (M2). Source requirements: 4.8.
+Status: **normative** (format 0.1). Source requirements: 4.8.
 
 These words are reserved for later phases so that Phase 1 files stay valid:
 

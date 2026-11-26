@@ -1,6 +1,6 @@
 # Lexical structure
 
-Status: **normative** (M2). Source requirements: 4.2. Grammar: [grammar.ebnf](grammar.ebnf).
+Status: **normative** (format 0.1). Source requirements: 4.2. Grammar: [grammar.ebnf](grammar.ebnf).
 
 ## Source text
 

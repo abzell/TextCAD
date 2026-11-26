@@ -1,6 +1,11 @@
 # Diagnostics
 
-Status: **normative** for the codes listed (M2); later milestones add codes. Source requirements: 4.7.
+Status: **normative** (format 0.2). Source requirements: 4.7.
+
+A file is **valid** if it has no diagnostic of severity `error`. The codes below are the format's
+standard names for problems, so that every tool reports the same problem the same way and an agent or
+a person can look a code up here. Implementations must report the listed condition as an error (or
+warning) and should use the listed code; they may add tool-specific codes outside the ranges below.
 
 ## Shape
 
@@ -8,7 +13,7 @@ Every diagnostic has:
 
 - a **stable code**: `E` (error) or `W` (warning) and four digits. A code is never renumbered or
   reused; retired codes stay in the registry.
-- a **severity**: `error` makes a command fail; `warning` and `info` do not. Codes start with `E`, `W` or `I` accordingly.
+- a **severity**: an `error` makes the file invalid; `warning` and `info` do not. Codes start with `E`, `W` or `I` accordingly.
 - a **message** for humans.
 - a **span**: a byte range in the source, reported with 1-based line and column of both ends
   (columns count Unicode scalar values).
@@ -17,18 +22,19 @@ Every diagnostic has:
 - an optional **fix hint**: a message and a list of text edits (byte range plus replacement) that
   can be applied mechanically.
 
-The registry lives in `crates/tcad-diag/src/codes.rs`; a test keeps it unique and ordered.
+
 
 ## Ranges
 
-| Range | Area | Milestone |
-| --- | --- | --- |
-| E0xxx, W0xxx | General: unsupported features, versioning | M2 |
-| E1xxx | Lexical and syntax | M2 |
-| E2xxx | Types, units, parameters, expressions, configurations | M3 |
-| E3xxx | Naming and references | M6 |
-| E4xxx | Sketch solver | M4 |
-| E5xxx | Kernel and geometry | M5 |
+| Range | Area |
+| --- | --- |
+| E0xxx, W0xxx | General: unsupported features, versioning |
+| E1xxx | Lexical and syntax |
+| E2xxx | Types, units, parameters, expressions, configurations |
+| E3xxx | Naming and references |
+| E4xxx | Sketches and constraints |
+| E5xxx | Features and geometry |
+| E6xxx | Assemblies (draft, spec/assembly.md) |
 
 ## Codes
 
@@ -37,7 +43,7 @@ The registry lives in `crates/tcad-diag/src/codes.rs`; a test keeps it unique an
 | E0001 | feature not yet supported (a keyword reserved for a later phase, or introduced by the declared format version but not implemented yet) |
 | E0101 | unsupported format major version |
 | W0102 | format minor version is newer than supported |
-| E0103 | a statement starts with a keyword of a newer format version than the header declares (hint: update the header; `tcad migrate`) |
+| E0103 | a statement starts with a keyword of a newer format version than the header declares (hint: update the header, or migrate the file, spec/versioning.md) |
 | E1001 | unexpected character |
 | E1002 | unterminated string |
 | E1003 | unterminated block comment |
@@ -95,16 +101,8 @@ The registry lives in `crates/tcad-diag/src/codes.rs`; a test keeps it unique an
 | E5005 | profile problem (open chain, self-intersection, empty sketch) |
 | E5006 | the first solid feature must add material, or the feature needs an existing body |
 
-## Output
+## Recovery (recommended)
 
-- **Text**: `file:line:col: error[E1102]: message`, the source line, a caret line and `= help: ...`.
-- **JSON** (`--json`): `{"file": ..., "diagnostics": [{"code", "severity", "message", "span": {"start",
-  "end", "start_line", "start_col", "end_line", "end_col"}, "related"?: [{"span", "message"}], "hint"?: {"message", "edits": [{"span",
-  "replacement"}]}}]}`. CLI commands wrap the per-file objects in `{"command", "ok", "files": [...]}`
-  with a `status` per file.
-
-## Recovery
-
-The parser reports several errors per file. After a syntax error it skips to the end of the
-statement (a line break outside nested braces) and continues, so later statements are still
-checked. A file with any error is never formatted.
+A parser should report several errors per file: after a syntax error, skip to the end of the
+statement (a line break outside nested braces) and continue, so later statements are still checked.
+A file with any error has no canonical form.

@@ -1,8 +1,6 @@
 # Features
 
-Status: **normative** (M5, M6): reference geometry, extrude, revolve, sweep, loft, holes, fillets,
-chamfers, shell, draft, rib, patterns. Source requirements: 7. Implemented by
-`tcad-build`.
+Status: **normative** (format 0.1; part metadata format 0.2). Source requirements: 7.
 
 Features are evaluated in declaration order. Regeneration **stops at the first feature that fails**,
 with a diagnostic naming it; it never skips or substitutes. A feature suppressed by `suppress if` or by
@@ -11,7 +9,7 @@ not the right kind of geometry is `E5002`.
 
 ## Part metadata
 
-Format 0.2 (`spec/versioning.md`). Implemented by `tcad-model` (`meta.rs`).
+Format 0.2 (`spec/versioning.md`).
 
 ```
 part rod "Piston rod, 50 mm" {
@@ -35,19 +33,20 @@ The description of a part is the string after its name. `meta` adds:
 
 - Values are literals or parameters of the right type (`number=num` with `param num = "HC-1"`);
   there is no string concatenation. Parameters must be declared before the `meta` statement.
-- `meta` may appear once (`E2303`), anywhere in the part body; `tcad fmt` does not move statements.
+- `meta` may appear once (`E2303`), anywhere in the part body; the canonical form does not move
+  statements.
   The keys are written in the order of the table.
 - A configuration overrides keys with `meta.<key> = <value>` (`E2401` for an unknown key). Keys
   it does not override keep their base values.
 - Errors: unknown key, a flag, a repeated key or a key with several values `E5001`; `com` without
   `mass` `E5001`; a value of the wrong type `E2202`; a non-positive mass or a colour component
   outside 0..1 `E2301`; an unknown `kind` `E2501`.
-- With `mass`, `tcad props` reports that mass (and `com` if given, else the computed center) and
-  scales the unit-density inertia by `mass / volume`, i.e. the inertia of a uniform body of that
-  mass about the computed center of mass; the computed values are reported alongside. Without
-  `mass` the material density is used as before.
-- The metadata of the configuration that was built is stored in the cache manifest
-  (spec/bundle.md) and written to STEP, 3MF and GLB exports (spec/io.md).
+- With `mass`, the part's mass properties are that mass (and `com` if given, else the computed
+  center), and its inertia is the unit-density inertia scaled by `mass / volume`, i.e. that of a
+  uniform body of that mass about the computed center of mass. Without `mass` the material density
+  is used. Tools should report the computed values alongside an override.
+- Exports should carry the metadata of the configuration they describe (spec/io.md, informative
+  mapping).
 
 ## Reference geometry
 
@@ -60,7 +59,7 @@ The description of a part is the string after its name. `meta` adds:
 
 Built in: `plane.XY`, `plane.YZ`, `plane.XZ`, `axis.X`, `axis.Y`, `axis.Z`, `origin`. Points are
 given as `(x, y, z)` lengths or the name of a `point`. A sketch can lie on any plane or `csys`; sketches
-on faces need persistent naming (M6).
+on faces use persistent naming ([naming.md](naming.md)).
 
 ## Profiles
 
@@ -81,7 +80,7 @@ All solid features take `op=add|subtract|intersect` (default `add`). The first s
 | `extrude e` | `from=` profile; **one** end condition: `distance=<length>`, `through_all`, or `to=<plane>`; optional `symmetric`, `distance2=<length>` (a second distance the other way, used with `distance`), `draft=<angle>` |
 | `revolve r` | `from=` profile; `axis=<axis>` (`axis.Z`, an `axis` feature, or a line of a sketch); `angle=<angle>` (default 360 deg) |
 | `sweep s` | `from=` profile; `path=` sketch (or entity) holding a chain; optional `guide=` |
-| `loft l` | `sections=[a, b, ...]` (two or more single profiles); optional flag `ruled` |
+| `loft l` | `sections=[a, b, ...]` (two or more single profiles); optional flag `ruled`; optional `guides=[...]` (sketch curves from the first section to the last that steer the surface; the exact rules are being specified, see the conformance part `feat_loft_guided`) |
 
 **End conditions.** A profile extrudes from its own plane along its normal. `distance` is signed; a
 negative value goes the other way. `symmetric` centers the distance on the plane. `distance2` adds a
@@ -151,6 +150,5 @@ solid into the part (spec/io.md).
 
 ## Not yet
 
-Guided lofts need a kernel feature OpenCASCADE lacks and are tracked in
-`docs/progress.md`. Queries on vertices, ribs along arcs and circular patterns of several axes are
-not part of Phase 1.
+Queries on vertices, ribs along arcs and circular patterns of several axes are not yet part of the
+format.

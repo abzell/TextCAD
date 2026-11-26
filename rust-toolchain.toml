@@ -1,4 +1,0 @@
-[toolchain]
-# Also the workspace MSRV (`rust-version` in Cargo.toml). See docs/adr/0002-toolchain-and-msrv.md.
-channel = "1.97.0"
-components = ["rustfmt", "clippy"]

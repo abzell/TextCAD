@@ -1,11 +1,14 @@
-# Golden corpus
+# Conformance corpus
 
-Each part lives in `corpus/<name>/` as `parts/<name>.tcad` plus `expected.json`. The test suite runs
-every entry (`cargo test -p tcad-model --test corpus`) and `tcad fmt --check corpus` keeps the
-sources canonical. From milestone M5 on, parts with geometry add expected properties and a
-`reference.py` build123d cross-check that runs in CI only (requirements section 11).
+Each case lives in `corpus/<name>/` as `parts/<name>.tcad` plus `expected.json`; cases with geometry
+also have a `bundle.toml` and a `reference.py` build123d model that computes the same part
+independently (requirements section 11). All sources are in canonical form.
 
-## `expected.json` for sketches (milestone M4)
+A tool conforms when, for every case it supports, it reports exactly the expected diagnostics, and (if
+it regenerates geometry) matches the expected values at determinism tier T2 (spec/kernel.md). The cases
+do not depend on any particular tool.
+
+## `expected.json` for sketches
 
 | Key | Meaning |
 | --- | --- |
@@ -19,12 +22,12 @@ sources canonical. From milestone M5 on, parts with geometry add expected proper
 | `not_named` | Substrings it must *not* contain (innocent constraints). |
 | `entity_count` | Number of solved entities. |
 
-## Sketch stress parts (6 of the planned ~40)
+## Sketch stress parts
 
 `sketch_fully_constrained`, `sketch_under_constrained`, `sketch_over_constrained` (must fail with
 a named conflict), `sketch_tangent_chain`, `sketch_splines`, `sketch_200_entities`.
 
-## Parts with geometry (milestones M5 and M6)
+## Parts with geometry
 
 `prim_*` (primitives), `feat_*` (detail features and patterns) and `nam_*` (naming robustness) have a
 `bundle.toml`, `parts/<name>.tcad`, `expected.json` and a `reference.py` build123d model. They are
@@ -35,13 +38,12 @@ never edited by hand.
 | Key | Meaning |
 | --- | --- |
 | `volume_mm3`, `bbox_min_mm`, `bbox_max_mm` | Closed-form values. |
-| `area_mm2`, `center_of_mass_mm` | Closed-form for the primitives; for parts with fillets and tapers taken from build123d once (listed under `baseline`) and then checked against our own result at tier T2. |
+| `area_mm2`, `center_of_mass_mm` | Closed-form for the primitives; for parts with fillets and tapers taken from the build123d model (listed under `baseline`). |
 | `topology` | Counts that must match exactly (any of `solids`, `faces`, `edges`, `vertices`). |
 | `sweeps` | `[{ "set": { "param": "value" }, "volume_mm3", "bbox_min_mm", "bbox_max_mm" }]`: for every parameter set the part must build, keep the same persistent names, and match. |
 
-`cargo test -p tcad-build --features occt --test corpus` checks tiers T1 (two builds are
-byte-identical) and T2; `python3 corpus/tools/compare_reference.py corpus` cross-checks every
-`expected.json` against its build123d model.
+`python3 corpus/tools/compare_reference.py corpus` cross-checks every `expected.json` against its
+build123d model at T2 (needs `pip install build123d`).
 
 ## The 43 parts
 
@@ -53,4 +55,5 @@ byte-identical) and T2; `python3 corpus/tools/compare_reference.py corpus` cross
 | Naming robustness (6) | `nam_*` with sweeps of 9 to 81 parameter sets each |
 | Hydraulic (6) | `hyd_rod_clevis`, `hyd_rod_eye`, `hyd_end_cap`, `hyd_tie_rod_head`, `hyd_manifold_4port`, `hyd_grease_pin`; expected values from the independent build123d model (`baseline` lists every value taken from it) |
 
-Surface area, center of mass and volume are integrated to a relative precision of 1e-12 on both sides.
+Surface area, center of mass and volume in `expected.json` are integrated to a relative precision of
+1e-12.

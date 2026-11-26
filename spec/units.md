@@ -1,6 +1,6 @@
 # Values and units
 
-Status: **normative** (M3). Source requirements: 4.4. Implemented by `tcad-expr` (`dim.rs`).
+Status: **normative** (format 0.1). Source requirements: 4.4.
 
 ## Dimensions
 
@@ -45,6 +45,8 @@ Display units in messages are mm, degrees, kg and kg/m^3.
 
 ## Determinism
 
-Arithmetic uses IEEE 754 double precision with no fused operations. `sin`, `cos`, `tan`, `asin`,
-`acos`, `atan`, `atan2` and non-integer powers come from the pure-Rust `libm` crate and integer powers
-use repeated squaring, so results are bit-identical on every platform (determinism tier T1).
+Arithmetic uses IEEE 754 binary64 with no fused operations; integer powers are exact repeated
+multiplication. Implementations should evaluate `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `atan2`
+and non-integer powers with a portable math library rather than the platform's C library, so that one
+implementation gives bit-identical values on every platform (determinism tier T1, spec/kernel.md).
+Different implementations must agree within the T2 tolerances.

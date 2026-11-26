@@ -1,7 +1,6 @@
 # Sketches
 
-Status: **normative** (M4). Source requirements: 7, 7.1. Implemented by `tcad-solver` (the
-constraint solver) and `tcad-model` (`sketch.rs`, the bridge from the language to the solver).
+Status: **normative** (format 0.1). Source requirements: 7, 7.1.
 
 ```
 sketch side on plane.XZ {
@@ -13,8 +12,7 @@ sketch side on plane.XZ {
 ```
 
 A sketch is a set of 2D entities and constraints in the sketch plane (coordinates in mm). The plane
-reference (`plane.XZ`, a face, a datum plane) is scope-checked here and placed in 3D by the kernel
-in M5.
+reference (`plane.XZ`, a face, a datum plane) places it in 3D (spec/features.md).
 
 ## Soft starting values and hard dimensions
 
@@ -110,18 +108,17 @@ freedom.
 
 ## Solving
 
-1. Entities become variables and primitives; constraints become scalar equations. Residuals are
-   lengths (mm) or dimensionless/radian quantities, so one tolerance of 1e-8 applies to all.
-2. Equations that share variables form a **cluster**; clusters are solved independently, in order of
-   their smallest variable. Authored coordinates are *pinned* (constants) in a first attempt, which
-   also decouples clusters; if that attempt fails they are released with large weights.
-3. Each cluster is solved by Newton's method. The step is the minimum-weighted-norm solution of the
-   linearized system, so an under-constrained sketch moves the *least*, and a solution never jumps
-   to a mirror branch; backtracking and Levenberg-Marquardt damping are the fallback. Jacobians are
-   exact (forward-mode automatic differentiation). All arithmetic is deterministic; trigonometry
-   uses the pure-Rust `libm`.
-4. Target: a connected sketch of 200 entities solves in under 50 ms (release build; the corpus test
-   `sketch_200_entities` checks it).
+What a solution is (how a solver finds it is up to the implementation):
+
+1. Entities become variables; constraints become scalar equations. A sketch is solved when every
+   equation holds within 1e-8 (lengths in mm, angles in radians).
+2. Equations that share variables form a **cluster**; clusters are independent of each other.
+3. Of all solutions, the solver must return the one **nearest to the starting values** in the sense of
+   a minimum weighted change: authored coordinates resist movement far more than stored hints, and
+   hints far more than values the tool had to invent. An under-constrained sketch therefore moves the
+   least, and a small parameter change never makes the solution jump to a mirror branch.
+4. Different solvers must agree within the T2 tolerances (spec/kernel.md); the conformance corpus
+   (`corpus/sketch_*`) lists solved coordinates to 1e-6 mm.
 
 ### Degrees of freedom and diagnostics
 
@@ -140,17 +137,17 @@ per entity, how many independent motions remain.
 Sketches are solved for the base part and again for every configuration; a problem that exists in the
 base part is reported once.
 
-### Hints and `tcad fmt --solve`
+### Hints
 
-`tcad fmt --solve` solves all sketches (under the `default` configuration) and writes the result into
+A tool may solve all sketches (under the `default` configuration) and write the result into
 the file as `@hint(v1, v2, ...)` on every entity, in the variable order of the table above (lengths
 in mm, angles in degrees, rounded to a nanometre). Regeneration then starts from the same solution:
 the branch of a two-solution constraint is the one the file stores, and the solver needs few
 iterations. A hint is a starting value of medium strength: an explicit coordinate in the arguments
-overrides it. The command is idempotent.
+overrides it. Writing hints again for an unchanged file changes nothing.
 
 ## Not yet specified
 
 Splines take part in constraints only through their points (no tangency or on-curve for the curve
-itself); the kernel (M5) decides how a sketch becomes a profile and how `project` and the sketch
-plane resolve.
+itself). `project` (projected model edges) is parsed but not yet specified; how the sketch plane and
+profiles become geometry is in [features.md](features.md) and [kernel.md](kernel.md).

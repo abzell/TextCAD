@@ -1,7 +1,6 @@
 # Versioning and migration
 
-Status: **normative** (format 0.2). Source requirements: 4.1. Implemented by `tcad-syntax`
-(header, keyword gating), `tcad-model` (`migrate`) and `tcad migrate`. Decisions: ADR 0016.
+Status: **normative** (format 0.2). Source requirements: 4.1. Decisions: ADR 0016.
 
 ## Header
 
@@ -12,8 +11,8 @@ Status: **normative** (format 0.2). Source requirements: 4.1. Implemented by `tc
   Unknown constructs in it are reported as ordinary syntax errors.
 - A missing or malformed header is `E1101`; its fix hint inserts the newest version.
 - A file is read with the rules of the version its header declares (below). Tools never change the
-  header on their own: `tcad fmt` keeps it, only the author or `tcad migrate` changes it. Tools that
-  create new files (the MCP server's `create_part`) write the newest version.
+  header on their own: formatting keeps it; only the author or a migration (below) changes it. Tools
+  that create new files write the newest version.
 
 ## What a minor version may change
 
@@ -35,7 +34,7 @@ means exactly the same: the same canonical text, the same evaluated parameters a
   geometry that the same text produces.
 - Making a previously valid file invalid, other than by the keyword rule below.
 
-Every breaking change ships a migration in `tcad migrate`.
+Every breaking change is published together with the rules of its migration (below).
 
 ## Keywords added in a minor version
 
@@ -46,51 +45,41 @@ keywords are **gated by the header**:
   later. In older files it is an ordinary identifier and may be a declared name.
 - In a file that declares *v* or later, declaring the word as a name is `E1104`.
 - A statement that starts with a keyword newer than the header is `E0103` ("requires format
-  *v*"). Its fix hint changes the version number in the header; `tcad migrate` does the same and
-  also renames clashing names.
-- A keyword that the format has introduced but this implementation does not support yet is
-  `E0001` (not yet supported), the same as a reserved word.
+  *v*"). Its fix hint changes the version number in the header; a migration does the same and also
+  renames clashing names.
+- An implementation that does not support a keyword's statement yet (for example while the chapter
+  is a draft) reports it as `E0001` (not yet supported), the same as a reserved word.
 
-| Keyword | Context | Introduced | Chapter | Implemented |
+| Keyword | Context | Introduced | Chapter | Status |
 | --- | --- | --- | --- | --- |
-| `meta` | part | 0.2 | [features.md](features.md) § Part metadata | yes (#9); also `meta.<key> = ...` in configurations |
-| `connector` | part | 0.2 | [assembly.md](assembly.md) § `connector` | not yet (#28) |
-| `publish` | part | 0.2 | [assembly.md](assembly.md) § `publish` | not yet (#28) |
-| `uses` | part | 0.2 | [assembly.md](assembly.md) § Skeleton | not yet (#41) |
+| `meta` | part | 0.2 | [features.md](features.md) § Part metadata | normative; also `meta.<key> = ...` in configurations |
+| `connector` | part | 0.2 | [assembly.md](assembly.md) § `connector` | draft |
+| `publish` | part | 0.2 | [assembly.md](assembly.md) § `publish` | draft |
+| `uses` | part | 0.2 | [assembly.md](assembly.md) § Skeleton | draft |
 
-The table lives in `crates/tcad-syntax/src/keywords.rs` (`VERSIONED_PART_KW`); a feature that adds a
-keyword adds a row here and there in the same change. Keywords that only have a meaning inside a new
-block (for example `ground` inside `assembly`) cannot clash with older files and need no row.
+A change to the format that adds a part-level keyword adds a row to this table. Keywords that only
+have a meaning inside a new block (for example `ground` inside `assembly`) cannot clash with older files and need no row.
 
-## `tcad migrate`
+## Migration
 
-```
-tcad migrate [--to 0.2] [--check] [--json] <path>...
-```
+A **migration** moves a file to a newer version of the format. Tools that offer one must:
 
-- Rewrites each file's header to the target version (default: the newest) and renames every
-  part-level declared name (parameter, sketch, feature, reference geometry, tag, import,
-  configuration) that is a keyword of the target version but not of the file's version. The new
-  name is `<name>_1` (or `_2`, ... if taken); every reference is renamed with it, including
-  configuration overrides and suppression lists. Sketch entities and argument names are not names
-  in that scope and are not touched.
-- The result is checked before anything is written: it must analyze without errors and every
-  configuration must evaluate to the same parameters and suppressions under the new names, with the
-  same feature list. Geometry is therefore unchanged apart from the renamed feature prefixes of
-  semantic IDs.
-- It refuses (status `refused`, exit code 1, nothing written):
-  - files with errors (they are reported),
-  - files without a valid header,
-  - a target older than the file (no downgrades) or unknown to the tool,
-  - a clashing name that is also the name of an entity in a sketch, because inside that sketch a
-    bare word may mean either; the user renames one of them first.
-- `--check` writes nothing and exits 1 if any file would change. `--json` reports per file
-  `status` (`unchanged`, `would_change`, `migrated`, `refused`, `error`), `renames`
-  (`[{ "from", "to" }]`) and, when refused, `message`.
-- A file that is already at the target version is `unchanged`.
+- rewrite the header to the target version;
+- rename every part-level declared name (parameter, sketch, feature, reference geometry, tag,
+  import, configuration) that is a keyword of the target version but not of the file's version. The
+  new name is `<name>_1` (or `_2`, ... if taken), and every reference is renamed with it, including
+  configuration overrides and suppression lists. Sketch entities and argument names are not names in
+  that scope and are not touched;
+- leave the meaning unchanged: the result must be valid, every configuration must evaluate to the
+  same parameters and suppressions under the new names, and the feature list must be the same. The
+  geometry is then unchanged apart from the renamed feature prefixes of semantic IDs;
+- refuse, and change nothing, for: files with errors; files without a valid header; a target older
+  than the file or unknown to the tool; and a clashing name that is also the name of an entity in a
+  sketch (inside that sketch a bare word may mean either, so the author renames one of them first).
 
-## Bundle and cache formats
+A file already at the target version is unchanged by a migration.
 
-`bundle.toml`'s `format` and `manifest.json`'s `format` are the versions of the **bundle layout** and
-the **cache manifest** (spec/bundle.md). They are separate from the language version in the header
-and change on their own schedule.
+## Bundle format
+
+`bundle.toml`'s `format` is the version of the **bundle layout** (spec/bundle.md). It is separate from
+the language version in each file's header and changes on its own schedule.

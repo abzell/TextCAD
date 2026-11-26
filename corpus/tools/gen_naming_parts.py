@@ -3,7 +3,7 @@
 every swept parameter set listed with its closed-form volume and bounding box).
 
 Usage: B123_PYTHON=/path/to/python-with-build123d python3 corpus/tools/gen_naming_parts.py
-       (then: tcad fmt corpus)
+       (then bring the files into canonical form, spec/canonical-form.md)
 """
 import itertools
 import os

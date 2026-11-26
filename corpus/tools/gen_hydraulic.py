@@ -6,7 +6,7 @@ of each part: there is no short closed form for fillets, cross drills and thread
 `spec/examples/rod_clevis.tcad` is the same text as `corpus/hyd_rod_clevis`.
 
 Usage: B123_PYTHON=/path/to/python-with-build123d python3 corpus/tools/gen_hydraulic.py
-       (then: tcad fmt corpus spec/examples)
+       (then bring the files into canonical form, spec/canonical-form.md)
 """
 import os
 import sys

@@ -1,4 +1,4 @@
-(* TextCAD grammar, DRAFT (milestone M1). Normative once the parser (M2) lands.
+(* TextCAD grammar. Normative (format 0.2).
 
    Notation: ISO 14977-style EBNF.
      =  definition        ,  concatenation     |  alternation
@@ -66,7 +66,7 @@ ref_geom_kw     = "plane" | "axis" | "point" | "csys" ;
 feature_stmt    = feature_kw , IDENT , { arg } , [ suppress_clause ] ;
 feature_kw      = "extrude" | "revolve" | "sweep" | "loft"
                 | "hole" | "fillet" | "chamfer" | "shell" | "draft" | "rib"
-                | "linear_pattern" | "circular_pattern" | "mirror" ;      (* provisional *)
+                | "linear_pattern" | "circular_pattern" | "mirror" | "combine" ;
 
 suppress_clause = "suppress" , "if" , expr ;                    (* the only conditional *)
 
@@ -91,7 +91,7 @@ sketch_item     = entity_stmt | constraint_stmt | reserved_stmt ;
 
 entity_stmt     = entity_kw , IDENT , { arg } , [ "construction" ] , [ hint ] ;
 entity_kw       = "point" | "line" | "arc" | "circle" | "ellipse" | "spline"
-                | "slot" | "rect" | "polygon" | "project" ;      (* provisional *)
+                | "slot" | "rect" | "polygon" | "project" ;
 
 (* constrain coincident(a, b) ;  constrain distance(a, b) = 12 mm *)
 constraint_stmt = "constrain" , IDENT , "(" , [ reference , { "," , reference } ] , ")" ,
@@ -167,7 +167,7 @@ NEWLINE         = ? LF ? ;
 digit           = "0".."9" ;
 
 
-(* ---------- decisions taken in M2 (docs/adr/0004-syntax-decisions.md) ---------- *)
+(* ---------- syntax decisions (docs/adr/0004-syntax-decisions.md) ---------- *)
 
 (* 1. Statements end at NEWLINE or ";"; NEWLINE is ignored inside ( ) and [ ] only.
    2. A unit is recognized only directly after a NUMBER. Composite units need no whitespace around
@@ -177,5 +177,5 @@ digit           = "0".."9" ;
    4. Keywords are contextual: every word lexes as IDENT and the parser decides by position. A
       declared name may not be a keyword that is meaningful in the same scope.
    5. and / or / not are part of the expression language (needed for "suppress if").
-   6. The feature and entity keyword lists stay provisional and are fixed per feature in
-      spec/features.md and spec/sketch.md. *)
+   6. The feature and entity keyword lists are fixed per feature in spec/features.md and
+      spec/sketch.md. *)

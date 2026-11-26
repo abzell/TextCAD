@@ -1,7 +1,6 @@
 # Persistent naming
 
-Status: **normative** (M6). Source requirements: 6. Implemented by `tcad-naming` (IDs, resolver,
-queries) and `tcad-build` (which feeds it the history of every operation).
+Status: **normative** (format 0.1). Source requirements: 6.
 
 A reference to a face or an edge must keep meaning the same geometry when upstream parameters change.
 There are three ways to refer to geometry, tried in this order: a **tag**, a **semantic ID**, a
@@ -90,14 +89,7 @@ Order: tag, then semantic ID, then (if written as `query(...)`) query. On failur
 | `E3004` | an unknown or malformed query filter |
 | `E3005` | the reference denotes the wrong kind of entity (an edge where a face is needed, ...) |
 
-## Topology map
-
-After every feature the manifest (`spec/bundle.md`) records the faces and edges of the result with
-their primary ID, aliases, surface or curve type, area or length and position, so tools can show
-and diff names without a kernel. `tcad refs <part>` prints each reference of the source with what it
-resolves to, and with the reason when it does not.
-
-## Robustness tests
+## Robustness in the conformance corpus
 
 `corpus/nam_*` parts declare **sweeps**: sets of parameter values (in ranges that keep the topology)
 for which the part must build, resolve every reference, keep exactly the same set of names and match

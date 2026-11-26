@@ -1,7 +1,7 @@
-TextCAD
+TextCAD format specification
 Copyright 2026 The TextCAD authors
 
 This product is licensed under the Apache License, Version 2.0.
 
-The OCCT backend (crate tcad-occt, from milestone M5) links Open CASCADE Technology,
-licensed under LGPL-2.1 with the OCCT exception, as a dynamically linked library.
+The conformance corpus's reference models (corpus/*/reference.py) are written for build123d
+(Apache-2.0), which is not included here.

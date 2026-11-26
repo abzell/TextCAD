@@ -23,29 +23,28 @@ raw faces and edges of parts and pick "the closest" solution; both break those g
    (`bundle.lock`). Inline hashes make every part edit a diff in every assembly that uses it; a lock file
    keeps that churn in one generated file, like `Cargo.lock`.
 4. **Solution choice**: "closest to the current pose" (as interactive CAD does) versus explicit
-   `aligned`/`opposed` flags with fixed defaults plus solver hints written by `tcad fmt --solve`.
+   `aligned`/`opposed` flags with fixed defaults plus solver hints written into the text.
 
 ## Decision
 
 - Option 2: assemblies reference only connectors, published entities, datums and the implicit `origin`
   connector of a part. In-context references between parts are not supported; top-down design goes
   through a skeleton part that parts `use` read-only.
-- Version pinning by `bundle.lock` (option 3, lock file), with `W6003`, and `E6003` under `--locked`. An
+- Version pinning by `bundle.lock` (option 3, lock file), with `W6003`, and `E6003` in a strict mode. An
   optional `rev=` pins the human revision from the part's `meta`.
-- Mate orientation is explicit with documented defaults; solved poses are written back as `@hint`, as
-  for sketches (ADR 0007). The solver is a new crate `tcad-asm` that reuses the numerical approach of
-  `tcad-solver` (Newton, LM damping, minimum-norm steps, conflict isolation, DOF by rank) on rigid
-  bodies with quaternion orientation, using `libm` only, so poses are T1 across platforms.
+- Mate orientation is explicit with documented defaults, and the solution is the one nearest to the
+  starting pose (minimum-norm change), as for sketches; tools may write solved poses back as `@hint`.
+  How a solver finds it is up to the implementation.
 - Assemblies get the diagnostics range `E6xxx`. The format version becomes `0.2`; `assembly`,
   `instance`, `mate`, `skeleton` and `bom` leave the reserved list.
 
 ## Consequences
 
 - Every part that is used in an assembly needs connectors. `connector from=<hole>` and the implicit
-  `origin` keep this cheap; the MCP server and LSP offer to create connectors from a face.
-- Assemblies can be checked, solved, posed and BOM-listed in the browser and by agents from cached part
-  manifests alone.
-- Tangent and cam mates need published surfaces, which store an analytic description or a tessellation
-  in the manifest; their accuracy is limited to the tessellation for free-form surfaces.
+  `origin` keep this cheap; editors can offer to create connectors from a face.
+- Assemblies can be checked, solved, posed and BOM-listed from each part's interface data, without
+  regenerating geometry in the assembly.
+- Tangent and cam mates need published surfaces; for free-form surfaces their accuracy depends on how
+  an implementation represents them, which the conformance tolerances must allow for.
 - Associative in-context modeling (a part's hole following a mating part's hole) is only possible via a
   skeleton; this is deliberate (references stay acyclic, requirements 4.3).
