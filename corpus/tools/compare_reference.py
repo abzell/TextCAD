@@ -4,7 +4,7 @@
 For every corpus/<name>/reference.py: run it, and compare the printed properties with
 expected.json at determinism tier T2 (requirements 8.2): volume and area to 1e-6 relative,
 center of mass and bounding box to 1e-5 mm (10 x the default modeling tolerance of 1e-6 mm);
-connector frames: origins to 1e-5 mm, axis components to 1e-9.
+connector frames: origins to 1e-5 mm, axis components to 1e-9; published entities likewise.
 
 Usage: python3 corpus/tools/compare_reference.py [corpus_dir]
 Needs `pip install build123d`. Run in CI only; build123d is never part of the product.
@@ -25,6 +25,36 @@ def close_rel(a, b):
 
 def close_abs(a, b):
     return abs(a - b) <= ABS
+
+
+def same_entity(a, b):
+    """Published entities agree: type and parameters (points and lengths at T2, unit vectors to
+    1e-9, areas to 1e-6 relative, angles to 1e-9 deg; `ends_mm` as an unordered pair)."""
+    if a.get("type") != b.get("type") or set(a) != set(b):
+        return False
+    for k, v in a.items():
+        w = b[k]
+        if k == "type":
+            continue
+        if k == "ends_mm":
+            pairs = [zip(v, w), zip(v, w[::-1])]
+            if not any(all(close_abs(p, q) for e, f in pr for p, q in zip(e, f)) for pr in pairs):
+                return False
+        elif k in ("normal", "axis"):
+            if any(abs(p - q) > AXIS for p, q in zip(v, w)):
+                return False
+        elif k == "area_mm2":
+            if not close_rel(w, v):
+                return False
+        elif k == "half_angle_deg":
+            if abs(v - w) > 1e-9:
+                return False
+        elif isinstance(v, list):
+            if not all(close_abs(p, q) for p, q in zip(v, w)):
+                return False
+        elif not close_abs(v, w):
+            return False
+    return True
 
 
 def main():
@@ -66,6 +96,15 @@ def main():
             for axis in "xyz":
                 if not all(abs(a - b) <= AXIS for a, b in zip(g[axis], f[axis])):
                     problems.append(f"connector {key}.{axis}: build123d {g[axis]} vs expected {f[axis]}")
+        # published entities: same type and parameters, in order
+        for key, ents in exp.get("published", {}).items():
+            g = got.get("published", {}).get(key)
+            if g is None or len(g) != len(ents):
+                problems.append(f"published {key}: build123d {g} vs expected {ents}")
+                continue
+            for e, h in zip(ents, g):
+                if not same_entity(e, h):
+                    problems.append(f"published {key}: build123d {h} vs expected {e}")
         if exp.get("topology") and got["topology"]["solids"] != exp["topology"]["solids"]:
             problems.append(f"solids: build123d {got['topology']['solids']} vs {exp['topology']['solids']}")
         checked += 1

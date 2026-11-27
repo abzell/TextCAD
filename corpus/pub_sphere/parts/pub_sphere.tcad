@@ -1,0 +1,11 @@
+tcad 0.2
+
+part pub_sphere "Sphere made by revolving an arc" {
+  sketch s on plane.XZ {
+    arc a start=(0 mm, -25 mm) end=(0 mm, 25 mm) through=(25 mm, 0 mm)
+    line l start=(0 mm, 25 mm) end=(0 mm, -25 mm)
+  }
+  revolve ball from s axis=axis.Z
+
+  publish ball_face = ball.side(s.a)
+}

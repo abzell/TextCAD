@@ -1,0 +1,5 @@
+format = "0.1"
+name = "pub_sphere"
+entry = "parts/pub_sphere.tcad"
+units = "mm"
+license = "Apache-2.0"

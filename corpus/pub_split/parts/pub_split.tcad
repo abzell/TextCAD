@@ -1,0 +1,16 @@
+tcad 0.2
+
+part pub_split "Fork with a published bore split by the slot" {
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=60 mm h=40 mm
+  }
+  extrude base from s.r distance=40 mm
+  sketch u on base.cap_end {
+    rect r corner=(0 mm, 12 mm) w=60 mm h=16 mm
+  }
+  extrude slot from u.r distance=-30 mm op=subtract
+  hole pin on=base.side(s.r.bottom) at=(30 mm, 25 mm) d=8 mm end=through_all
+
+  publish bore = pin.wall
+  publish bore_a = pin.wall#1
+}

@@ -1,0 +1,18 @@
+tcad 0.2
+
+part pub_surfaces "Block with published faces" {
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=60 mm h=40 mm
+  }
+  extrude base from s.r distance=20 mm
+  sketch t on base.cap_end {
+    circle c center=(15 mm, 20 mm) r=8 mm
+  }
+  extrude boss from t.c distance=15 mm
+  hole h on=base.cap_end at=(45 mm, 20 mm) d=6 mm csk_d=12 mm end=through_all
+
+  publish top = base.cap_end
+  publish boss_side = boss.side(t.c)
+  publish seat = h.csk
+  publish caps = base.cap_start, boss.cap_end
+}

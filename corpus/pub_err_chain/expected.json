@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E5002"
+  ],
+  "fails": true,
+  "note": "Published edges must connect end to end in the order written."
+}

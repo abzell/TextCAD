@@ -152,10 +152,37 @@ publish slot_path = edge(slot.side(g.top) & base.cap_end)
 ```
 
 Makes a face, a set of faces or an edge chain of the part visible to assemblies, for mates that cannot
-be written with frames (`tangent`, `cam`, `path`) and for named interference checks. The manifest stores
-for each published entity its surface or curve type, analytic parameters where it has them (plane,
-cylinder, cone, sphere, torus, line, circle) and otherwise a tessellation and a sampled polyline at the
-modeling tolerance times 100.
+be written with frames (`tangent`, `cam`, `path`) and for named interference checks. Like connectors,
+published entities are evaluated after the last feature, and their names share the part's name scope
+(`E2101`).
+
+- The references are faces or edges, not both (`E3005` for a mix). A face that later features split
+  into pieces, given without an ordinal, means all its pieces, as for connectors.
+- Edges must form one connected chain, each edge sharing an end point with the next in the order
+  written (`E5002` otherwise).
+- The entities are listed in the order of the references and, within one reference, in the order of
+  their ordinals (`#1`, `#2`, spec/naming.md).
+
+Each entity is described in the part frame by its type and, where it has them, analytic parameters
+that do not depend on the kernel:
+
+| Type | Parameters |
+| --- | --- |
+| `plane` | `normal` (outward unit normal), `point_mm` (the face's centroid), `area_mm2` |
+| `cylinder` | `axis` (oriented by the sign rule of connectors), `axis_point_mm` (the point of the axis nearest the part origin), `radius_mm`, `span_mm` (`[start, end]` of the face along the axis, measured from `axis_point_mm`) |
+| `cone` | `axis` (sign rule), `apex_mm`, `half_angle_deg`, `span_mm` (along the axis, from the apex) |
+| `sphere` | `centre_mm`, `radius_mm` |
+| `torus` | `centre_mm`, `axis` (sign rule), `major_radius_mm`, `minor_radius_mm` |
+| `bspline` (any other surface) | `area_mm2` |
+| `line` | `ends_mm` (the two end points) |
+| `circle` (also an arc) | `centre_mm`, `axis` (sign rule), `radius_mm`, and `ends_mm` for an arc |
+| `ellipse`, `bspline` (curves) | `length_mm` |
+
+A face of revolution is described by its geometry, not by how it was made: a sphere made by revolving
+an arc is a `sphere`. Tools may store more (a tessellation and a sampled polyline at the modeling
+tolerance times 100 for free-form entities); conformance checks only the parameters above, at tier T2
+for lengths and points and to 1e-9 for unit vectors. The conformance cases `corpus/pub_*` cover these
+rules.
 
 ## Assembly file
 

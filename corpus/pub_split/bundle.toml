@@ -1,0 +1,5 @@
+format = "0.1"
+name = "pub_split"
+entry = "parts/pub_split.tcad"
+units = "mm"
+license = "Apache-2.0"

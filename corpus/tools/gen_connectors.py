@@ -61,6 +61,20 @@ def clean(f):
     return {k: [0.0 if abs(c) < 1e-15 else round(c, 15) for c in v] for k, v in f.items()}
 
 
+def clean_entity(e):
+    out = {}
+    for k, v in e.items():
+        if k == "type":
+            out[k] = v
+        elif k == "ends_mm":
+            out[k] = [[0.0 if abs(c) < 1e-15 else round(c, 12) for c in p] for p in v]
+        elif isinstance(v, list):
+            out[k] = [0.0 if abs(c) < 1e-15 else round(c, 12) for c in v]
+        else:
+            out[k] = round(v, 12)
+    return out
+
+
 IDENTITY = {"origin_mm": [0.0, 0.0, 0.0], "x": [1.0, 0.0, 0.0], "y": [0.0, 1.0, 0.0], "z": [0.0, 0.0, 1.0]}
 
 
@@ -189,11 +203,86 @@ def cylinder_axis_all(shape, radius, axis_point, axis_dir, at="start"):
 '''
 
 
+REF_PUBLISHED = '''
+from math import degrees
+from OCP.BRepAdaptor import BRepAdaptor_Curve
+
+
+def _axis_near_origin(p, z):
+    return [p[i] - _dot(p, z) * z[i] for i in range(3)]
+
+
+def pub_plane(face):
+    c = face.center(CenterOf.MASS)
+    n = face.normal_at(c)
+    return {"type": "plane", "normal": [n.X, n.Y, n.Z], "point_mm": [c.X, c.Y, c.Z], "area_mm2": face.area}
+
+
+def pub_face(f):
+    s = BRepAdaptor_Surface(f.wrapped)
+    t = f.geom_type
+    if t == GeomType.PLANE:
+        return pub_plane(f)
+    if t == GeomType.CYLINDER:
+        ax = s.Cylinder().Axis()
+        z = _orient([ax.Direction().X(), ax.Direction().Y(), ax.Direction().Z()])
+        p = _axis_near_origin([ax.Location().X(), ax.Location().Y(), ax.Location().Z()], z)
+        ts = [_dot([v.X - p[0], v.Y - p[1], v.Z - p[2]], z) for v in f.vertices()]
+        return {"type": "cylinder", "axis": z, "axis_point_mm": p, "radius_mm": s.Cylinder().Radius(),
+                "span_mm": [min(ts), max(ts)]}
+    if t == GeomType.CONE:
+        cone = s.Cone()
+        ax = cone.Axis()
+        z = _orient([ax.Direction().X(), ax.Direction().Y(), ax.Direction().Z()])
+        a = cone.Apex()
+        apex = [a.X(), a.Y(), a.Z()]
+        ts = [_dot([v.X - apex[0], v.Y - apex[1], v.Z - apex[2]], z) for v in f.vertices()]
+        return {"type": "cone", "axis": z, "apex_mm": apex, "half_angle_deg": degrees(abs(cone.SemiAngle())),
+                "span_mm": [min(ts), max(ts)]}
+    if t == GeomType.SPHERE:
+        sp = s.Sphere()
+        c = sp.Location()
+        return {"type": "sphere", "centre_mm": [c.X(), c.Y(), c.Z()], "radius_mm": sp.Radius()}
+    if t == GeomType.TORUS:
+        to = s.Torus()
+        ax = to.Axis()
+        c = ax.Location()
+        z = _orient([ax.Direction().X(), ax.Direction().Y(), ax.Direction().Z()])
+        return {"type": "torus", "centre_mm": [c.X(), c.Y(), c.Z()], "axis": z,
+                "major_radius_mm": to.MajorRadius(), "minor_radius_mm": to.MinorRadius()}
+    return {"type": "bspline", "area_mm2": f.area}
+
+
+def pub_edge(e):
+    t = e.geom_type
+    a, b = e.start_point(), e.end_point()
+    if t == GeomType.LINE:
+        return {"type": "line", "ends_mm": [[a.X, a.Y, a.Z], [b.X, b.Y, b.Z]]}
+    if t == GeomType.CIRCLE:
+        ci = BRepAdaptor_Curve(e.wrapped).Circle()
+        ax = ci.Axis()
+        c = ax.Location()
+        out = {"type": "circle", "centre_mm": [c.X(), c.Y(), c.Z()],
+               "axis": _orient([ax.Direction().X(), ax.Direction().Y(), ax.Direction().Z()]),
+               "radius_mm": ci.Radius()}
+        if (a - b).length > 1e-9:
+            out["ends_mm"] = [[a.X, a.Y, a.Z], [b.X, b.Y, b.Z]]
+        return out
+    return {"type": "bspline" if t != GeomType.ELLIPSE else "ellipse", "length_mm": e.length}
+
+
+def nearest(items, near):
+    return min(items, key=lambda x: (x.center(CenterOf.MASS) - Vector(*near)).length)
+
+'''
+
+
 def ref_tail(frames_code):
     """reference.py ending: the usual properties plus the connector frames derived from the geometry."""
     return (
-        REF_TAIL.replace("print(json.dumps({\n", "connectors = {}\n" + frames_code + "print(json.dumps({\n", 1)
-        .replace("\n}))\n", '\n    "connectors": connectors,\n}))\n', 1)
+        REF_TAIL.replace("print(json.dumps({\n", "connectors = {}\npublished = {}\n" + frames_code
+                         + "print(json.dumps({\n", 1)
+        .replace("\n}))\n", '\n    "connectors": connectors,\n    "published": published,\n}))\n', 1)
     )
 
 
@@ -211,13 +300,58 @@ def check_frames(name, expected, got):
                     sys.exit(f"{name}: {key}.{axis} {f[axis]} disagrees with build123d {g[axis]}")
 
 
+def close_entity(a, b):
+    """Published entities agree: same type and parameters (points and lengths at T2, unit vectors to
+    1e-9, areas to 1e-6 relative, angles to 1e-9 deg; `ends_mm` as an unordered pair)."""
+    if a["type"] != b["type"] or set(a) != set(b):
+        return False
+    for k, v in a.items():
+        w = b[k]
+        if k == "type":
+            continue
+        if k == "ends_mm":
+            same = all(abs(p - q) <= ORIGIN_TOL for e, f in zip(v, w) for p, q in zip(e, f))
+            swap = all(abs(p - q) <= ORIGIN_TOL for e, f in zip(v, w[::-1]) for p, q in zip(e, f))
+            if not (same or swap):
+                return False
+        elif k in ("normal", "axis"):
+            if any(abs(p - q) > AXIS_TOL for p, q in zip(v, w)):
+                return False
+        elif k == "area_mm2":
+            if abs(v - w) > 1e-6 * max(1.0, abs(w)):
+                return False
+        elif k == "half_angle_deg":
+            if abs(v - w) > 1e-9:
+                return False
+        elif isinstance(v, list):
+            if any(abs(p - q) > ORIGIN_TOL for p, q in zip(v, w)):
+                return False
+        elif abs(v - w) > ORIGIN_TOL:
+            return False
+    return True
+
+
+def check_published(name, expected, got):
+    for key, ents in expected.items():
+        g = got.get(key)
+        if g is None or len(g) != len(ents):
+            sys.exit(f"{name}: published {key}: build123d gives {g}")
+        for a, b in zip(ents, g):
+            if not close_entity(a, b):
+                sys.exit(f"{name}: published {key}: {a} disagrees with build123d {b}")
+
+
 def emit_connectors(name, title, body, note, volume, lo, hi, ref, frames_code, connectors, absent,
-                    sweeps=None):
-    code = REF_HEAD + REF_FRAMES + ref + "\n" + ref_tail(frames_code)
+                    sweeps=None, published=None):
+    code = REF_HEAD + REF_FRAMES + REF_PUBLISHED + ref + "\n" + ref_tail(frames_code)
     out = subprocess.run([PY, "-c", code], capture_output=True, text=True)
     if out.returncode != 0:
         sys.exit(f"{name}: build123d failed:\n{out.stderr}")
     got = json.loads(out.stdout.strip().splitlines()[-1])
+    baseline = ["area_mm2", "center_of_mass_mm"]
+    if volume is None:
+        volume, lo, hi = got["volume_mm3"], got["bbox_min_mm"], got["bbox_max_mm"]
+        baseline = ["volume_mm3", "area_mm2", "center_of_mass_mm", "bbox_min_mm", "bbox_max_mm"]
     if abs(got["volume_mm3"] - volume) > 1e-6 * volume:
         sys.exit(f"{name}: closed-form volume {volume} disagrees with build123d {got['volume_mm3']}")
     for a, b in zip(got["bbox_min_mm"] + got["bbox_max_mm"], list(lo) + list(hi)):
@@ -225,6 +359,8 @@ def emit_connectors(name, title, body, note, volume, lo, hi, ref, frames_code, c
             sys.exit(f"{name}: closed-form bounding box disagrees with build123d")
     explicit = {k: v for k, v in connectors.items() if k != "origin"}
     check_frames(name, explicit, got["connectors"])
+    if published:
+        check_published(name, published, got["published"])
     expected = {
         "note": note,
         "volume_mm3": volume,
@@ -235,8 +371,10 @@ def emit_connectors(name, title, body, note, volume, lo, hi, ref, frames_code, c
         "topology": {"solids": 1},
         "connectors": {k: clean(v) for k, v in connectors.items()},
         "absent": absent,
-        "baseline": ["area_mm2", "center_of_mass_mm"],
+        "baseline": baseline,
     }
+    if published:
+        expected["published"] = {k: [clean_entity(e) for e in v] for k, v in published.items()}
     if sweeps:
         expected["sweeps"] = sweeps
     d = os.path.join(ROOT, name)
@@ -519,7 +657,136 @@ emit_connectors(
     datum, [],
 )
 
-# 5. invalid connectors: each part must fail with exactly the one code -----------------------------
+# 5. published geometry --------------------------------------------------------------------------
+
+BLOCK = "  sketch s on plane.XY {\n    rect r corner=(0 mm, 0 mm) w=60 mm h=40 mm\n  }\n  extrude base from s.r distance=20 mm\n"
+BOSS = "  sketch t on base.cap_end {\n    circle c center=(15 mm, 20 mm) r=8 mm\n  }\n  extrude boss from t.c distance=15 mm\n"
+BLOCK_REF = ("shape = Box(60, 40, 20, align=(Align.MIN, Align.MIN, Align.MIN))\n"
+             "shape = shape + Pos(15, 20, 27.5) * Cylinder(8, 15)\n")
+
+
+def plane(normal, point, area):
+    return {"type": "plane", "normal": normal, "point_mm": point, "area_mm2": area}
+
+
+top_area = 2400 - 100 * PI
+bottom_area = 2400 - 9 * PI
+surfaces = {
+    "top": [plane([0, 0, 1], [(72000 - 2580 * PI) / top_area, 20, 20], top_area)],
+    "boss_side": [{"type": "cylinder", "axis": [0, 0, 1], "axis_point_mm": [15, 20, 0], "radius_mm": 8,
+                   "span_mm": [20, 35]}],
+    "seat": [{"type": "cone", "axis": [0, 0, 1], "apex_mm": [45, 20, 14], "half_angle_deg": 45.0,
+              "span_mm": [3, 6]}],
+    "caps": [plane([0, 0, -1], [(72000 - 405 * PI) / bottom_area, 20, 0], bottom_area),
+             plane([0, 0, 1], [15, 20, 35], 64 * PI)],
+}
+emit_connectors(
+    "pub_surfaces", "Block with published faces",
+    BLOCK + BOSS
+    + "  hole h on=base.cap_end at=(45 mm, 20 mm) d=6 mm csk_d=12 mm end=through_all\n\n"
+    "  publish top = base.cap_end\n"
+    "  publish boss_side = boss.side(t.c)\n"
+    "  publish seat = h.csk\n"
+    "  publish caps = base.cap_start, boss.cap_end\n",
+    "Published faces with their analytic parameters: a plane (outward normal, centroid, area), a "
+    "cylinder (oriented axis, the axis point nearest the origin, radius, extent along the axis), a "
+    "countersink cone (apex, half angle, extent from the apex) and a set of two planes in the order "
+    "written.",
+    48000 + 744 * PI, [0, 0, 0], [60, 40, 35],
+    BLOCK_REF
+    + "shape = shape - Pos(45, 20, 10) * Cylinder(3, 20)\n"
+    "shape = shape - Pos(45, 20, 18.5) * Cone(3, 6, 3)\n",
+    "published['top'] = [pub_plane(planar_face(shape, [0, 0, 1], (30, 20, 20)))]\n"
+    "_cyl = [f for f in shape.faces() if f.geom_type == GeomType.CYLINDER\n"
+    "        and abs(BRepAdaptor_Surface(f.wrapped).Cylinder().Radius() - 8) < 1e-9]\n"
+    "published['boss_side'] = [pub_face(nearest(_cyl, (15, 20, 27.5)))]\n"
+    "_cones = [f for f in shape.faces() if f.geom_type == GeomType.CONE]\n"
+    "published['seat'] = [pub_face(nearest(_cones, (45, 20, 18.5)))]\n"
+    "published['caps'] = [pub_plane(planar_face(shape, [0, 0, -1], (30, 20, 0))),\n"
+    "                     pub_plane(planar_face(shape, [0, 0, 1], (15, 20, 35)))]\n",
+    {"origin": IDENTITY}, [], published=surfaces,
+)
+
+edges = {
+    "front_top": [{"type": "line", "ends_mm": [[0, 0, 20], [60, 0, 20]]}],
+    "rim": [{"type": "line", "ends_mm": [[0, 0, 20], [60, 0, 20]]},
+            {"type": "line", "ends_mm": [[60, 0, 20], [60, 40, 20]]}],
+    "boss_rim": [{"type": "circle", "centre_mm": [15, 20, 35], "axis": [0, 0, 1], "radius_mm": 8}],
+}
+emit_connectors(
+    "pub_edges", "Block with published edges",
+    BLOCK + BOSS + "\n"
+    "  publish front_top = edge(base.cap_end & base.side(s.r.bottom))\n"
+    "  publish rim = edge(base.cap_end & base.side(s.r.bottom)), edge(base.cap_end & base.side(s.r.right))\n"
+    "  publish boss_rim = edge(boss.cap_end & boss.side(t.c))\n",
+    "A published line, a chain of two lines that share a corner (in the order written) and a full "
+    "circle (centre, oriented axis, radius).",
+    48000 + 960 * PI, [0, 0, 0], [60, 40, 35],
+    BLOCK_REF,
+    "_lines = [e for e in shape.edges() if e.geom_type == GeomType.LINE]\n"
+    "published['front_top'] = [pub_edge(nearest(_lines, (30, 0, 20)))]\n"
+    "published['rim'] = [pub_edge(nearest(_lines, (30, 0, 20))), pub_edge(nearest(_lines, (60, 20, 20)))]\n"
+    "_circles = [e for e in shape.edges() if e.geom_type == GeomType.CIRCLE]\n"
+    "published['boss_rim'] = [pub_edge(nearest(_circles, (15, 20, 35)))]\n",
+    {"origin": IDENTITY}, [], published=edges,
+)
+
+bore = {"type": "cylinder", "axis": [0, 1, 0], "axis_point_mm": [30, 0, 25], "radius_mm": 4}
+emit_connectors(
+    "pub_split", "Fork with a published bore split by the slot",
+    "  sketch s on plane.XY {\n    rect r corner=(0 mm, 0 mm) w=60 mm h=40 mm\n  }\n"
+    "  extrude base from s.r distance=40 mm\n"
+    "  sketch u on base.cap_end {\n    rect r corner=(0 mm, 12 mm) w=60 mm h=16 mm\n  }\n"
+    "  extrude slot from u.r distance=-30 mm op=subtract\n"
+    "  hole pin on=base.side(s.r.bottom) at=(30 mm, 25 mm) d=8 mm end=through_all\n\n"
+    "  publish bore = pin.wall\n"
+    "  publish bore_a = pin.wall#1\n",
+    "A face split into pieces, published without an ordinal, gives all its pieces in ordinal order "
+    "(the same axis, different extents); with #1 only the first.",
+    60 * 40 * 40 - 60 * 16 * 30 - PI * 16 * 24, [0, 0, 0], [60, 40, 40],
+    "shape = Box(60, 40, 40, align=(Align.MIN, Align.MIN, Align.MIN))\n"
+    "shape = shape - Pos(30, 20, 25) * Box(60, 16, 30)\n"
+    "shape = shape - Pos(30, 20, 25) * Rot(90, 0, 0) * Cylinder(4, 40)\n",
+    "_cyl = sorted([f for f in shape.faces() if f.geom_type == GeomType.CYLINDER],\n"
+    "              key=lambda f: f.center(CenterOf.MASS).Y)\n"
+    "published['bore'] = [pub_face(f) for f in _cyl]\n"
+    "published['bore_a'] = [pub_face(_cyl[0])]\n",
+    {"origin": IDENTITY}, [],
+    published={"bore": [dict(bore, span_mm=[0, 12]), dict(bore, span_mm=[28, 40])],
+               "bore_a": [dict(bore, span_mm=[0, 12])]},
+)
+
+emit_connectors(
+    "pub_sphere", "Sphere made by revolving an arc",
+    "  sketch s on plane.XZ {\n"
+    "    arc a start=(0 mm, -25 mm) end=(0 mm, 25 mm) through=(25 mm, 0 mm)\n"
+    "    line l start=(0 mm, 25 mm) end=(0 mm, -25 mm)\n  }\n"
+    "  revolve ball from s axis=axis.Z\n\n"
+    "  publish ball_face = ball.side(s.a)\n",
+    "A face of revolution is described by its geometry, not by how it was made: the revolved arc is "
+    "a sphere.",
+    4 / 3 * PI * 25 ** 3, [-25, -25, -25], [25, 25, 25],
+    "shape = Sphere(25)\n",
+    "published['ball_face'] = [pub_face(f) for f in shape.faces() if f.geom_type == GeomType.SPHERE]\n",
+    {"origin": IDENTITY}, [],
+    published={"ball_face": [{"type": "sphere", "centre_mm": [0, 0, 0], "radius_mm": 25}]},
+)
+
+emit_connectors(
+    "pub_torus", "Torus made by revolving a circle",
+    "  sketch k on plane.XZ {\n    circle c center=(30 mm, 0 mm) r=8 mm\n  }\n"
+    "  revolve ring from k axis=axis.Z\n\n"
+    "  publish ring_face = ring.side(k.c)\n",
+    "The revolved circle is a torus: centre, oriented axis, major and minor radius.",
+    2 * PI ** 2 * 30 * 64, [-38, -38, -8], [38, 38, 8],
+    "shape = Torus(30, 8)\n",
+    "published['ring_face'] = [pub_face(f) for f in shape.faces() if f.geom_type == GeomType.TORUS]\n",
+    {"origin": IDENTITY}, [],
+    published={"ring_face": [{"type": "torus", "centre_mm": [0, 0, 0], "axis": [0, 0, 1],
+                              "major_radius_mm": 30, "minor_radius_mm": 8}]},
+)
+
+# 6. invalid connectors: each part must fail with exactly the one code -----------------------------
 
 BASE = "  sketch s on plane.XY {\n    rect r corner=(0 mm, 0 mm) w=40 mm h=30 mm\n  }\n  extrude base from s.r distance=20 mm\n"
 emit_invalid("con_err_missing_z", "Connector without z",
@@ -548,3 +815,18 @@ emit_invalid("con_err_version", "Connector under a format 0.1 header",
              BASE + "  connector a origin=(0 mm, 0 mm, 0 mm) z=+Z\n", "E0103",
              "connector is a keyword of format 0.2 (spec/versioning.md); under a 0.1 header the statement "
              "is an error whose fix changes the header.", version="0.1")
+emit_invalid("pub_err_mixed", "Published faces and edges together",
+             BASE + "  publish m = base.cap_end, edge(base.cap_end & base.side(s.r.bottom))\n", "E3005",
+             "A published entity is faces or edges, not both.")
+emit_invalid("pub_err_unknown_ref", "Publishing a face that does not exist",
+             BASE + "  publish u = base.cap_middle\n", "E3001",
+             "The reference does not resolve; the message names the nearest roles.")
+emit_invalid("pub_err_chain", "Published edges that do not form a chain",
+             BASE + "  publish c = edge(base.cap_end & base.side(s.r.bottom)), edge(base.cap_start & base.side(s.r.top))\n",
+             "E5002", "Published edges must connect end to end in the order written.")
+emit_invalid("pub_err_duplicate", "Published name that clashes with a feature",
+             BASE + "  publish base = base.cap_end\n", "E2101",
+             "Published names share the part's name scope.")
+emit_invalid("pub_err_version", "publish under a format 0.1 header",
+             BASE + "  publish top = base.cap_end\n", "E0103",
+             "publish is a keyword of format 0.2.", version="0.1")

@@ -123,6 +123,77 @@ def cylinder_axis_all(shape, radius, axis_point, axis_dir, at="start"):
     t = {"start": min(ts), "end": max(ts), "middle": (min(ts) + max(ts)) / 2}[at]
     return [axis_point[i] + t * z[i] for i in range(3)], z
 
+
+from math import degrees
+from OCP.BRepAdaptor import BRepAdaptor_Curve
+
+
+def _axis_near_origin(p, z):
+    return [p[i] - _dot(p, z) * z[i] for i in range(3)]
+
+
+def pub_plane(face):
+    c = face.center(CenterOf.MASS)
+    n = face.normal_at(c)
+    return {"type": "plane", "normal": [n.X, n.Y, n.Z], "point_mm": [c.X, c.Y, c.Z], "area_mm2": face.area}
+
+
+def pub_face(f):
+    s = BRepAdaptor_Surface(f.wrapped)
+    t = f.geom_type
+    if t == GeomType.PLANE:
+        return pub_plane(f)
+    if t == GeomType.CYLINDER:
+        ax = s.Cylinder().Axis()
+        z = _orient([ax.Direction().X(), ax.Direction().Y(), ax.Direction().Z()])
+        p = _axis_near_origin([ax.Location().X(), ax.Location().Y(), ax.Location().Z()], z)
+        ts = [_dot([v.X - p[0], v.Y - p[1], v.Z - p[2]], z) for v in f.vertices()]
+        return {"type": "cylinder", "axis": z, "axis_point_mm": p, "radius_mm": s.Cylinder().Radius(),
+                "span_mm": [min(ts), max(ts)]}
+    if t == GeomType.CONE:
+        cone = s.Cone()
+        ax = cone.Axis()
+        z = _orient([ax.Direction().X(), ax.Direction().Y(), ax.Direction().Z()])
+        a = cone.Apex()
+        apex = [a.X(), a.Y(), a.Z()]
+        ts = [_dot([v.X - apex[0], v.Y - apex[1], v.Z - apex[2]], z) for v in f.vertices()]
+        return {"type": "cone", "axis": z, "apex_mm": apex, "half_angle_deg": degrees(abs(cone.SemiAngle())),
+                "span_mm": [min(ts), max(ts)]}
+    if t == GeomType.SPHERE:
+        sp = s.Sphere()
+        c = sp.Location()
+        return {"type": "sphere", "centre_mm": [c.X(), c.Y(), c.Z()], "radius_mm": sp.Radius()}
+    if t == GeomType.TORUS:
+        to = s.Torus()
+        ax = to.Axis()
+        c = ax.Location()
+        z = _orient([ax.Direction().X(), ax.Direction().Y(), ax.Direction().Z()])
+        return {"type": "torus", "centre_mm": [c.X(), c.Y(), c.Z()], "axis": z,
+                "major_radius_mm": to.MajorRadius(), "minor_radius_mm": to.MinorRadius()}
+    return {"type": "bspline", "area_mm2": f.area}
+
+
+def pub_edge(e):
+    t = e.geom_type
+    a, b = e.start_point(), e.end_point()
+    if t == GeomType.LINE:
+        return {"type": "line", "ends_mm": [[a.X, a.Y, a.Z], [b.X, b.Y, b.Z]]}
+    if t == GeomType.CIRCLE:
+        ci = BRepAdaptor_Curve(e.wrapped).Circle()
+        ax = ci.Axis()
+        c = ax.Location()
+        out = {"type": "circle", "centre_mm": [c.X(), c.Y(), c.Z()],
+               "axis": _orient([ax.Direction().X(), ax.Direction().Y(), ax.Direction().Z()]),
+               "radius_mm": ci.Radius()}
+        if (a - b).length > 1e-9:
+            out["ends_mm"] = [[a.X, a.Y, a.Z], [b.X, b.Y, b.Z]]
+        return out
+    return {"type": "bspline" if t != GeomType.ELLIPSE else "ellipse", "length_mm": e.length}
+
+
+def nearest(items, near):
+    return min(items, key=lambda x: (x.center(CenterOf.MASS) - Vector(*near)).length)
+
 shape = Box(60, 40, 30, align=(Align.MIN, Align.MIN, Align.MIN))
 shape = shape + Pos(15, 20, 40) * Cylinder(8, 20)
 shape = shape - Pos(40, 20, 15) * Rot(90, 0, 0) * Cylinder(4, 40)
@@ -136,6 +207,7 @@ BRepGProp.SurfaceProperties_s(shape.wrapped, _a, 1e-12)
 bb = shape.bounding_box()
 c = _v.CentreOfMass()
 connectors = {}
+published = {}
 for key, at in (('boss_start', 'start'), ('boss_mid', 'middle'), ('boss_end', 'end')):
     connectors[key] = _frame(*cylinder_axis(shape, 8, (15, 20, 40), at))
 connectors['boss_rim'] = _frame(circle_centre(shape, 8, (15, 20, 50)), [0, 0, 1])
@@ -151,4 +223,5 @@ print(json.dumps({
     "topology": {"solids": len(shape.solids()), "faces": len(shape.faces()),
                  "edges": len(shape.edges()), "vertices": len(shape.vertices())},
     "connectors": connectors,
+    "published": published,
 }))

@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E0103"
+  ],
+  "fails": true,
+  "note": "publish is a keyword of format 0.2."
+}
