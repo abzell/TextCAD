@@ -1,0 +1,16 @@
+tcad 0.2
+
+part pub_edges "Block with published edges" {
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=60 mm h=40 mm
+  }
+  extrude base from s.r distance=20 mm
+  sketch t on base.cap_end {
+    circle c center=(15 mm, 20 mm) r=8 mm
+  }
+  extrude boss from t.c distance=15 mm
+
+  publish front_top = edge(base.cap_end & base.side(s.r.bottom))
+  publish rim = edge(base.cap_end & base.side(s.r.bottom)), edge(base.cap_end & base.side(s.r.right))
+  publish boss_rim = edge(boss.cap_end & boss.side(t.c))
+}

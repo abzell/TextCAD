@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E0103"
+  ],
+  "fails": true,
+  "note": "connector is a keyword of format 0.2 (spec/versioning.md); under a 0.1 header the statement is an error whose fix changes the header."
+}

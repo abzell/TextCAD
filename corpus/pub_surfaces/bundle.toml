@@ -1,0 +1,5 @@
+format = "0.1"
+name = "pub_surfaces"
+entry = "parts/pub_surfaces.tcad"
+units = "mm"
+license = "Apache-2.0"

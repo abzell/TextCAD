@@ -5,7 +5,38 @@ Changes to the TextCAD format, its specification and its conformance corpus. For
 
 ## [Unreleased]
 
+### Added
+- Conformance cases for connectors (#28): `con_hole_frames`, `con_explicit`, `con_revolution`,
+  `con_split_axis`, `con_mirror_holes` and `con_datum_hole` with expected frames cross-checked against
+  build123d, and eight invalid parts (`con_err_*`).
+- Conformance cases for `publish` (#28): `pub_surfaces`, `pub_edges`, `pub_split`, `pub_sphere`
+  and `pub_torus` with entities cross-checked against build123d, and five invalid parts (`pub_err_*`).
+- Connectors and published faces on the six hydraulic parts (pin joints, rod threads, ports, tie rods,
+  mounting faces, bearing surfaces), cross-checked against their build123d models; the clevis also for
+  its `heavy` configuration. `con_suppressed` and `con_err_connector_ref`.
+  `compare_reference.py` also compares connector frames.
+- `con_sweep_flange`, `con_sweep_pocket`, `con_sweep_shell`, `con_sweep_mirror`: the naming-robustness
+  parts with connectors (on pattern instances, tagged faces, mirrored holes, chamfered bore walls),
+  whose frames are listed for every swept parameter set (#28).
+
+### Clarified
+- `spec/assembly.md` § `connector`: naming of single- and multi-position holes and skipped pattern
+  instances; the order flip → rotate → offset and the sense of `rotate`; `origin_at` along the oriented
+  axis; explicit directions keep their sign; diagnostics for wrong `from=`, zero directions and name
+  clashes. Canonical argument order for `connector`.
+- Connectors on a face of revolution split into pieces take all pieces (one axis) unless an ordinal
+  picks one; `from=` accepts mirrors of holes (`.m1` original, `.m2` copy, nested outermost first);
+  a hole on a datum plane gives a connector on the plane with z opposite to the drilling direction.
+- `spec/assembly.md` § `publish`: faces or edges (not both), edge chains, split faces, the order of
+  entities, and the kernel-independent parameters of each surface and curve type.
+- Connectors and published entities that refer to a suppressed feature are suppressed with it
+  (`I6014`); connectors may not refer to other connectors (`E5002`; share a frame through a `csys`).
+
 ### Changed
+- Connectors and published geometry are normative: their rules moved from `spec/assembly.md` (draft)
+  to `spec/features.md` § Connectors and § Published geometry, unchanged. `connector_decl` and
+  `publish_decl` are in `grammar.ebnf`; `E6011` and `I6014` are in `spec/diagnostics.md`; the
+  versioning table lists both keywords as normative. `spec/assembly.md` keeps summaries (#28).
 - The repository holds the format only. The specification no longer describes a particular program:
   command lines, caches, exports, the language server, the agent interface and the viewer were removed
   from `spec/` (the chapters `mcp.md` and `viewer.md` entirely), and the implementation and its tests

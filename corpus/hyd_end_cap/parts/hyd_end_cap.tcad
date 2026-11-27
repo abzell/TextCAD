@@ -23,4 +23,9 @@ part end_cap "Cylinder end cap with an SAE O-ring port" {
   hole tie on=cap.cap_end at=(50 mm, 0 mm) d=14 mm end=through_all
   circular_pattern ties of=tie axis=axis.Z count=4
   chamfer rim edges=[edge(cap.cap_end & cap.side(cap_sk.c))] d=2 mm
+
+  connector port_face from=port
+  connector tie_rod from=ties
+  connector pilot_face origin=pilot.cap_end z=pilot.cap_end
+  publish spigot = pilot.side(pilot_sk.c)
 }

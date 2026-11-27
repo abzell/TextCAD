@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E6011"
+  ],
+  "fails": true,
+  "note": "x parallel to z leaves nothing to project: degenerate frame."
+}

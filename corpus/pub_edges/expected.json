@@ -1,0 +1,119 @@
+{
+  "note": "A published line, a chain of two lines that share a corner (in the order written) and a full circle (centre, oriented axis, radius).",
+  "volume_mm3": 51015.9289474462,
+  "area_mm2": 9553.98223686155,
+  "center_of_mass_mm": [
+    29.113239038373763,
+    20.000000000000004,
+    11.034554455230603
+  ],
+  "bbox_min_mm": [
+    0,
+    0,
+    0
+  ],
+  "bbox_max_mm": [
+    60,
+    40,
+    35
+  ],
+  "topology": {
+    "solids": 1
+  },
+  "connectors": {
+    "origin": {
+      "origin_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    }
+  },
+  "absent": [],
+  "baseline": [
+    "area_mm2",
+    "center_of_mass_mm"
+  ],
+  "published": {
+    "front_top": [
+      {
+        "type": "line",
+        "ends_mm": [
+          [
+            0.0,
+            0.0,
+            20
+          ],
+          [
+            60,
+            0.0,
+            20
+          ]
+        ]
+      }
+    ],
+    "rim": [
+      {
+        "type": "line",
+        "ends_mm": [
+          [
+            0.0,
+            0.0,
+            20
+          ],
+          [
+            60,
+            0.0,
+            20
+          ]
+        ]
+      },
+      {
+        "type": "line",
+        "ends_mm": [
+          [
+            60,
+            0.0,
+            20
+          ],
+          [
+            60,
+            40,
+            20
+          ]
+        ]
+      }
+    ],
+    "boss_rim": [
+      {
+        "type": "circle",
+        "centre_mm": [
+          15,
+          20,
+          35
+        ],
+        "axis": [
+          0.0,
+          0.0,
+          1
+        ],
+        "radius_mm": 8
+      }
+    ]
+  }
+}

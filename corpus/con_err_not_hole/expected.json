@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E5002"
+  ],
+  "fails": true,
+  "note": "from= accepts a hole or a pattern of a hole; an extrude is the wrong kind of geometry."
+}

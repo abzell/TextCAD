@@ -1,0 +1,22 @@
+tcad 0.2
+
+part con_revolution "Block with a boss and a cross hole: connectors on axes" {
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=60 mm h=40 mm
+  }
+  extrude base from s.r distance=30 mm
+  sketch t on base.cap_end {
+    circle c center=(15 mm, 20 mm) r=8 mm
+  }
+  extrude boss from t.c distance=20 mm
+  hole cross on=base.side(s.r.top) at=(-40 mm, 15 mm) d=8 mm end=through_all
+
+  connector boss_start origin=boss.side(t.c) z=boss.side(t.c)
+  connector boss_mid origin=boss.side(t.c) z=boss.side(t.c) origin_at=middle
+  connector boss_end origin=boss.side(t.c) z=boss.side(t.c) origin_at=end
+  connector boss_rim origin=edge(boss.cap_end & boss.side(t.c)) z=+Z
+  connector cross_axis origin=cross.wall z=cross.wall
+  connector cross_end origin=cross.wall z=cross.wall origin_at=end
+  connector cross_entry from=cross
+  connector cross_down origin=cross.wall z=cross.wall flip
+}

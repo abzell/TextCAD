@@ -1,0 +1,184 @@
+{
+  "note": "Frames from a face centroid and normal (top, and front with x by the default rule), from points and directions (an explicit direction keeps its sign; x is normalized and projected), from a csys rotated and offset, and a frame that is flipped, then rotated, then offset in its own axes. Every part also has the implicit connector origin.",
+  "volume_mm3": 24000,
+  "area_mm2": 5200.0,
+  "center_of_mass_mm": [
+    20.0,
+    15.0,
+    10.0
+  ],
+  "bbox_min_mm": [
+    0,
+    0,
+    0
+  ],
+  "bbox_max_mm": [
+    40,
+    30,
+    20
+  ],
+  "topology": {
+    "solids": 1
+  },
+  "connectors": {
+    "top": {
+      "origin_mm": [
+        20.0,
+        15.0,
+        20.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "front": {
+      "origin_mm": [
+        20.0,
+        0.0,
+        10.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "z": [
+        0.0,
+        -1.0,
+        0.0
+      ]
+    },
+    "corner": {
+      "origin_mm": [
+        40.0,
+        30.0,
+        0.0
+      ],
+      "x": [
+        0.707106781186547,
+        0.707106781186547,
+        0.0
+      ],
+      "y": [
+        0.707106781186547,
+        -0.707106781186547,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        -1.0
+      ]
+    },
+    "tilt": {
+      "origin_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        0.707106781186547,
+        -0.707106781186547
+      ],
+      "z": [
+        0.0,
+        0.707106781186547,
+        0.707106781186547
+      ]
+    },
+    "seat": {
+      "origin_mm": [
+        10.0,
+        5.0,
+        22.0
+      ],
+      "x": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "y": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "probe": {
+      "origin_mm": [
+        0.0,
+        -5.0,
+        20.0
+      ],
+      "x": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "y": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        -1.0
+      ]
+    },
+    "origin": {
+      "origin_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    }
+  },
+  "absent": [],
+  "baseline": [
+    "area_mm2",
+    "center_of_mass_mm"
+  ]
+}

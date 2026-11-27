@@ -15,6 +15,13 @@ sys.path.insert(0, os.path.dirname(__file__))
 from corpuslib import *  # noqa: F401,F403
 
 SRC = os.path.join(os.path.dirname(__file__), "hydraulic")
+REFS = {}
+_emit = emit
+
+
+def emit(name, *args, **kw):  # noqa: F811  keeps each part's build123d model for its interface
+    REFS[name] = args[6]
+    _emit(name, *args, **kw)
 
 
 def source(name):
@@ -133,4 +140,184 @@ emit(
     "and (abs(e.arc_center.Z) < 1e-6 or abs(e.arc_center.Z - 120) < 1e-6)]\n"
     "shape = chamfer(ends, 2)\n",
     source=source("grease_pin"),
+)
+
+
+# --- interfaces: connectors and published faces (spec/features.md) -------------------------
+import json  # noqa: E402
+import subprocess  # noqa: E402
+
+from framelib import (  # noqa: E402
+    IDENTITY, REF_FRAMES, REF_PUBLISHED, check_frames, check_published, clean, clean_entity, frame,
+    ref_tail,
+)
+
+
+def cyl(axis, point, r, span):
+    return {"type": "cylinder", "axis": axis, "axis_point_mm": point, "radius_mm": r, "span_mm": span}
+
+
+def interface(name, frames_code, connectors, published=None, configs=None):
+    """Adds the part's connectors and published entities to its expected.json, after checking them
+    against the frames and entities its build123d model derives from its own geometry."""
+    code = REF_HEAD + REF_FRAMES + REF_PUBLISHED + REFS[name] + "\n" + ref_tail(frames_code)
+    out = subprocess.run([PY, "-c", code], capture_output=True, text=True)
+    if out.returncode != 0:
+        sys.exit(f"{name}: build123d failed:\n{out.stderr}")
+    got = json.loads(out.stdout.strip().splitlines()[-1])
+    check_frames(name, {k: v for k, v in connectors.items() if k != "origin"}, got["connectors"])
+    if published:
+        check_published(name, published, got["published"])
+    d = os.path.join(ROOT, name)
+    with open(os.path.join(d, "expected.json")) as f:
+        expected = json.load(f)
+    expected["connectors"] = {k: clean(v) for k, v in connectors.items()}
+    if published:
+        expected["published"] = {k: [clean_entity(e) for e in v] for k, v in published.items()}
+    if configs:
+        expected["configs"] = {
+            c: {
+                "connectors": {k: clean(v) for k, v in spec["connectors"].items()},
+                "published": {k: [clean_entity(e) for e in v] for k, v in spec.get("published", {}).items()},
+                "info": spec.get("info", []),
+            }
+            for c, spec in configs.items()
+        }
+    write(os.path.join(d, "expected.json"), json.dumps(expected, indent=2) + "\n")
+    write(os.path.join(d, "reference.py"), code)
+    print("interface", name)
+
+
+PIN = "\n".join([
+    "_cyl = sorted([f for f in shape.faces() if f.geom_type == GeomType.CYLINDER",
+    "               and abs(BRepAdaptor_Surface(f.wrapped).Cylinder().Radius() - {r}) < 1e-9], key=lambda f: {key})",
+    "",
+])
+
+# 1. rod clevis: the pin joint at the middle of the fork, the rod thread, the pin surface
+clevis_conn = {
+    "pin": frame([50, 0, 0], [0, 1, 0]),
+    "rod": frame([0, 0, 0], [-1, 0, 0]),
+    "origin": IDENTITY,
+}
+interface(
+    "hyd_rod_clevis",
+    PIN.format(r=10, key="f.center(CenterOf.MASS).Y")
+    + "connectors['pin'] = _frame(*cylinder_axis_all(shape, 10, [50, 0, 0], [0, 1, 0], 'middle'))\n"
+    "_o, _left = face_frame(planar_face(shape, [-1, 0, 0], (0, 0, 0)))\n"
+    "connectors['rod'] = _frame(circle_centre(shape, 11, (0, 0, 0)), _left)\n"
+    "published['pin_surface'] = [pub_face(f) for f in _cyl]\n",
+    clevis_conn,
+    {"pin_surface": [cyl([0, 1, 0], [50, 0, 0], 10, [-27.5, -13]), cyl([0, 1, 0], [50, 0, 0], 10, [13, 27.5])]},
+    configs={"heavy": {
+        "connectors": clevis_conn,
+        "published": {"pin_surface": [cyl([0, 1, 0], [50, 0, 0], 12.5, [-31.5, -13]),
+                                      cyl([0, 1, 0], [50, 0, 0], 12.5, [13, 31.5])]},
+    }},
+)
+
+# 2. rod eye: the bearing at the eye's centre, the rod thread at the shank's end
+interface(
+    "hyd_rod_eye",
+    PIN.format(r=16, key="f.center(CenterOf.MASS).Y")
+    + "connectors['bearing'] = _frame(*cylinder_axis_all(shape, 16, [0, 0, 0], [0, 1, 0], 'middle'))\n"
+    "_o, _end = face_frame(planar_face(shape, [1, 0, 0], (50, 0, 0)))\n"
+    "connectors['rod'] = _frame(circle_centre(shape, 10.75 / 2, (50, 0, 0)), _end)\n"
+    "published['bearing_bore'] = [pub_face(f) for f in _cyl]\n",
+    {"bearing": frame([0, 0, 0], [0, 1, 0]), "rod": frame([50, 0, 0], [1, 0, 0]), "origin": IDENTITY},
+    {"bearing_bore": [cyl([0, 1, 0], [0, 0, 0], 16, [-8.5, 8.5])]},
+)
+
+# 3. end cap: the port, the four tie rods, the spigot that seats in the barrel
+interface(
+    "hyd_end_cap",
+    "_o, _top = face_frame(planar_face(shape, [0, 0, 1], (0, 0, 25)))\n"
+    "connectors['port_face'] = _frame(circle_centre(shape, 15, (0, 0, 25)), _top)\n"
+    "for i in range(4):\n"
+    "    connectors[f'tie_rod.i{i + 1}'] = _frame(circle_centre(shape, 7, (50 * cos(i * pi / 2), 50 * sin(i * pi / 2), 25)), _top)\n"
+    "_o, _n = face_frame(planar_face(shape, [0, 0, -1], (0, 0, -6)))\n"
+    "connectors['pilot_face'] = _frame(_o, _n)\n"
+    + PIN.format(r=40, key="f.center(CenterOf.MASS).Z")
+    + "published['spigot'] = [pub_face(f) for f in _cyl]\n",
+    {"port_face": frame([0, 0, 25], [0, 0, 1]),
+     "tie_rod.i1": frame([50, 0, 25], [0, 0, 1]),
+     "tie_rod.i2": frame([0, 50, 25], [0, 0, 1]),
+     "tie_rod.i3": frame([-50, 0, 25], [0, 0, 1]),
+     "tie_rod.i4": frame([0, -50, 25], [0, 0, 1]),
+     "pilot_face": frame([0, 0, -6], [0, 0, -1]),
+     "origin": IDENTITY},
+    {"spigot": [cyl([0, 0, 1], [0, 0, 0], 40, [-6, 0])]},
+)
+
+# 4. tie-rod head: the rod axis through the split bore, the tie rods (a mirror of a mirror), the port
+interface(
+    "hyd_tie_rod_head",
+    "connectors['rod_axis'] = _frame(*cylinder_axis_all(shape, 25, [0, 0, 0], [0, 0, 1], 'middle'))\n"
+    "_o, _top = face_frame(planar_face(shape, [0, 0, 1], (0, 0, 40)))\n"
+    "for key, x, y in (('tie_rod.m1.m1', 36, 36), ('tie_rod.m1.m2', -36, 36), ('tie_rod.m2.m1', 36, -36), ('tie_rod.m2.m2', -36, -36)):\n"
+    "    connectors[key] = _frame(circle_centre(shape, 7, (x, y, 40)), _top)\n"
+    "_o, _side = face_frame(planar_face(shape, [1, 0, 0], (50, 0, 20)))\n"
+    "connectors['port_face'] = _frame(circle_centre(shape, 8.25, (50, 0, 20)), _side)\n"
+    "_o, _n = face_frame(planar_face(shape, [0, 0, -1], (0, 0, 0)))\n"
+    "connectors['seat'] = _frame(_o, _n)\n",
+    {"rod_axis": frame([0, 0, 20], [0, 0, 1]),
+     "tie_rod.m1.m1": frame([36, 36, 40], [0, 0, 1]),
+     "tie_rod.m1.m2": frame([-36, 36, 40], [0, 0, 1]),
+     "tie_rod.m2.m1": frame([36, -36, 40], [0, 0, 1]),
+     "tie_rod.m2.m2": frame([-36, -36, 40], [0, 0, 1]),
+     "port_face": frame([50, 0, 20], [1, 0, 0]),
+     "seat": frame([0, 0, 0], [0, 0, -1]),
+     "origin": IDENTITY},
+)
+
+# 5. manifold: four ports (a pattern), the gallery and cross-drill plugs, four mounting bolts
+manifold = {
+    f"port_face.i{i + 1}": frame([20 + i * 80 / 3, 30, 40], [0, 0, 1]) for i in range(4)
+}
+manifold.update({
+    "gallery_plug": frame([0, 30, 20], [-1, 0, 0]),
+    "cross_plug": frame([60, 0, 20], [0, -1, 0]),
+    "mount_bolt.i1.i1": frame([8, 8, 40], [0, 0, 1]),
+    "mount_bolt.i1.i2": frame([112, 8, 40], [0, 0, 1]),
+    "mount_bolt.i2.i1": frame([8, 52, 40], [0, 0, 1]),
+    "mount_bolt.i2.i2": frame([112, 52, 40], [0, 0, 1]),
+    "base": frame([60, 30, 0], [0, 0, -1]),
+    "origin": IDENTITY,
+})
+interface(
+    "hyd_manifold_4port",
+    "_o, _top = face_frame(planar_face(shape, [0, 0, 1], (60, 30, 40)))\n"
+    "for i in range(4):\n"
+    "    connectors[f'port_face.i{i + 1}'] = _frame(circle_centre(shape, 8.25, (20 + i * 80 / 3, 30, 40)), _top)\n"
+    "for key, x, y in (('mount_bolt.i1.i1', 8, 8), ('mount_bolt.i1.i2', 112, 8), ('mount_bolt.i2.i1', 8, 52), ('mount_bolt.i2.i2', 112, 52)):\n"
+    "    connectors[key] = _frame(circle_centre(shape, 4.5, (x, y, 40)), _top)\n"
+    "_o, _left = face_frame(planar_face(shape, [-1, 0, 0], (0, 30, 20)))\n"
+    "connectors['gallery_plug'] = _frame(circle_centre(shape, 6, (0, 30, 20)), _left)\n"
+    "_o, _front = face_frame(planar_face(shape, [0, -1, 0], (60, 0, 20)))\n"
+    "connectors['cross_plug'] = _frame(circle_centre(shape, 4, (60, 0, 20)), _front)\n"
+    "_o, _n = face_frame(planar_face(shape, [0, 0, -1], (60, 30, 0)))\n"
+    "connectors['base'] = _frame(_o, _n)\n",
+    manifold,
+)
+
+# 6. grease pin: the pin axis across the groove, the grease nipple, the cross hole, both ends
+interface(
+    "hyd_grease_pin",
+    "connectors['pin_axis'] = _frame(*cylinder_axis_all(shape, 20, [0, 0, 0], [0, 0, 1], 'middle'))\n"
+    "_o, _n = face_frame(planar_face(shape, [0, 0, -1], (0, 0, 0)))\n"
+    "connectors['grease'] = _frame(circle_centre(shape, 4, (0, 0, 0)), _n)\n"
+    "connectors['end_a'] = _frame(_o, _n)\n"
+    "_o, _n = face_frame(planar_face(shape, [0, 0, 1], (0, 0, 120)))\n"
+    "connectors['end_b'] = _frame(_o, _n)\n"
+    "_p, _ax = cylinder_axis(shape, 3, (0, 11, 60), 'start')\n"
+    "connectors['cross_in'] = _frame(_p, [-c for c in _ax])\n"
+    + PIN.format(r=20, key="f.center(CenterOf.MASS).Z")
+    + "published['bearing_surface'] = [pub_face(f) for f in _cyl]\n",
+    {"pin_axis": frame([0, 0, 60], [0, 0, 1]),
+     "grease": frame([0, 0, 0], [0, 0, -1]),
+     "cross_in": frame([0, 0, 60], [0, -1, 0]),
+     "end_a": frame([0, 0, 0], [0, 0, -1]),
+     "end_b": frame([0, 0, 120], [0, 0, 1]),
+     "origin": IDENTITY},
+    {"bearing_surface": [cyl([0, 0, 1], [0, 0, 0], 20, [2, 56]), cyl([0, 0, 1], [0, 0, 0], 20, [64, 118])]},
 )

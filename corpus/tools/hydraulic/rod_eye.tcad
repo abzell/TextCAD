@@ -25,4 +25,8 @@ part rod_eye "Rod eye with a spherical bearing bore" {
   hole seat on=eye.cap_start at=(0 mm, 0 mm) d=bore end=through_all
   hole rod_thread on=shank.cap_end at=(0 mm, 0 mm) thread=thread depth=24 mm
   chamfer seat_edges edges=[edge(eye.cap_start & seat.wall), edge(eye.cap_end & seat.wall)] d=1.5 mm
+
+  connector bearing origin=seat.wall z=seat.wall origin_at=middle
+  connector rod from=rod_thread
+  publish bearing_bore = seat.wall
 }

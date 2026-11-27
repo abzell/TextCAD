@@ -1,0 +1,96 @@
+{
+  "note": "Holes that start on plane.XZ inside the block and break out through a side. The connector sits on the plane with z opposite to the drilling direction: the plane's normal (-Y) for c, reversed (+Y) for the flipped cf.",
+  "volume_mm3": 46869.02664470767,
+  "area_mm2": 8753.982236861548,
+  "center_of_mass_mm": [
+    20.0,
+    -1.552402116079577e-16,
+    15.0
+  ],
+  "bbox_min_mm": [
+    0,
+    -20,
+    0
+  ],
+  "bbox_max_mm": [
+    40,
+    20,
+    30
+  ],
+  "topology": {
+    "solids": 1
+  },
+  "connectors": {
+    "c_entry": {
+      "origin_mm": [
+        10.0,
+        0.0,
+        10.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "z": [
+        0.0,
+        -1.0,
+        0.0
+      ]
+    },
+    "cf_entry": {
+      "origin_mm": [
+        30.0,
+        0.0,
+        20.0
+      ],
+      "x": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "z": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "origin": {
+      "origin_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    }
+  },
+  "absent": [],
+  "baseline": [
+    "area_mm2",
+    "center_of_mass_mm"
+  ]
+}

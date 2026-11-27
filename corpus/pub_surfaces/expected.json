@@ -1,0 +1,140 @@
+{
+  "note": "Published faces with their analytic parameters: a plane (outward normal, centroid, area), a cylinder (oriented axis, the axis point nearest the origin, radius, extent along the axis), a countersink cone (apex, half angle, extent from the apex) and a set of two planes in the order written.",
+  "volume_mm3": 50337.344934270805,
+  "area_mm2": 9853.010857446445,
+  "center_of_mass_mm": [
+    28.89907394834419,
+    20.0,
+    11.028139486590995
+  ],
+  "bbox_min_mm": [
+    0,
+    0,
+    0
+  ],
+  "bbox_max_mm": [
+    60,
+    40,
+    35
+  ],
+  "topology": {
+    "solids": 1
+  },
+  "connectors": {
+    "origin": {
+      "origin_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    }
+  },
+  "absent": [],
+  "baseline": [
+    "area_mm2",
+    "center_of_mass_mm"
+  ],
+  "published": {
+    "top": [
+      {
+        "type": "plane",
+        "normal": [
+          0.0,
+          0.0,
+          1
+        ],
+        "point_mm": [
+          30.632583731152,
+          20,
+          20
+        ],
+        "area_mm2": 2085.840734641021
+      }
+    ],
+    "boss_side": [
+      {
+        "type": "cylinder",
+        "axis": [
+          0.0,
+          0.0,
+          1
+        ],
+        "axis_point_mm": [
+          15,
+          20,
+          0.0
+        ],
+        "radius_mm": 8,
+        "span_mm": [
+          20,
+          35
+        ]
+      }
+    ],
+    "seat": [
+      {
+        "type": "cone",
+        "axis": [
+          0.0,
+          0.0,
+          1
+        ],
+        "apex_mm": [
+          45,
+          20,
+          14
+        ],
+        "half_angle_deg": 45.0,
+        "span_mm": [
+          3,
+          6
+        ]
+      }
+    ],
+    "caps": [
+      {
+        "type": "plane",
+        "normal": [
+          0.0,
+          0.0,
+          -1
+        ],
+        "point_mm": [
+          29.821178724718,
+          20,
+          0.0
+        ],
+        "area_mm2": 2371.725666117692
+      },
+      {
+        "type": "plane",
+        "normal": [
+          0.0,
+          0.0,
+          1
+        ],
+        "point_mm": [
+          15,
+          20,
+          35
+        ],
+        "area_mm2": 201.061929829747
+      }
+    ]
+  }
+}

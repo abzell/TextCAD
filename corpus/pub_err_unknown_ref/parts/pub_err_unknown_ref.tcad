@@ -1,0 +1,9 @@
+tcad 0.2
+
+part pub_err_unknown_ref "Publishing a face that does not exist" {
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=40 mm h=30 mm
+  }
+  extrude base from s.r distance=20 mm
+  publish u = base.cap_middle
+}

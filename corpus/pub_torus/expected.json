@@ -1,0 +1,71 @@
+{
+  "note": "The revolved circle is a torus: centre, oriented axis, major and minor radius.",
+  "volume_mm3": 37899.280900183134,
+  "area_mm2": 9474.82022504578,
+  "center_of_mass_mm": [
+    -7.105427357601002e-15,
+    -6.074929730580667e-15,
+    -3.9183371479962713e-16
+  ],
+  "bbox_min_mm": [
+    -38,
+    -38,
+    -8
+  ],
+  "bbox_max_mm": [
+    38,
+    38,
+    8
+  ],
+  "topology": {
+    "solids": 1
+  },
+  "connectors": {
+    "origin": {
+      "origin_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    }
+  },
+  "absent": [],
+  "baseline": [
+    "area_mm2",
+    "center_of_mass_mm"
+  ],
+  "published": {
+    "ring_face": [
+      {
+        "type": "torus",
+        "centre_mm": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "axis": [
+          0.0,
+          0.0,
+          1
+        ],
+        "major_radius_mm": 30,
+        "minor_radius_mm": 8
+      }
+    ]
+  }
+}

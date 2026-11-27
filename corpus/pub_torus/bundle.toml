@@ -1,0 +1,5 @@
+format = "0.1"
+name = "pub_torus"
+entry = "parts/pub_torus.tcad"
+units = "mm"
+license = "Apache-2.0"

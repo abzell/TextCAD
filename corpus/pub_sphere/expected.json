@@ -1,0 +1,65 @@
+{
+  "note": "A face of revolution is described by its geometry, not by how it was made: the revolved arc is a sphere.",
+  "volume_mm3": 65449.84694978735,
+  "area_mm2": 7853.981633974478,
+  "center_of_mass_mm": [
+    -1.7215445546057979e-15,
+    -2.0081643015146247e-15,
+    3.274180926382539e-17
+  ],
+  "bbox_min_mm": [
+    -25,
+    -25,
+    -25
+  ],
+  "bbox_max_mm": [
+    25,
+    25,
+    25
+  ],
+  "topology": {
+    "solids": 1
+  },
+  "connectors": {
+    "origin": {
+      "origin_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    }
+  },
+  "absent": [],
+  "baseline": [
+    "area_mm2",
+    "center_of_mass_mm"
+  ],
+  "published": {
+    "ball_face": [
+      {
+        "type": "sphere",
+        "centre_mm": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius_mm": 25
+      }
+    ]
+  }
+}

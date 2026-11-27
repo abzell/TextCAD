@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E2101"
+  ],
+  "fails": true,
+  "note": "Published names share the part's name scope."
+}

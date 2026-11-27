@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E2101"
+  ],
+  "fails": true,
+  "note": "Connectors share the part's name scope with parameters, sketches, features, datums and tags."
+}

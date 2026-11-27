@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E3005"
+  ],
+  "fails": true,
+  "note": "A published entity is faces or edges, not both."
+}

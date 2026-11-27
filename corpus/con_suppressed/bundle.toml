@@ -1,0 +1,5 @@
+format = "0.1"
+name = "con_suppressed"
+entry = "parts/con_suppressed.tcad"
+units = "mm"
+license = "Apache-2.0"

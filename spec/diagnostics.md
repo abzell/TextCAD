@@ -34,7 +34,7 @@ Every diagnostic has:
 | E3xxx | Naming and references |
 | E4xxx | Sketches and constraints |
 | E5xxx | Features and geometry |
-| E6xxx | Assemblies (draft, spec/assembly.md) |
+| E6xxx | Assemblies (draft, spec/assembly.md), and connectors (E6011, I6014, normative) |
 
 ## Codes
 
@@ -100,6 +100,8 @@ Every diagnostic has:
 | E5004 | the kernel failed to build the feature |
 | E5005 | profile problem (open chain, self-intersection, empty sketch) |
 | E5006 | the first solid feature must add material, or the feature needs an existing body |
+| E6011 | connector axes are parallel or degenerate (x parallel to z, or a zero direction) |
+| I6014 | a connector or published entity is suppressed with the feature it refers to (information) |
 
 ## Recovery (recommended)
 

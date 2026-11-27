@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E3001"
+  ],
+  "fails": true,
+  "note": "The reference does not resolve; the message names the nearest roles."
+}

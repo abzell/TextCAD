@@ -1,0 +1,10 @@
+tcad 0.2
+
+part pub_torus "Torus made by revolving a circle" {
+  sketch k on plane.XZ {
+    circle c center=(30 mm, 0 mm) r=8 mm
+  }
+  revolve ring from k axis=axis.Z
+
+  publish ring_face = ring.side(k.c)
+}

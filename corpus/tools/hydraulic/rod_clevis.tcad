@@ -33,6 +33,10 @@ part rod_clevis "Rod clevis, 20 mm pin" {
 
   chamfer bore_edges edges=[edge(body.side(side.outline.top) & pin_bore.wall#2), edge(body.side(side.outline.bottom) & pin_bore.wall#1)] d=1.5 mm
 
+  connector pin origin=pin_bore.wall z=pin_bore.wall origin_at=middle
+  connector rod from=rod_thread
+  publish pin_surface = pin_bore.wall
+
   config heavy { pin_dia = 25 mm; jaw_thk = 20 mm; thread = "M30x2" }
   config default standard { }
 }

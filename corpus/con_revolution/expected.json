@@ -1,0 +1,228 @@
+{
+  "note": "Axes of a cylindrical boss and of a hole drilled in -Y from the back face. An axis of revolution has no sign of its own: both point along +Y or +Z (first non-zero component positive), so the hole axis starts at the exit side (y = 0) while the hole connector (from=) sits at the entry with z out of the material. origin_at picks start, middle or end along the oriented axis; flip turns the frame in place and does not move the origin.",
+  "volume_mm3": 74010.61929829748,
+  "area_mm2": 12710.088333382595,
+  "center_of_mass_mm": [
+    28.91333469852821,
+    20.0,
+    16.358331626839743
+  ],
+  "bbox_min_mm": [
+    0,
+    0,
+    0
+  ],
+  "bbox_max_mm": [
+    60,
+    40,
+    50
+  ],
+  "topology": {
+    "solids": 1
+  },
+  "connectors": {
+    "boss_start": {
+      "origin_mm": [
+        15.0,
+        20.0,
+        30.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "boss_mid": {
+      "origin_mm": [
+        15.0,
+        20.0,
+        40.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "boss_end": {
+      "origin_mm": [
+        15.0,
+        20.0,
+        50.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "boss_rim": {
+      "origin_mm": [
+        15.0,
+        20.0,
+        50.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "cross_axis": {
+      "origin_mm": [
+        40.0,
+        0.0,
+        15.0
+      ],
+      "x": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "z": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "cross_end": {
+      "origin_mm": [
+        40.0,
+        40.0,
+        15.0
+      ],
+      "x": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "z": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "cross_entry": {
+      "origin_mm": [
+        40.0,
+        40.0,
+        15.0
+      ],
+      "x": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "z": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "cross_down": {
+      "origin_mm": [
+        40.0,
+        0.0,
+        15.0
+      ],
+      "x": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "z": [
+        0.0,
+        -1.0,
+        0.0
+      ]
+    },
+    "origin": {
+      "origin_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    }
+  },
+  "absent": [],
+  "baseline": [
+    "area_mm2",
+    "center_of_mass_mm"
+  ]
+}

@@ -31,12 +31,13 @@ by following it.
 | --- | --- |
 | [`spec/`](spec/README.md) | The normative specification: grammar, statements, units, naming, geometric semantics, diagnostics |
 | [`spec/examples/`](spec/examples/) | Example parts |
-| [`corpus/`](corpus/README.md) | The conformance corpus: 43 parts with expected results and independent build123d reference models |
+| [`corpus/`](corpus/README.md) | The conformance corpus: 73 cases with expected results and independent build123d reference models |
 | [`docs/TextCAD-Requirements.md`](docs/TextCAD-Requirements.md) | What the format must achieve |
 | [`docs/roadmap.md`](docs/roadmap.md) | Phases and open work |
 | [`docs/adr/`](docs/adr/) | Decisions about the format |
 
-Status: format 0.2. Parts (Phase 1) are specified; assemblies (Phase 2) are a draft.
+Status: format 0.2. Parts (Phase 1), including their connectors and published geometry, are
+specified; assemblies (Phase 2) are a draft.
 
 Licensed under Apache-2.0 ([`LICENSE`](LICENSE), [`NOTICE`](NOTICE)). Contributions: see
 [`CONTRIBUTING.md`](CONTRIBUTING.md).

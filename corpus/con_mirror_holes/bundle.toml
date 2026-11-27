@@ -1,0 +1,5 @@
+format = "0.1"
+name = "con_mirror_holes"
+entry = "parts/con_mirror_holes.tcad"
+units = "mm"
+license = "Apache-2.0"
