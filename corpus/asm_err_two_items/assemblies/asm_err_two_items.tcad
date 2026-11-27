@@ -5,8 +5,10 @@ part box "Box" {
     rect r corner=(0 mm, 0 mm) w=10 mm h=10 mm
   }
   extrude body from s.r distance=10 mm
-  config big { }
+  config default big { }
 }
 
 assembly asm_err_two_items "Invalid" {
+  instance a = part("../parts/box.tcad")
+  ground a
 }

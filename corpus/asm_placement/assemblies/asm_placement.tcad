@@ -3,7 +3,9 @@ tcad 0.2
 assembly asm_placement "Parts and sub-assemblies placed by at= and rotate=" {
   instance base = part("../parts/plate.tcad")
   instance post_a = assembly("post.tcad") at=(30 mm, 40 mm, 10 mm)
-  instance post_b = assembly("post.tcad") at=(90 mm, 40 mm, 10 mm) rotate=[(+Z, 90 deg)] { h = 50 mm }
+  instance post_b = assembly("post.tcad") at=(90 mm, 40 mm, 10 mm) rotate=[(+Z, 90 deg)] {
+    h = 50 mm
+  }
   instance lying = part("../parts/block.tcad") config=tall at=(60 mm, -20 mm, 10 mm) rotate=[(+Y, 90 deg), (+Z, 30 deg)]
   instance loose = part("../parts/pin.tcad") at=(0 mm, 100 mm, 0 mm) rotate=[((1, 1, 0), 45 deg)]
 

@@ -5,8 +5,8 @@ part plate "Base plate" {
     rect r corner=(0 mm, 0 mm) w=120 mm h=80 mm
   }
   extrude body from s.r distance=10 mm
-  hole socket on=body.cap_end at=[(30 mm, 40 mm), (90 mm, 40 mm)] d=10 mm end=through_all
+  hole sockets on=body.cap_end at=[(30 mm, 40 mm), (90 mm, 40 mm)] d=10 mm end=through_all
 
-  connector socket from=socket
+  connector socket from=sockets
   connector bottom origin=body.cap_start z=body.cap_start
 }

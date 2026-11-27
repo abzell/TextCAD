@@ -100,9 +100,9 @@ part plate "Base plate" {
     rect r corner=(0 mm, 0 mm) w=120 mm h=80 mm
   }
   extrude body from s.r distance=10 mm
-  hole socket on=body.cap_end at=[(30 mm, 40 mm), (90 mm, 40 mm)] d=10 mm end=through_all
+  hole sockets on=body.cap_end at=[(30 mm, 40 mm), (90 mm, 40 mm)] d=10 mm end=through_all
 
-  connector socket from=socket
+  connector socket from=sockets
   connector bottom origin=body.cap_start z=body.cap_start
 }
 """
@@ -294,7 +294,9 @@ TOP = """tcad 0.2
 assembly asm_placement "Parts and sub-assemblies placed by at= and rotate=" {
   instance base = part("../parts/plate.tcad")
   instance post_a = assembly("post.tcad") at=(30 mm, 40 mm, 10 mm)
-  instance post_b = assembly("post.tcad") at=(90 mm, 40 mm, 10 mm) rotate=[(+Z, 90 deg)] { h = 50 mm }
+  instance post_b = assembly("post.tcad") at=(90 mm, 40 mm, 10 mm) rotate=[(+Z, 90 deg)] {
+    h = 50 mm
+  }
   instance lying = part("../parts/block.tcad") config=tall at=(60 mm, -20 mm, 10 mm) rotate=[(+Y, 90 deg), (+Z, 30 deg)]
   instance loose = part("../parts/pin.tcad") at=(0 mm, 100 mm, 0 mm) rotate=[((1, 1, 0), 45 deg)]
 
@@ -414,7 +416,7 @@ part box "Box" {
     rect r corner=(0 mm, 0 mm) w=10 mm h=10 mm
   }
   extrude body from s.r distance=10 mm
-  config big { }
+  config default big { }
 }
 """
 
@@ -484,7 +486,9 @@ def invalid():
             "note": "Assemblies need format 0.2; under a 0.1 header `assembly` is a reserved word."})
     # one file, two top-level items
     name = "asm_err_two_items"
-    bundle(name, {f"assemblies/{name}.tcad": BOX.rstrip("\n") + "\n\n" + asm(name, "")[len("tcad 0.2\n\n"):]},
+    body = "  instance a = part(\"../parts/box.tcad\")\n  ground a\n"
+    bundle(name, {"parts/box.tcad": BOX,
+                  f"assemblies/{name}.tcad": BOX.rstrip("\n") + "\n\n" + asm(name, body)[len("tcad 0.2\n\n"):]},
            f"assemblies/{name}.tcad",
            {"codes": ["E2701"], "fails": True, "note": "A file holds one part or one assembly, not both."})
 
