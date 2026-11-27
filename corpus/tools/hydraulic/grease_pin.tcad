@@ -1,8 +1,9 @@
-tcad 0.1
+tcad 0.2
 
 part grease_pin "Pin with a grease groove and cross hole" {
   tolerance 1e-6 mm
   material "AISI 1045" density=7.85 g/cm^3
+  meta number="TC-HYD-006" revision="A"
 
   param pin_d = 40 mm range(30 mm, 60 mm)
   param pin_len = 120 mm range(100 mm, 200 mm)

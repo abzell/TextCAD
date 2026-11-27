@@ -1,30 +1,37 @@
 # TextCAD specification
 
-Normative. Every language construct is defined here (prose plus grammar) before it is implemented.
-If the implementation and this spec disagree, fix one of them and record an ADR in `docs/adr/`.
+Normative. This directory defines the TextCAD format: how a part (and, in Phase 2, an assembly) is
+written as text, what every statement means, and what geometry it describes. It says nothing about any
+particular program; any tool that reads, checks, regenerates or exports TextCAD files follows it.
 
-Chapters marked *normative* are complete for their milestone; the others are stubs until theirs. The requirements they derive from are in
-[`../docs/TextCAD-Requirements.md`](../docs/TextCAD-Requirements.md).
+If a tool and this specification disagree, the specification is right. Changes to the format are made
+here first, recorded as ADRs in [`../docs/adr/`](../docs/adr/), and covered by conformance cases in
+[`../corpus/`](../corpus/).
 
-| Chapter | Topic | Milestone |
+| Chapter | Topic | Status |
 | --- | --- | --- |
-| [name.md](name.md) | Name and extensions | M1 |
-| [grammar.ebnf](grammar.ebnf) | Grammar | M1 draft, M2 syntax, extended per milestone |
-| [lexical.md](lexical.md) | Lexical structure | M2 |
-| [canonical-form.md](canonical-form.md) | Canonical formatting | M2 |
-| [diagnostics.md](diagnostics.md) | Error codes and output | M2 |
-| [versioning.md](versioning.md) | Versioning and migration | M2 (header), later migrations |
-| [reserved.md](reserved.md) | Reserved keywords | M2 |
-| [units.md](units.md) | Values and units | M3 |
-| [expressions.md](expressions.md) | Expressions | M3 |
-| [parameters.md](parameters.md) | Parameters and configurations | M3 |
-| [sketch.md](sketch.md) | Sketches and constraints | M4 |
-| [kernel.md](kernel.md) | Kernel contract, determinism | M5 |
-| [bundle.md](bundle.md) | Bundle layout and cache | M5 |
-| [features.md](features.md) | Features | M5, M6 |
-| [naming.md](naming.md) | Persistent naming | M6 |
-| [io.md](io.md) | Import and export | M7 |
-| [viewer.md](viewer.md) | Viewer server, language server | M8 |
-| [assembly.md](assembly.md) | Assemblies, connectors, mates, BOM (draft) | Phase 2 |
+| [name.md](name.md) | Name and extensions | normative |
+| [grammar.ebnf](grammar.ebnf) | Grammar | normative (format 0.2) |
+| [lexical.md](lexical.md) | Lexical structure | normative |
+| [canonical-form.md](canonical-form.md) | Canonical text form | normative |
+| [versioning.md](versioning.md) | Versions, evolution rules, migration | normative |
+| [reserved.md](reserved.md) | Reserved keywords | normative |
+| [units.md](units.md) | Values and units | normative |
+| [expressions.md](expressions.md) | Expressions and scopes | normative |
+| [parameters.md](parameters.md) | Parameters and configurations | normative |
+| [sketch.md](sketch.md) | Sketches and constraints | normative |
+| [features.md](features.md) | Features and part metadata | normative |
+| [naming.md](naming.md) | Persistent naming | normative |
+| [kernel.md](kernel.md) | Geometric semantics, conformance tiers | normative |
+| [bundle.md](bundle.md) | Bundle layout, archive, source hash | normative |
+| [io.md](io.md) | STEP import | normative |
+| [diagnostics.md](diagnostics.md) | Validity and standard diagnostic codes | normative |
+| [assembly.md](assembly.md) | Assemblies, connectors, mates, BOM | draft (Phase 2) |
 
-Examples live in [`examples/`](examples/); CI keeps them parseable and in canonical form.
+Examples live in [`examples/`](examples/); they are valid and in canonical form.
+
+## Conformance
+
+A tool conforms to a chapter when it accepts every valid file of the conformance corpus, rejects the
+invalid ones with the listed diagnostics, and (for tools that regenerate geometry) matches the expected
+results at determinism tier T2 ([kernel.md](kernel.md)).

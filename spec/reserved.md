@@ -1,6 +1,6 @@
 # Reserved keywords
 
-Status: **normative** (M2). Source requirements: 4.8.
+Status: **normative** (format 0.1). Source requirements: 4.8.
 
 These words are reserved for later phases so that Phase 1 files stay valid:
 
@@ -13,3 +13,8 @@ sheet_metal flange bend flat_pattern weldment direct_edit`
 - They may not be used as declared names (`E1104`).
 - The list is extended only by a minor version bump; removing a word needs a major version
   (see [versioning.md](versioning.md)).
+- A word leaves this list when the statement it starts is implemented, in a minor version; files with
+  an older header keep reading it under the rules of their version.
+- Keywords added in later minor versions that are not reserved words (`meta`, `connector`, ...)
+  are gated by the header instead: see [versioning.md](versioning.md) § Keywords added in a minor
+  version.

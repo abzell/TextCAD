@@ -1,11 +1,10 @@
 # Canonical form
 
-Status: **normative** (M2). Source requirements: 4.6. Implemented by `tcad fmt`
-(`tcad_syntax::format_source`).
+Status: **normative** (format 0.1). Source requirements: 4.6.
 
 A syntactically valid file has exactly one canonical text form up to the author's choice of blank
-lines and comments. `tcad fmt` produces it, and `tcad fmt --check` (run by CI on the examples and
-the corpus) fails when a file differs. Formatting a file with syntax errors is refused.
+lines and comments. A conforming formatter produces it; the examples and the conformance corpus are
+in canonical form. A file with syntax errors has no canonical form.
 
 ## Rules
 
@@ -36,17 +35,14 @@ the corpus) fails when a file differs. Formatting a file with syntax errors is r
    stays at its token; a line comment there moves the rest of the statement to a continuation line.
 8. **End of file.** Exactly one trailing line break.
 
-`format(format(x)) == format(x)` for every input that formats at all; this is tested on the examples,
-by mutation tests and by the fuzz target.
+Formatting is idempotent: `format(format(x)) == format(x)` for every input that formats at all.
 
-## Argument order table (provisional)
-
-The table is fixed per keyword in `crates/tcad-syntax/src/format.rs` and will move into the
-chapters [sketch.md](sketch.md) and [features.md](features.md) as those are written.
+## Argument order table
 
 | Keyword | Argument order |
 | --- | --- |
 | material | density |
+| meta | number, revision, kind, vendor, vendor_number, mass, com, color |
 | point | at |
 | line | start, end |
 | arc | center, start, end, through, tangent_to, r |

@@ -3,7 +3,7 @@
 lofts, sweep along an arc and boolean operations.
 
 Usage: B123_PYTHON=/path/to/python-with-build123d python3 corpus/tools/gen_more_features.py
-       (then: tcad fmt corpus)
+       (then bring the files into canonical form, spec/canonical-form.md)
 """
 import math
 import os

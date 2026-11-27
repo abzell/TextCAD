@@ -1,13 +1,13 @@
 # Assemblies
 
-Status: **draft** (Phase 2). Source requirements: 13 (Phase 2). Decisions: ADR 0015. Nothing in this
-chapter is implemented yet; the work is split into GitHub issues listed in
-[`../docs/phase2-plan.md`](../docs/phase2-plan.md). Each issue moves the sections it implements from
-*draft* to *normative*, and records any change to this text in an ADR.
+Status: **draft** (Phase 2 of the format). Source requirements: 13 (Phase 2). Decisions: ADR 0015.
+Sections become *normative* one by one as they are reviewed and covered by conformance cases; changes
+to this text are recorded in ADRs. The roadmap is in [`../docs/roadmap.md`](../docs/roadmap.md).
 
 An assembly places instances of parts and other assemblies relative to each other and records the design
 intent behind the placement: which frames meet, what may still move, which values drive the pose. Like
-a part, it is a recipe: the resolved transforms are derived and live in the cache.
+a part, it is a recipe: the resolved transforms are derived from it and are not part of the source
+(apart from optional solver hints).
 
 ## Principles
 
@@ -19,14 +19,14 @@ a part, it is a recipe: the resolved transforms are derived and live in the cach
 2. **Everything resolves to a transform.** Every instance ends with one rigid transform relative to the
    assembly origin. Mates, joints, patterns and fastener stacks are intent that the assembly solver turns
    into those transforms.
-3. **Determinism.** The same text gives the same transforms, bit for bit, on every platform (T1 for the
-   solver, which uses only `libm`). Where a mate allows several solutions, the text chooses one with an
-   explicit orientation flag; the solver never picks "the closest" by itself. Solved poses are written
-   back as `@hint(...)` by `tcad fmt --solve`, as sketches do.
-4. **No kernel needed to solve.** Connectors and published geometry are stored in each part's cache
-   manifest, so an assembly can be checked, solved, posed and listed (BOM, mass) from the cache alone,
-   in the browser too. The kernel is needed only for geometry that the assembly creates itself
-   (assembly features, routed parts, interference).
+3. **Determinism.** The same text gives the same transforms. Where a mate allows several solutions, the
+   text chooses one with an explicit orientation flag; a solver never picks "the closest" by itself.
+   Tools may write solved poses back as `@hint(...)`, as for sketches.
+4. **Interfaces are enough to solve.** Mates use only the connectors and published geometry of the
+   parts. An implementation can therefore check, solve, pose and list an assembly (BOM, mass) from each
+   part's interface data and properties, without regenerating geometry in the assembly. Only geometry
+   that the assembly creates itself (assembly features, routed parts) and geometric checks
+   (interference, clearance) need the parts' regenerated shapes.
 5. **References point backward.** An assembly may reference parts, sub-assemblies and its skeleton; a
    part may reference a skeleton; nothing may reference the assembly that contains it (`E6004`).
 
@@ -35,12 +35,11 @@ a part, it is a recipe: the resolved transforms are derived and live in the cach
 ```
 excavator_boom/
   bundle.toml                 entry = "assemblies/boom.tcad"
-  bundle.lock                 source hashes of every referenced file (written by `tcad lock`)
+  bundle.lock                 source hashes of every referenced file (written by tools)
   parts/        *.tcad         one part per file
   assemblies/   *.tcad         one assembly per file
   skeletons/    *.tcad         layout parts (optional)
   library/                    standard parts, or a path to a shared library bundle (see "Libraries")
-  .cache/
 ```
 
 - A `.tcad` file holds exactly one `part` **or** one `assembly` (`E2701` is extended to say so).
@@ -60,8 +59,9 @@ format = "0.1"
 "lib:iso4762.tcad"     = "sha256:9ab0..."
 ```
 
-- `tcad lock` writes it. `tcad check` reports `W6003` for every referenced file whose current source
-  hash differs from the lock, and `E6003` under `--locked` (for CI and release builds).
+- Tools write it on request. A checker reports `W6003` for every referenced file whose current source
+  hash differs from the lock (or that the lock does not list), and `E6003` in a strict mode meant for
+  release builds.
 - An instance may also pin a revision from the part's `meta` (`rev="B"`); a different revision in the
   file is `E6005`.
 
@@ -70,6 +70,8 @@ format = "0.1"
 These statements are added to **parts** (spec/features.md links here).
 
 ### `meta`
+
+**Normative in [features.md](features.md) § Part metadata** (implemented, #9); summary:
 
 ```
 meta number="HC-110-014" revision="B" kind=made vendor="" mass=0.84 kg color=(0.7, 0.7, 0.72)
@@ -214,7 +216,7 @@ nearest names (did-you-mean), as in parts.
 
 `at=` and `rotate=` on an instance are **starting values** (soft), like coordinates in a sketch: an
 instance with no mate stays exactly there; a mated instance starts there. `@hint(x, y, z, qw, qx, qy,
-qz)` (millimetres and a unit quaternion) is the solver output written by `tcad fmt --solve` and is used
+qz)` (millimetres and a unit quaternion) is a solved pose written by a tool and is used
 when `at=` is absent. A grounded instance's `at=` is hard.
 
 ## Mates
@@ -259,20 +261,16 @@ message lists the primitives each argument offers.
 
 ### Solving
 
-The assembly solver (crate `tcad-asm`) treats each non-grounded instance (or rigid sub-assembly) as a
-rigid body with six variables (translation and a rotation vector about the current orientation) and
-each mate as equations on the primitives' world positions. It follows ADR 0007 (the sketch solver):
-
-- Newton with backtracking and Levenberg-Marquardt damping, minimum-weighted-norm steps, exact
-  Jacobians by forward-mode differentiation. Rotations are updated multiplicatively (quaternions) and
-  renormalized every step.
-- Bodies connected by no mate are separate clusters and are solved separately, in instance order.
+Each non-grounded instance (or rigid sub-assembly) is a rigid body with six degrees of freedom, and
+each mate is a set of equations on the world positions of its primitives. A solver must find the
+solution nearest to the starting pose (`at=`, `rotate=`, `@hint`) in the sense of a minimum-norm change
+from it, respecting the explicit orientation flags, and must report:
 - **Over-constrained**: a set of mates with no solution is `E6102` naming a minimal conflicting set
   (with related locations), as `E4101` does for sketches; a mate that removes no further DOF is
   `W6103`.
 - **Under-constrained** is allowed: `I6201` reports the remaining DOF per instance and names them
-  (`rod: 1 rotation about barrel.bore_axis`). `tcad check --strict-dof` turns it into an error for
-  release builds.
+  (`rod: 1 rotation about barrel.bore_axis`). Tools may offer a strict mode that treats it as an
+  error for release builds.
 - **No solution near the start** is `E6301` and names the mates with the largest residual.
 - Joint limits are inequality constraints; a `drive` outside `min`/`max` is `E6302`.
 - Tolerances: positions within the assembly's modeling tolerance (default 1e-6 mm), angles within
@@ -320,9 +318,9 @@ config long default {
 
 As in parts (spec/parameters.md), plus `<instance>.config = <name>` and suppression of instances,
 pattern copies and mates. A suppressed instance is absent from the solve, the BOM, mass properties and
-exports; mates that reference it are suppressed with it (`I6202` lists them). `suppress if <expr>` on
+checks; mates that reference it are suppressed with it (`I6202` lists them). `suppress if <expr>` on
 `instance` and `mate` works as on features. A **pose** is a configuration that only changes driving
-parameters; `tcad build --config extended` and the viewer's pose slider use it.
+parameters; tools use poses to show or check the assembly in a given state.
 
 ## Skeleton (top-down layout)
 
@@ -367,10 +365,9 @@ extrude relief from=asm_sketch.r op=subtract through_all affects=[weldment]
   instances cut. `on=` accepts a frame primitive or a published planar face; sketches in an assembly
   lie on frame planes (`sketch s on frame.mid.xy { ... }`).
 - The cut applies to those instances **in this assembly only**. Their part files are unchanged; the
-  assembly cache holds the modified solids and their names follow spec/naming.md with the assembly
-  feature as the creator (`dowel.p1.wall`).
-- The BOM keeps the part number and marks the line "machined in assembly". STEP exports the modified
-  solids as separate products named `<part>@<assembly>`.
+  modified solids exist only in the assembly's regenerated result, and their new faces are named by
+  spec/naming.md with the assembly feature as the creator (`dowel.p1.wall`).
+- The BOM keeps the part number and marks the line "machined in assembly".
 
 ## Fastener stacks
 
@@ -395,7 +392,7 @@ route p_hose from=pump.port_a to=boom_cyl.port_b profile=tube(od=12 mm, wall=1.5
              via=[frame.clip1, frame.clip2] min_bend=48 mm material="EN 853 2SN" kind=purchased
 ```
 
-A route generates a part (cached under `.cache/<assembly>/routes/<name>`) by sweeping a profile along a
+A route generates a part (part of the assembly's regenerated result, not a file) by sweeping a profile along a
 3D path from connector `from` to connector `to` (leaving and entering along their z axes), through
 `via` connectors or points, with every corner rounded to `min_bend` (spec/features.md, 3D paths).
 `profile=` is `tube(od=, wall=)`, `rod(d=)` or a sketch profile. The BOM lists the cut length (the
@@ -411,7 +408,7 @@ weld w1 between=[gusset, base_plate] type=fillet size=6 mm length=all side=both
 A weld records a callout between two instances along their common edges (`length=all` or a length with
 `pitch=` for intermittent welds); with the flag `bead` it also adds a simplified bead solid (a swept
 triangle) to the assembly. `type` is `fillet`, `butt`, `plug`, `spot`. Welds appear in the BOM's weld
-table and in STEP as PMI notes from Phase 3. The parts welded into one item are listed with
+table and, from Phase 3, as PMI items of the assembly. The parts welded into one item are listed with
 `weldment=<name>` on the instances; the weldment is one BOM line with its members as a cut list.
 
 ## BOM
@@ -426,13 +423,13 @@ bom numbering=first_appearance structure=indented columns=[number, revision, des
 - Item numbers follow `numbering=` (`first_appearance`, the default, or `sorted_by_number`) and can be
   pinned per instance with `item=<n>` so drawings keep their balloons; a pinned number used twice is
   `E6501`.
-- `tcad bom <assembly> [--config c] [--format csv|json|md] [--flat]` prints it; the cache stores it as
-  `bom.json`.
+- How a BOM is presented (table, CSV, JSON) is up to tools; its lines, quantities and item numbers are
+  defined here.
 
 ## Mass properties
 
-`tcad props <assembly>` gives the mass, the centre of mass and the inertia tensor about the centre of
-mass of the whole assembly in its current pose, combining each instance's part properties (or its
+The mass properties of an assembly are the mass, the centre of mass and the inertia tensor about the
+centre of mass of the whole assembly in its current pose, combining each instance's part properties (or its
 `meta mass` / `com` override) with the parallel axis theorem. Parts without a material are reported
 (`W6601`) and counted with zero mass.
 
@@ -449,8 +446,8 @@ check eye_clear  clearance(eye, barrel) min=10 mm over=extension from=0 mm to=st
 - `clearance(a, b) min=` requires the minimum distance between the bodies to be at least `min`; with
   `over=<parameter> from= to= steps=` it is evaluated at each step of a driving parameter (the solver
   re-poses the assembly at each step).
-- `tcad check --geometry` runs the checks (they need the kernel); a failing check is `E6403` with the
-  pair, the configuration, the step and the measured distance or volume.
+- Checks need the parts' regenerated geometry. A failing check is `E6403`, reported with the pair, the
+  configuration, the step and the measured distance or volume.
 
 ## Exploded views
 
@@ -462,21 +459,8 @@ explode service {
 ```
 
 Exploded views are named, ordered lists of displacements applied after solving. They do not change the
-solved transforms, the BOM or the checks; the viewer and the GLB export (`--explode service`) use them.
+solved transforms, the BOM or the checks; tools use them to show the assembly.
 (`view` is reserved for drawings in Phase 4.)
-
-## Cache and exports
-
-- `.cache/<assembly>/manifest.json`: source hash (the assembly's canonical text, the lock entries and
-  the resolved configuration), per instance the path, the resolved (file, configuration, overrides)
-  key, the world transform as translation (mm) and quaternion, the joint coordinates, the solver report
-  (DOF, residuals, iterations), the BOM and the check results.
-- Part results are cached once per (file, configuration, overrides) key under `.cache/parts/<key>/`.
-- `tcad export <assembly> --to step` writes AP242 with assembly structure: one product per BOM line,
-  `NEXT_ASSEMBLY_USAGE_OCCURRENCE` per instance with its transform, sub-assemblies as nested products,
-  names and part numbers from `meta`. `--to glb` writes one node per instance (named by its instance
-  path, with `extras` `{ "instance", "part", "config" }`) sharing meshes between instances of one key.
-  `--to 3mf` writes the build items with transforms.
 
 ## Diagnostics (E6xxx)
 
@@ -542,11 +526,10 @@ uses_decl       = "uses" , IDENT , "=" , "skeleton" , "(" , STRING , ")" ;
 `mirror_instance`, `check`, `fastener`, `route`, `weld`, `explode`; they may not be used as declared names
 in the scope where they are meaningful (ADR 0004).
 
-## Phase 2 gate
+## Conformance
 
-A 300-part excavator boom-and-cylinder assembly (boom, stick, two boom cylinders and one stick cylinder
-as flexible sub-assemblies, pins, bushings, fastener stacks from the library, hoses as routes) opens,
-solves and exports to STEP AP242 assembly structure in under 10 s on the Windows CI runner, with a cold
-part cache excluded and a warm one included in the measurement as two separate numbers; FreeCAD opens
-the STEP with the right number of instances; the pose sweep of the boom cylinder passes its clearance
-check.
+Phase 2 is complete when the conformance corpus (`corpus/asm_*`) holds assemblies whose expected
+transforms, joint coordinates, BOM lines and mass properties are computed independently, covering every
+mate kind, sub-assemblies, patterns, mirroring, configurations, skeletons, fastener stacks, routes and
+checks, and including a large reference model: an excavator boom with flexible hydraulic-cylinder
+sub-assemblies (about 300 instances) with a clearance check through the full cylinder stroke.

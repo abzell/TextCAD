@@ -2,7 +2,7 @@
 """Regenerates the detail-feature and naming-robustness corpus parts (milestone M6).
 
 Usage: B123_PYTHON=/path/to/python-with-build123d python3 corpus/tools/gen_features.py
-       (then: tcad fmt corpus)
+       (then bring the files into canonical form, spec/canonical-form.md)
 
 Volumes and bounding boxes are closed-form, computed here. Surface area and center of mass of
 parts with fillets and tapers have no short closed form; those two values are taken from the

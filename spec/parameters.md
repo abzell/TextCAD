@@ -1,6 +1,6 @@
 # Parameters and configurations
 
-Status: **normative** (M3). Source requirements: 4.5. Implemented by `tcad-model`.
+Status: **normative** (format 0.1). Source requirements: 4.5.
 
 ## Parameters
 
@@ -32,8 +32,8 @@ config default standard { }
   base part is the default and `W2405` is reported. Configuration names are unique (`E2101`).
 - A feature statement can end with `suppress if <boolean expression>`; the expression is evaluated
   under each configuration and must be boolean (`E2601`).
-- Every configuration is fully evaluated by `tcad check`, so an invalid variant is found without
-  building it. A problem that exists in the base part is reported once, not once per configuration.
+- Every configuration is fully evaluated by a checker, so an invalid variant is found without
+  regenerating it. A problem that exists in the base part is reported once, not once per configuration.
 
 ## Resolution
 

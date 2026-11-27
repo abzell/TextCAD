@@ -1,7 +1,6 @@
 # Expressions
 
-Status: **normative** (M3). Source requirements: 4.3, 4.4. Grammar: [grammar.ebnf](grammar.ebnf).
-Implemented by `tcad-expr` (`eval.rs`) and `tcad-model` (scope checks).
+Status: **normative** (format 0.1). Source requirements: 4.3, 4.4. Grammar: [grammar.ebnf](grammar.ebnf).
 
 ## Forms
 
@@ -54,19 +53,20 @@ Wrong arity or an unknown function is `E2206`; an invalid root or exponent is `E
 - A parameter expression may only use value names: other parameters. Using a feature or sketch name
   as a value is `E2104`.
 - The head of a geometric reference (`side.pin.center`, `slot.side(+Y)`) is scope-checked here; its
-  roles are checked against the feature's roles in M6 ([naming.md](naming.md)).
+  roles are checked against the feature's roles ([naming.md](naming.md)).
 - Close misspellings produce `E2102` with a fix hint ("did you mean `jaw_gap`?").
 
 ## Enumerated arguments
 
-Some arguments take a fixed set of words instead of a reference (provisional until
-[features.md](features.md)): `op` of `extrude revolve sweep loft` (`add subtract intersect`), `type` of
+Some arguments take a fixed set of words instead of a reference ([features.md](features.md)): `op` of `extrude revolve sweep loft` (`add subtract intersect`), `type` of
 `hole` (`simple counterbore countersink tapped`), `end` of `hole` (`through_all blind`) and `type` in
 `query(...)` (`plane cylinder cone torus bspline`). Another word is `E2501`.
 
-## What `tcad check` evaluates
+## Static evaluation
 
-Parameters, ranges, configuration overrides, `suppress if` conditions, and every argument, hint and
+A checker evaluates, without regenerating geometry:
+
+parameters, ranges, configuration overrides, `suppress if` conditions, and every argument, hint and
 constraint expression that is made of literals and parameters only. Expressions that mention
 geometry (`outline.right`) cannot be evaluated before the kernel runs; their value parts are still
 checked as far as they go.

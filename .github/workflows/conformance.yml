@@ -1,0 +1,22 @@
+name: Conformance corpus
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  reference-models:
+    # Every expected.json must agree with its independent build123d model (determinism tier T2).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Corpus tools compile
+        run: python3 -m py_compile corpus/tools/*.py
+      - name: Cross-check expected values against build123d
+        run: |
+          pip install build123d
+          python3 corpus/tools/compare_reference.py corpus

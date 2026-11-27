@@ -1,13 +1,50 @@
 # Features
 
-Status: **normative** (M5, M6): reference geometry, extrude, revolve, sweep, loft, holes, fillets,
-chamfers, shell, draft, rib, patterns. Source requirements: 7. Implemented by
-`tcad-build`.
+Status: **normative** (format 0.1; part metadata format 0.2). Source requirements: 7.
 
 Features are evaluated in declaration order. Regeneration **stops at the first feature that fails**,
 with a diagnostic naming it; it never skips or substitutes. A feature suppressed by `suppress if` or by
 the active configuration is skipped. Unknown or misplaced arguments are `E5001`; a reference that is
 not the right kind of geometry is `E5002`.
+
+## Part metadata
+
+Format 0.2 (`spec/versioning.md`).
+
+```
+part rod "Piston rod, 50 mm" {
+  material "AISI 1045" density=7.85 g/cm^3
+  meta number="HC-110-014" revision="B" kind=made mass=0.84 kg com=(0 mm, 0 mm, 12 mm) color=(0.7, 0.7, 0.72)
+  config heavy { meta.number = "HC-110-015" }
+}
+```
+
+The description of a part is the string after its name. `meta` adds:
+
+| Key | Value | Use |
+| --- | --- | --- |
+| `number` | string | part number: STEP product id, BOM (Phase 2), title blocks (Phase 4) |
+| `revision` | string | revision: STEP product version, BOM, `rev=` pins (spec/assembly.md) |
+| `kind` | `made` (default), `purchased`, `phantom` | BOM classification |
+| `vendor`, `vendor_number` | string | for purchased parts |
+| `mass` | mass, positive | overrides the computed mass (purchased parts modeled simplified) |
+| `com` | `(x, y, z)` lengths | overrides the center of mass; only together with `mass` |
+| `color` | `(r, g, b)`, numbers from 0 to 1 | display colour, **sRGB** |
+
+- Values are literals or parameters of the right type (`number=num` with `param num = "HC-1"`);
+  there is no string concatenation. Parameters must be declared before the `meta` statement.
+- `meta` may appear once (`E2303`), anywhere in the part body; the canonical form does not move
+  statements.
+  The keys are written in the order of the table.
+- A configuration overrides keys with `meta.<key> = <value>` (`E2401` for an unknown key). Keys
+  it does not override keep their base values.
+- Errors: unknown key, a flag, a repeated key or a key with several values `E5001`; `com` without
+  `mass` `E5001`; a value of the wrong type `E2202`; a non-positive mass or a colour component
+  outside 0..1 `E2301`; an unknown `kind` `E2501`.
+- With `mass`, the part's mass properties are that mass (and `com` if given, else the computed
+  center), and its inertia is the unit-density inertia scaled by `mass / volume`, i.e. that of a
+  uniform body of that mass about the computed center of mass. Without `mass` the material density
+  is used. Tools should report the computed values alongside an override.
 
 ## Reference geometry
 
@@ -20,7 +57,7 @@ not the right kind of geometry is `E5002`.
 
 Built in: `plane.XY`, `plane.YZ`, `plane.XZ`, `axis.X`, `axis.Y`, `axis.Z`, `origin`. Points are
 given as `(x, y, z)` lengths or the name of a `point`. A sketch can lie on any plane or `csys`; sketches
-on faces need persistent naming (M6).
+on faces use persistent naming ([naming.md](naming.md)).
 
 ## Profiles
 
@@ -41,7 +78,7 @@ All solid features take `op=add|subtract|intersect` (default `add`). The first s
 | `extrude e` | `from=` profile; **one** end condition: `distance=<length>`, `through_all`, or `to=<plane>`; optional `symmetric`, `distance2=<length>` (a second distance the other way, used with `distance`), `draft=<angle>` |
 | `revolve r` | `from=` profile; `axis=<axis>` (`axis.Z`, an `axis` feature, or a line of a sketch); `angle=<angle>` (default 360 deg) |
 | `sweep s` | `from=` profile; `path=` sketch (or entity) holding a chain; optional `guide=` |
-| `loft l` | `sections=[a, b, ...]` (two or more single profiles); optional flag `ruled` |
+| `loft l` | `sections=[a, b, ...]` (two or more single profiles); optional flag `ruled`; optional `guides=[...]` (sketch curves from the first section to the last that steer the surface; the exact rules are being specified, see the conformance part `feat_loft_guided`) |
 
 **End conditions.** A profile extrudes from its own plane along its normal. `distance` is signed; a
 negative value goes the other way. `symmetric` centers the distance on the plane. `distance2` adds a
@@ -111,6 +148,5 @@ solid into the part (spec/io.md).
 
 ## Not yet
 
-Guided lofts need a kernel feature OpenCASCADE lacks and are tracked in
-`docs/progress.md`. Queries on vertices, ribs along arcs and circular patterns of several axes are
-not part of Phase 1.
+Queries on vertices, ribs along arcs and circular patterns of several axes are not yet part of the
+format.

@@ -1,8 +1,9 @@
-tcad 0.1
+tcad 0.2
 
 part end_cap "Cylinder end cap with an SAE O-ring port" {
   tolerance 1e-6 mm
   material "EN-GJS-400" density=7.1 g/cm^3
+  meta number="TC-HYD-003" revision="A"
 
   param cap_od = 120 mm range(100 mm, 160 mm)
   param cap_t = 25 mm range(20 mm, 40 mm)

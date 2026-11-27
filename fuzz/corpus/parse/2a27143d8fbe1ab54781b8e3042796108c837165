@@ -1,3 +1,0 @@
-tcad re_edges edges=[pin_b)] d=1 mm
-
-  config heavyaw_thklen haw_thk = 20 mm 0clpinp
