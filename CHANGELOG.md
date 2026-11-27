@@ -20,6 +20,9 @@ Changes to the TextCAD format, its specification and its conformance corpus. For
   whose frames are listed for every swept parameter set (#28).
 
 ### Clarified
+- `spec/features.md` § Published geometry: a tool may store a tessellation or sampled polyline of
+  free-form entities at a resolution of its choosing (the fixed "modeling tolerance times 100" is
+  removed); the accuracy that mates need is defined with the mates (#37).
 - `spec/assembly.md` § `connector`: naming of single- and multi-position holes and skipped pattern
   instances; the order flip → rotate → offset and the sense of `rotate`; `origin_at` along the oriented
   axis; explicit directions keep their sign; diagnostics for wrong `from=`, zero directions and name

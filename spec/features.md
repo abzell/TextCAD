@@ -148,9 +148,11 @@ that do not depend on the kernel:
 | `ellipse`, `bspline` (curves) | `length_mm` |
 
 A face of revolution is described by its geometry, not by how it was made: a sphere made by revolving
-an arc is a `sphere`. Tools may store more (a tessellation and a sampled polyline at the modeling
-tolerance times 100 for free-form entities); conformance checks only the parameters above, at tier T2
-for lengths and points and to 1e-9 for unit vectors. The conformance cases `corpus/pub_*` cover these
+an arc is a `sphere`. Tools may store more, such as a tessellation of a free-form face or a sampled
+polyline of a free-form curve, at a resolution of their choosing; conformance checks only the
+parameters above, at tier T2 for lengths and points and to 1e-9 for unit vectors. The accuracy that
+assembly mates on free-form published geometry require is defined with those mates (spec/assembly.md
+§ Mates). The conformance cases `corpus/pub_*` cover these
 rules.
 
 ## Reference geometry
