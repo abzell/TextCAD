@@ -42,10 +42,27 @@ excavator_boom/
   library/                    standard parts, or a path to a shared library bundle (see "Libraries")
 ```
 
-- A `.tcad` file holds exactly one `part` **or** one `assembly` (`E2701` is extended to say so).
-- Files that use any construct of this chapter declare `tcad 0.2` (spec/versioning.md).
+- A `.tcad` file holds exactly one `part` **or** one `assembly` (`E2701`).
+- Files that use any construct of this chapter declare `tcad 0.2` (spec/versioning.md). Under a
+  `tcad 0.1` header, `assembly` and `instance` are reserved words (`E0001`, spec/reserved.md).
 - `bundle.toml` gains `[libraries]`: a table of name to path (a directory or a `.tcadz` archive),
   so `part("lib:iso4762.tcad")` resolves without relative paths.
+
+**Resolving a file.** The string in `part("...")`, `assembly("...")` and `skeleton("...")` is a path
+with `/` separators:
+
+- relative to the directory of the file that contains it (an assembly in `assemblies/` refers to
+  `"../parts/rod.tcad"`); `..` is allowed, but the resolved path must stay inside the bundle root
+  (the directory of `bundle.toml`, or of the entry file for a loose file);
+- or `lib:<name>/<path>`, resolved inside the library `<name>` of `[libraries]`; nothing else reaches
+  files outside the bundle.
+
+A path that leaves the bundle, a file that does not exist, a library that is not declared, and a file
+whose content is not what the call says (`part(...)` naming an assembly, `assembly(...)` naming a
+part) are `E6002`. A file that refers back to itself, directly or through other files, is `E6004`;
+the message lists the cycle (`assemblies/a.tcad -> assemblies/b.tcad -> assemblies/a.tcad`).
+Referenced files are checked as files of their own: their diagnostics are reported against them,
+and an assembly whose referenced file has errors does not build.
 
 ### Version lock
 
@@ -158,7 +175,7 @@ assembly boom_cylinder "Boom cylinder, 110 bore, 900 stroke" {
 | `meta` | as for parts (`kind=phantom` makes the assembly transparent in the BOM) |
 | `param` | as for parts; assembly parameters may be passed to instances and drive joints |
 | `instance` | `instance <name> = part("<path>") \| assembly("<path>") \| skeleton("<path>")`, then optional `config=<name>`, `rev="<revision>"`, `at=(x, y, z)`, `rotate=[(axis, angle), ...]`, flag `flexible` (sub-assemblies), `bom=made\|purchased\|phantom\|exclude`, `suppress if <expr>`, an optional override block `{ param = expr; ... }` and an optional `@hint(...)` |
-| `ground` | `ground <instance> [at=(x, y, z)] [rotate=[...]]`: fixes the instance (default: at the assembly origin). At least one instance is grounded (`E6012` otherwise); the first instance is **not** grounded implicitly. |
+| `ground` | `ground <instance>`: fixes the instance where its `at=` and `rotate=` place it (at the assembly origin without them). `ground` takes no arguments (`E5001`): the placement is written once, on the instance. At least one instance is grounded (`E6012` otherwise); the first instance is **not** grounded implicitly. |
 | `mate` | `mate <name> <kind>(<ref>, <ref>[, ...]) [= <value>] { <arg> } [suppress if <expr>]` (below) |
 | `pattern` | component patterns (below) |
 | `mirror_instance` | mirrored components (below) |
@@ -172,13 +189,28 @@ assembly boom_cylinder "Boom cylinder, 110 bore, 900 stroke" {
 | assembly features | `hole`, `extrude ... op=subtract` with `affects=[...]` (below) |
 | `tag` | `tag <name> = <reference>`: a local name for an instance path |
 
-`instance` overrides `{ ... }` set parameters of the referenced part or assembly for this instance only.
-Each distinct (file, configuration, overrides) triple is built once and shared by all instances that
-use it; it is its own BOM line.
+### Instances
+
+- Instance names share the assembly's name scope with its parameters, tags and other declared names
+  (`E2101`), and may not be keywords (`E1104`).
+- `config=<name>` builds the referenced file in that configuration; a name the file does not declare
+  is `E6006`. Without `config=`, the file's default configuration is built.
+- The override block `{ p = expr; ... }` sets parameters of the referenced part or assembly for this
+  instance only, after `config=` is applied. The expressions are evaluated in the assembly's scope (they
+  may use its parameters); a name that is not a parameter of the referenced file is `E2401`, a value
+  of the wrong type or dimension `E2402`, and a value outside the parameter's `range` is checked as in
+  configurations (spec/parameters.md).
+- Each distinct (file, configuration, overrides) triple is built once and shared by all instances that
+  use it; it is its own BOM line.
+
+The conformance cases `corpus/asm_*` cover files, instances, references and placement.
 
 ### References
 
-`<instance>[.<instance> ...].<connector | published | datum>` and, for frames, the derived primitives:
+`<instance>[.<instance> ...].<connector | published | datum>` and, for frames, the derived primitives.
+After the instance path, the next segment names a connector (including the implicit `origin`), a
+published entity or a datum of that instance's part; a segment after that is one of the suffixes
+below. So `rod.origin` is the rod's part frame and `rod.origin.origin` its origin point.
 
 | Suffix | Denotes |
 | --- | --- |
@@ -187,16 +219,35 @@ use it; it is its own BOM line.
 | `.x`, `.y`, `.z` | the axis line through the origin along that direction |
 | `.xy`, `.yz`, `.xz` | the plane through the origin with normal z, x, y respectively |
 
-A path through a sub-assembly names the nested instance: `left_cyl.rod.thread_end`. A pattern copy is
-`<pattern>.i<k>` and its instance names follow: `bolts.i3.head`. Unknown segments are `E6001` with the
-nearest names (did-you-mean), as in parts.
+A path through a sub-assembly names the nested instance: `left_cyl.rod.thread_end`. This works for
+rigid and for `flexible` sub-assemblies alike. In a rigid sub-assembly the nested instance's pose is
+fixed relative to the sub-assembly, so the reference is a fixed frame of the sub-assembly as a whole,
+and a mate on it moves the whole sub-assembly; `flexible` only decides whether the nested joints keep
+their freedom (§ Sub-assemblies). A pattern copy is `<pattern>.i<k>` and its instance names follow:
+`bolts.i3.head`. Unknown segments are `E6001` with the nearest names (did-you-mean), as in parts.
+All references are evaluated in the assembly frame: a nested frame is carried through the placements
+of every instance on its path (§ Placement).
 
 ### Placement before solving
 
-`at=` and `rotate=` on an instance are **starting values** (soft), like coordinates in a sketch: an
-instance with no mate stays exactly there; a mated instance starts there. `@hint(x, y, z, qw, qx, qy,
-qz)` (millimetres and a unit quaternion) is a solved pose written by a tool and is used
-when `at=` is absent. A grounded instance's `at=` is hard.
+An instance's placement is the rigid transform from its file's frame (the part frame, or the
+sub-assembly's frame) to the frame of the assembly that contains it:
+
+- `rotate=[(axis, angle), ...]` is a list of rotations applied **in the order written, each about an
+  axis through the origin of the containing assembly's fixed frame**, by the right-hand rule (a positive
+  angle turns counterclockwise looking against the axis). An axis is a direction: `+X`, `-Z`, or
+  `(x, y, z)` (need not be unit length; a zero vector is `E6011`). `rotate=[(+Z, 90 deg), (+X, 30 deg)]`
+  is R = Rx(30 deg) · Rz(90 deg).
+- `at=(x, y, z)` then translates by that vector. Without `rotate=` the rotation is the identity;
+  without `at=` the translation is zero.
+- So a point p of the instance's file is at `R p + at` in the containing assembly. A nested instance
+  is placed by composing: the assembly frame of `arm.link`'s point p is `T_arm (T_link p)`.
+
+`at=` and `rotate=` are **starting values** (soft), like coordinates in a sketch: an instance with no
+mate stays exactly there; a mated instance starts there. A grounded instance stays exactly there
+(hard). `@hint(x, y, z, qw, qx, qy, qz)` (millimetres and a unit quaternion) is a solved pose written
+by a tool and is used as the start when `at=` is absent. Until mates are specified (#33) every
+instance is placed exactly by its `at=` and `rotate=`.
 
 ## Mates
 
@@ -450,6 +501,7 @@ solved transforms, the BOM or the checks; tools use them to show the assembly.
 | W6003 / E6003 | referenced file differs from `bundle.lock` (error under `--locked`) |
 | E6004 | reference cycle (an assembly or skeleton that refers back to itself) |
 | E6005 | the referenced part's `meta revision` does not match `rev=` |
+| E6006 | `config=` names a configuration the referenced file does not declare |
 | E6011 | connector axes are parallel or degenerate (normative, spec/diagnostics.md) |
 | E6012 | no grounded instance |
 | E6013 | opposite-hand part lacks connectors of the seed |
@@ -483,7 +535,7 @@ meta_decl       = "meta" , { named_arg } ;
 instance_decl   = "instance" , IDENT , "=" , source_call , { arg } , [ suppress_clause ] ,
                   [ "{" , { IDENT , "=" , ( expr | STRING ) , [ ";" ] } , "}" ] , [ hint ] ;
 source_call     = ( "part" | "assembly" | "skeleton" ) , "(" , STRING , ")" ;
-ground_decl     = "ground" , reference , { arg } ;
+ground_decl     = "ground" , IDENT ;
 mate_decl       = "mate" , IDENT , IDENT , "(" , reference , { "," , reference } , ")" ,
                   [ "=" , expr ] , { arg } , [ suppress_clause ] ;
 pattern_decl    = "pattern" , IDENT , { arg } , [ suppress_clause ] ;

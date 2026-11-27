@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E6004"
+  ],
+  "fails": true,
+  "note": "The assembly refers to another that refers back to it; the message lists the cycle."
+}

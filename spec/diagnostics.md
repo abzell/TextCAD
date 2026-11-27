@@ -80,7 +80,7 @@ Every diagnostic has:
 | W2405 | configurations exist but none is marked default |
 | E2501 | unknown value for an enumerated argument |
 | E2601 | `suppress if` condition is not boolean |
-| E2701 | a file must contain exactly one part |
+| E2701 | a file must contain exactly one part (format 0.2: one part or one assembly) |
 | E4001 | invalid sketch entity argument |
 | E4002 | unknown sketch constraint |
 | E4003 | invalid constraint arguments |

@@ -1,0 +1,7 @@
+tcad 0.2
+
+assembly sub "Invalid" {
+  param w = 10 mm
+  instance b = part("../parts/box.tcad")
+  ground b
+}

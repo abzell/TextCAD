@@ -1,0 +1,12 @@
+tcad 0.2
+
+part plate "Base plate" {
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=120 mm h=80 mm
+  }
+  extrude body from s.r distance=10 mm
+  hole socket on=body.cap_end at=[(30 mm, 40 mm), (90 mm, 40 mm)] d=10 mm end=through_all
+
+  connector socket from=socket
+  connector bottom origin=body.cap_start z=body.cap_start
+}

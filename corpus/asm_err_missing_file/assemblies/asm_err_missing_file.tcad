@@ -1,0 +1,6 @@
+tcad 0.2
+
+assembly asm_err_missing_file "Invalid" {
+  instance a = part("../parts/nope.tcad")
+  ground a
+}

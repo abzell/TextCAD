@@ -62,6 +62,7 @@ Formatting is idempotent: `format(format(x)) == format(x)` for every input that 
 | loft | sections, guides, op |
 | hole | on, at, from, type, d, thread, cbore_d, cbore_depth, csk_d, csk_angle, depth, end, flip |
 | connector | from, csys, origin, z, x, origin_at, rotate, offset, flip |
+| instance | config, rev, at, rotate, flexible, bom; then the override block (draft, spec/assembly.md) |
 | fillet | edges, r |
 | chamfer | edges, d, d2, angle |
 | shell | faces, thickness, outward |

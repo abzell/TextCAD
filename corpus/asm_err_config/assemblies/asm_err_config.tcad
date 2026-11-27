@@ -1,0 +1,6 @@
+tcad 0.2
+
+assembly asm_err_config "Invalid" {
+  instance a = part("../parts/box.tcad") config=small
+  ground a
+}

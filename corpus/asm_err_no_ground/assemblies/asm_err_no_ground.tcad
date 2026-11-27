@@ -1,0 +1,5 @@
+tcad 0.2
+
+assembly asm_err_no_ground "Invalid" {
+  instance a = part("../parts/box.tcad")
+}

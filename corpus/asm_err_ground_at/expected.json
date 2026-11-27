@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E5001"
+  ],
+  "fails": true,
+  "note": "`ground` takes no arguments: the placement is written once, on the instance."
+}

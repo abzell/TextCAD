@@ -1,0 +1,6 @@
+tcad 0.2
+
+assembly other "Invalid" {
+  instance back = assembly("asm_err_cycle.tcad")
+  ground back
+}

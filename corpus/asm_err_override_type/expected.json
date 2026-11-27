@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E2402"
+  ],
+  "fails": true,
+  "note": "An override of a length parameter with an angle."
+}

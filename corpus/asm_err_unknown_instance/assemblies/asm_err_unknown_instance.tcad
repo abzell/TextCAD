@@ -1,0 +1,6 @@
+tcad 0.2
+
+assembly asm_err_unknown_instance "Invalid" {
+  instance a = part("../parts/box.tcad")
+  ground b
+}

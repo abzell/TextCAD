@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E6012"
+  ],
+  "fails": true,
+  "note": "No instance is grounded; the first is not grounded implicitly."
+}

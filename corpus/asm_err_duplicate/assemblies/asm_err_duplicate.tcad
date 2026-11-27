@@ -1,0 +1,7 @@
+tcad 0.2
+
+assembly asm_err_duplicate "Invalid" {
+  instance a = part("../parts/box.tcad")
+  instance a = part("../parts/box.tcad")
+  ground a
+}

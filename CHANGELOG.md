@@ -6,6 +6,12 @@ Changes to the TextCAD format, its specification and its conformance corpus. For
 ## [Unreleased]
 
 ### Added
+- Draft rules for assembly files (#29): resolving `part()`/`assembly()` paths (relative to the file,
+  inside the bundle, or `lib:`), instances (`config=`, override blocks, name scope), reference paths
+  into rigid and flexible sub-assemblies, and placement (`rotate=` in order about the fixed axes, then
+  `at=`; nested placements composed); `ground` takes no arguments; `E6006`; canonical argument order
+  for `instance`. Conformance cases `asm_placement` (cross-checked against build123d) and 15 invalid
+  `asm_err_*` bundles (`tools/gen_assemblies.py`).
 - Conformance cases for connectors (#28): `con_hole_frames`, `con_explicit`, `con_revolution`,
   `con_split_axis`, `con_mirror_holes` and `con_datum_hole` with expected frames cross-checked against
   build123d, and eight invalid parts (`con_err_*`).

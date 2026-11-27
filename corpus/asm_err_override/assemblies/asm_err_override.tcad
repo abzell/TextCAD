@@ -1,0 +1,6 @@
+tcad 0.2
+
+assembly asm_err_override "Invalid" {
+  instance a = part("../parts/box.tcad") { nosuch = 1 mm }
+  ground a
+}

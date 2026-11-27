@@ -1,0 +1,10 @@
+tcad 0.2
+
+part pin "Pin" {
+  sketch s on plane.XY {
+    circle c center=(0 mm, 0 mm) r=4 mm
+  }
+  extrude body from s.c distance=30 mm
+
+  connector tip origin=body.cap_end z=body.cap_end
+}
