@@ -15,6 +15,9 @@ Changes to the TextCAD format, its specification and its conformance corpus. For
   mounting faces, bearing surfaces), cross-checked against their build123d models; the clevis also for
   its `heavy` configuration. `con_suppressed` and `con_err_connector_ref`.
   `compare_reference.py` also compares connector frames.
+- `con_sweep_flange`, `con_sweep_pocket`, `con_sweep_shell`, `con_sweep_mirror`: the naming-robustness
+  parts with connectors (on pattern instances, tagged faces, mirrored holes, chamfered bore walls),
+  whose frames are listed for every swept parameter set (#28).
 
 ### Clarified
 - `spec/assembly.md` § `connector`: naming of single- and multi-position holes and skipped pattern

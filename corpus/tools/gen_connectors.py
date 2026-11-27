@@ -8,6 +8,7 @@ own geometry, and small invalid parts that must fail with exactly one diagnostic
 Usage: B123_PYTHON=/path/to/python-with-build123d python3 corpus/tools/gen_connectors.py
        (then bring the files into canonical form, spec/canonical-form.md)
 """
+import itertools
 import json
 import math
 import os
@@ -505,7 +506,218 @@ emit_connectors(
                        "info": ["I6014", "I6014"]}},
 )
 
-# 7. invalid connectors: each part must fail with exactly the one code -----------------------------
+# 7. connectors through the naming sweeps ----------------------------------------------------------
+# The four naming-robustness parts of gen_naming_parts.py (format 0.1 cases nam_*), raised to format
+# 0.2 with connectors. Every swept parameter set lists its connectors: they must keep resolving and
+# move with the geometry. Volumes are the closed forms of gen_naming_parts.py.
+
+def sweep_frames(names, ranges, volume, bbox, frames):
+    out = []
+    for vals in itertools.product(*ranges):
+        p = dict(zip(names, vals))
+        lo, hi = bbox(**p)
+        out.append({
+            "set": {k: f"{v} mm" for k, v in p.items()},
+            "volume_mm3": volume(**p),
+            "bbox_min_mm": lo,
+            "bbox_max_mm": hi,
+            "connectors": {k: clean(v) for k, v in frames(**p).items()},
+        })
+    return out
+
+
+def _chamfer_ring(r, d):
+    return 2 * PI * (r + d / 3) * d * d / 2
+
+
+def flange_volume(r_out, t, rb):
+    return (PI * r_out**2 * t - PI * 100 * t - 6 * PI * 9 * t - _chamfer_ring(10, 1.5)
+            - _chamfer_ring(3, 1.5))
+
+
+def flange_frames(r_out, t, rb):
+    c = {f"bolt_seat.i{k + 1}": frame([rb * math.cos(k * PI / 3), rb * math.sin(k * PI / 3), t], [0, 0, 1])
+         for k in range(6)}
+    c["bore_mid"] = frame([0, 0, (t - 1.5) / 2], [0, 0, 1])
+    c["bore_top"] = frame([0, 0, t - 1.5], [0, 0, 1])
+    c["origin"] = IDENTITY
+    return c
+
+
+emit_connectors(
+    "con_sweep_flange", "Flange with a bolt circle and connectors",
+    "  param r_out = 50 mm range(40 mm, 70 mm)\n"
+    "  param t = 10 mm range(6 mm, 14 mm)\n"
+    "  param rb = 30 mm range(25 mm, 35 mm)\n\n"
+    "  sketch s on plane.XY {\n    circle c center=(0 mm, 0 mm) r=r_out\n  }\n"
+    "  extrude disc from s.c distance=t\n"
+    "  hole bore on=disc.cap_end at=(0 mm, 0 mm) d=20 mm end=through_all\n"
+    "  hole bolt on=disc.cap_end at=(rb, 0 mm) d=6 mm end=through_all\n"
+    "  circular_pattern bolts of=bolt axis=axis.Z count=6\n"
+    "  chamfer rims edges=[edge(disc.cap_end & bore.wall), edge(disc.cap_end & bolts.i3.wall)] d=1.5 mm\n\n"
+    "  connector bolt_seat from=bolts\n"
+    "  connector bore_mid origin=bore.wall z=bore.wall origin_at=middle\n"
+    "  connector bore_top origin=bore.wall z=bore.wall origin_at=end\n"
+    "  publish bore_surface = bore.wall\n",
+    "nam_flange_pattern with connectors: one per bolt-circle instance (the chamfered .i3 included, its "
+    "origin on the hole's entry plane), and two on the bore wall, which the chamfer shortens. Every swept "
+    "radius, thickness and bolt circle moves them with the geometry.",
+    flange_volume(50, 10, 30), [-50, -50, 0], [50, 50, 10],
+    "r_out, t, rb = 50, 10, 30\n"
+    "shape = Pos(0, 0, t / 2) * Cylinder(r_out, t)\n"
+    "shape = shape - Pos(0, 0, t / 2) * Cylinder(10, t)\n"
+    "for i in range(6):\n"
+    "    shape = shape - Pos(rb * cos(i * pi / 3), rb * sin(i * pi / 3), t / 2) * Cylinder(3, t)\n"
+    "top = shape.edges().filter_by(GeomType.CIRCLE).filter_by_position(Axis.Z, t - 0.01, t + 0.01)\n"
+    "ch = [e for e in top if abs(e.radius - 10) < 1e-6 or (abs(e.radius - 3) < 1e-6 and abs(e.arc_center.X - rb * cos(2 * pi / 3)) < 1e-6 and abs(e.arc_center.Y - rb * sin(2 * pi / 3)) < 1e-6)]\n"
+    "shape = chamfer(ch, 1.5)\n",
+    "_o, _top = face_frame(planar_face(shape, [0, 0, 1], (0, 40, 10)))\n"
+    "for k in range(6):\n"
+    "    r = 4.5 if k == 2 else 3\n"
+    "    connectors[f'bolt_seat.i{k + 1}'] = _frame(circle_centre(shape, r, (30 * cos(k * pi / 3), 30 * sin(k * pi / 3), 10)), _top)\n"
+    "connectors['bore_mid'] = _frame(*cylinder_axis(shape, 10, (0, 10, 4), 'middle'))\n"
+    "connectors['bore_top'] = _frame(*cylinder_axis(shape, 10, (0, 10, 4), 'end'))\n"
+    "published['bore_surface'] = [pub_face(f) for f in shape.faces() if f.geom_type == GeomType.CYLINDER\n"
+    "                             and abs(BRepAdaptor_Surface(f.wrapped).Cylinder().Radius() - 10) < 1e-9]\n",
+    flange_frames(50, 10, 30), ["bolt_seat", "bolt_seat.i7"],
+    sweep_frames(["r_out", "t", "rb"], [[40, 50, 70], [6, 10, 14], [25, 30, 35]], flange_volume,
+                 lambda r_out, t, rb: ([-r_out, -r_out, 0], [r_out, r_out, t]), flange_frames),
+    published={"bore_surface": [{"type": "cylinder", "axis": [0, 0, 1], "axis_point_mm": [0, 0, 0],
+                                 "radius_mm": 10, "span_mm": [0, 8.5]}]},
+)
+
+
+def pocket_volume(w, d, h, dp):
+    return w * d * h - (w - 30) * (d - 20) * dp - PI * 9 * (h - dp) - 0.5 * 1 * 1 * (d - 20)
+
+
+def pocket_frames(w, d, h, dp):
+    return {
+        "drain_seat": frame([w / 2, d / 2, h - dp], [0, 0, 1]),
+        "pocket_floor": frame([w / 2, d / 2, h - dp], [0, 0, 1]),
+        "origin": IDENTITY,
+    }
+
+
+emit_connectors(
+    "con_sweep_pocket", "Pocketed plate with connectors through tags",
+    "  param w = 80 mm range(60 mm, 120 mm)\n"
+    "  param d = 50 mm range(40 mm, 80 mm)\n"
+    "  param h = 20 mm range(14 mm, 30 mm)\n"
+    "  param dp = 8 mm range(4 mm, 12 mm)\n\n"
+    "  sketch s on plane.XY {\n    rect r corner=(0 mm, 0 mm) w=w h=d\n  }\n"
+    "  extrude plate from s.r distance=h\n\n"
+    "  sketch cut on plate.cap_end {\n    rect r corner=(15 mm, 10 mm) w=w - 30 mm h=d - 20 mm\n  }\n"
+    "  extrude pocket from cut.r distance=-dp op=subtract\n\n"
+    "  tag floor_face = pocket.cap_end\n"
+    "  tag rim = edge(plate.cap_end & pocket.side(cut.r.left))\n\n"
+    "  hole drain on=floor_face at=(w / 2, d / 2) d=6 mm end=through_all\n"
+    "  chamfer rim_chamfer edges=[rim] d=1 mm\n\n"
+    "  connector drain_seat from=drain\n"
+    "  connector pocket_floor origin=floor_face z=floor_face\n",
+    "nam_pocket_tags with connectors: one from a hole drilled on a tagged face, one on the tagged pocket "
+    "floor itself (its centroid, which the centred drain hole does not move). Every swept plate size and "
+    "pocket depth keeps them on the floor.",
+    pocket_volume(80, 50, 20, 8), [0, 0, 0], [80, 50, 20],
+    "w, d, h, dp = 80, 50, 20, 8\n"
+    "shape = Box(w, d, h, align=(Align.MIN, Align.MIN, Align.MIN))\n"
+    "shape = shape - Pos(15 + (w - 30) / 2, 10 + (d - 20) / 2, h - dp / 2) * Box(w - 30, d - 20, dp)\n"
+    "shape = shape - Pos(w / 2, d / 2, (h - dp) / 2) * Cylinder(3, h - dp)\n"
+    "rim = shape.edges().filter_by(Axis.Y).filter_by_position(Axis.X, 14.99, 15.01).filter_by_position(Axis.Z, h - 0.01, h + 0.01)\n"
+    "shape = chamfer(rim, 1)\n",
+    "_o, _n = face_frame(planar_face(shape, [0, 0, 1], (40, 25, 12)))\n"
+    "connectors['drain_seat'] = _frame(circle_centre(shape, 3, (40, 25, 12)), _n)\n"
+    "connectors['pocket_floor'] = _frame(_o, _n)\n",
+    pocket_frames(80, 50, 20, 8), [],
+    sweep_frames(["w", "d", "h", "dp"], [[60, 80, 120], [40, 50, 80], [14, 20, 30], [4, 8, 12]],
+                 pocket_volume, lambda w, d, h, dp: ([0, 0, 0], [w, d, h]), pocket_frames),
+)
+
+
+def cup_volume(w, d, h, tw):
+    return w * d * h - (w - 2 * tw) * (d - 2 * tw) * (h - tw) - 2 * PI * 16 * tw
+
+
+def cup_frames(w, d, h, tw):
+    return {
+        "port_face": frame([0, d / 2, h / 2], [-1, 0, 0]),
+        "base_face": frame([w / 2, d / 2, 0], [0, 0, -1]),
+        "origin": IDENTITY,
+    }
+
+
+emit_connectors(
+    "con_sweep_shell", "Open box with connectors",
+    "  param w = 80 mm range(60 mm, 100 mm)\n"
+    "  param d = 50 mm range(40 mm, 70 mm)\n"
+    "  param h = 40 mm range(30 mm, 50 mm)\n"
+    "  param tw = 3 mm range(2 mm, 4 mm)\n\n"
+    "  sketch s on plane.XY {\n    rect r corner=(0 mm, 0 mm) w=w h=d\n  }\n"
+    "  extrude body from s.r distance=h\n"
+    "  shell cup faces=[body.cap_end] thickness=tw\n"
+    "  hole port on=body.side(s.r.left) at=(-(d / 2), h / 2) d=8 mm end=through_all\n\n"
+    "  connector port_face from=port\n"
+    "  connector base_face origin=body.cap_start z=body.cap_start\n",
+    "nam_shell_box with connectors: the cross hole's entry on the outer left wall (z = -X, x by the "
+    "hole-frame rule) and the bottom face after the shell. Every swept size and wall thickness keeps them.",
+    cup_volume(80, 50, 40, 3), [0, 0, 0], [80, 50, 40],
+    "w, d, h, tw = 80, 50, 40, 3\n"
+    "shape = Box(w, d, h, align=(Align.MIN, Align.MIN, Align.MIN))\n"
+    "shape = shape - Pos(w / 2, d / 2, tw + (h - tw) / 2) * Box(w - 2 * tw, d - 2 * tw, h - tw)\n"
+    "wall = Pos(w / 2, d / 2, h / 2) * (Rot(0, 90, 0) * Cylinder(4, w + 2))\n"
+    "shape = shape - wall\n",
+    "_o, _left = face_frame(planar_face(shape, [-1, 0, 0], (0, 25, 20)))\n"
+    "connectors['port_face'] = _frame(circle_centre(shape, 4, (0, 25, 20)), _left)\n"
+    "_o, _n = face_frame(planar_face(shape, [0, 0, -1], (40, 25, 0)))\n"
+    "connectors['base_face'] = _frame(_o, _n)\n",
+    cup_frames(80, 50, 40, 3), [],
+    sweep_frames(["w", "d", "h", "tw"], [[60, 80, 100], [40, 50, 70], [30, 40, 50], [2, 3, 4]],
+                 cup_volume, lambda w, d, h, tw: ([0, 0, 0], [w, d, h]), cup_frames),
+)
+
+
+def mirror_volume(w, c):
+    return w * 30 * 12 - 2 * PI * 9 * 12 - 2 * 0.5 * c * c * w - 2 * _chamfer_ring(3, c)
+
+
+def mirror_frames(w, c):
+    return {
+        "hole_seat.m1": frame([w / 4, 15, 12], [0, 0, 1]),
+        "hole_seat.m2": frame([-w / 4, 15, 12], [0, 0, 1]),
+        "origin": IDENTITY,
+    }
+
+
+emit_connectors(
+    "con_sweep_mirror", "Symmetric plate with connectors on mirrored holes",
+    "  param w = 90 mm range(60 mm, 140 mm)\n"
+    "  param c = 2 mm range(1 mm, 3 mm)\n\n"
+    "  sketch s on plane.XY {\n    rect r corner=(-w / 2, 0 mm) w=w h=30 mm\n  }\n"
+    "  extrude plate from s.r distance=12 mm\n"
+    "  hole h on=plate.cap_end at=(w / 4, 15 mm) d=6 mm end=through_all\n"
+    "  mirror twin of=h plane=plane.YZ\n"
+    "  chamfer edges_ch edges=[edge(plate.cap_end & plate.side(s.r.top)), edge(plate.cap_end & plate.side(s.r.bottom)), edge(plate.cap_end & h.wall), edge(plate.cap_end & twin.wall)] d=c\n\n"
+    "  connector hole_seat from=twin\n",
+    "nam_mirror_chamfer with connectors on the hole (.m1) and its mirror image (.m2), on the hole's "
+    "entry plane under the chamfers. Every swept width and chamfer size moves them apart symmetrically.",
+    mirror_volume(90, 2), [-45, 0, 0], [45, 30, 12],
+    "w, c = 90, 2\n"
+    "shape = Box(w, 30, 12, align=(Align.CENTER, Align.MIN, Align.MIN))\n"
+    "for x in (w / 4, -w / 4):\n"
+    "    shape = shape - Pos(x, 15, 6) * Cylinder(3, 12)\n"
+    "top = [e for e in shape.edges().filter_by_position(Axis.Z, 11.99, 12.01)\n"
+    "       if not (e.geom_type == GeomType.LINE and abs(e.start_point().X - e.end_point().X) < 1e-6)]\n"
+    "shape = chamfer(top, c)\n",
+    "_o, _top = face_frame(planar_face(shape, [0, 0, 1], (0, 15, 12)))\n"
+    "connectors['hole_seat.m1'] = _frame(circle_centre(shape, 5, (22.5, 15, 12)), _top)\n"
+    "connectors['hole_seat.m2'] = _frame(circle_centre(shape, 5, (-22.5, 15, 12)), _top)\n",
+    mirror_frames(90, 2), ["hole_seat"],
+    sweep_frames(["w", "c"], [[60, 90, 140], [1, 2, 3]], mirror_volume,
+                 lambda w, c: ([-w / 2, 0, 0], [w / 2, 30, 12]), mirror_frames),
+)
+
+
+# 8. invalid connectors: each part must fail with exactly the one code -----------------------------
 
 BASE = "  sketch s on plane.XY {\n    rect r corner=(0 mm, 0 mm) w=40 mm h=30 mm\n  }\n  extrude base from s.r distance=20 mm\n"
 emit_invalid("con_err_missing_z", "Connector without z",
