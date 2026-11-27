@@ -1,0 +1,15 @@
+tcad 0.2
+
+part con_suppressed "Plate whose hole is suppressed in one configuration" {
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=60 mm h=40 mm
+  }
+  extrude base from s.r distance=20 mm
+  hole h on=base.cap_end at=(45 mm, 20 mm) d=10 mm end=through_all
+
+  connector seat from=h
+  connector top origin=base.cap_end z=base.cap_end
+  publish bore = h.wall
+
+  config plain { suppress h }
+}

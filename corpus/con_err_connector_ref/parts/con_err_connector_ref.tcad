@@ -1,0 +1,10 @@
+tcad 0.2
+
+part con_err_connector_ref "Connector that refers to another connector" {
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=40 mm h=30 mm
+  }
+  extrude base from s.r distance=20 mm
+  connector a origin=(0 mm, 0 mm, 0 mm) z=+Z
+  connector b origin=a z=+Z
+}

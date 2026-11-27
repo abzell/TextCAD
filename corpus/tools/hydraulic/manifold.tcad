@@ -23,4 +23,10 @@ part manifold_4port "Four-port manifold block with cross-drilled galleries" {
   hole mount on=block.cap_end at=(8 mm, 8 mm) d=9 mm end=through_all
   linear_pattern mount_row of=mount dir=+X count=2 spacing=len - 16 mm
   linear_pattern mount_grid of=mount_row dir=+Y count=2 spacing=wid - 16 mm
+
+  connector port_face from=ports
+  connector gallery_plug from=gallery
+  connector cross_plug from=cross
+  connector mount_bolt from=mount_grid
+  connector base origin=block.cap_start z=block.cap_start
 }

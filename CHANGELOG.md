@@ -11,6 +11,9 @@ Changes to the TextCAD format, its specification and its conformance corpus. For
   build123d, and eight invalid parts (`con_err_*`).
 - Conformance cases for `publish` (draft, #28): `pub_surfaces`, `pub_edges`, `pub_split`, `pub_sphere`
   and `pub_torus` with entities cross-checked against build123d, and five invalid parts (`pub_err_*`).
+- Connectors and published faces on the six hydraulic parts (pin joints, rod threads, ports, tie rods,
+  mounting faces, bearing surfaces), cross-checked against their build123d models; the clevis also for
+  its `heavy` configuration. `con_suppressed` and `con_err_connector_ref`.
   `compare_reference.py` also compares connector frames.
 
 ### Clarified (draft)
@@ -23,6 +26,8 @@ Changes to the TextCAD format, its specification and its conformance corpus. For
   a hole on a datum plane gives a connector on the plane with z opposite to the drilling direction.
 - `spec/assembly.md` § `publish`: faces or edges (not both), edge chains, split faces, the order of
   entities, and the kernel-independent parameters of each surface and curve type.
+- Connectors and published entities that refer to a suppressed feature are suppressed with it
+  (`I6014`); connectors may not refer to other connectors (`E5002`; share a frame through a `csys`).
 
 ### Changed
 - The repository holds the format only. The specification no longer describes a particular program:

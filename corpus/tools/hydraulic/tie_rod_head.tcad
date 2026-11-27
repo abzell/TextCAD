@@ -26,4 +26,9 @@ part tie_rod_head "Tie-rod cylinder head" {
   revolve seal_groove from groove_sk.r axis=axis.Z op=subtract
 
   hole port on=block.side(plan.r.right) at=(0 mm, thick / 2) thread="M18x1.5" depth=head / 2
+
+  connector rod_axis origin=rod_bore.wall z=rod_bore.wall origin_at=middle
+  connector tie_rod from=tie_y
+  connector port_face from=port
+  connector seat origin=block.cap_start z=block.cap_start
 }

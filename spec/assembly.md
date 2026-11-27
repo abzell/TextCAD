@@ -137,6 +137,15 @@ Rules, so that no frame depends on the kernel:
   that is not a hole or a pattern of one is `E5002`; x parallel to z, or a zero direction, is `E6011`.
 - Connector names share the part's name scope with parameters, sketches, features, datums and tags
   (`E2101` for a clash).
+- A connector refers to geometry, datums, points and holes, never to another connector or to a
+  published name (`E5002`). To share a frame, declare a `csys` and use it in both connectors.
+
+**Suppression.** A connector or `publish` whose references name a feature that is suppressed in the
+configuration being built (by the configuration's `suppress` list or by the feature's `suppress if`,
+directly or through a tag) is suppressed with it. It is left out of that configuration's interface and
+reported with the information `I6014`, not an error; an assembly that uses it in that configuration
+follows the rules for suppressed references (`I6202`). A connector can also be suppressed on its own
+(`suppress if`).
 
 The conformance cases `corpus/con_*` cover these rules.
 
@@ -515,6 +524,7 @@ solved transforms, the BOM or the checks; tools use them to show the assembly.
 | E6011 | connector axes are parallel or degenerate |
 | E6012 | no grounded instance |
 | E6013 | opposite-hand part lacks connectors of the seed |
+| I6014 | a connector or published entity is suppressed with the feature it refers to |
 | E6101 | mate arguments have the wrong primitive kinds |
 | E6102 | mates conflict (names a minimal conflicting set) |
 | W6103 | redundant mate |

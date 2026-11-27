@@ -21,4 +21,11 @@ part grease_pin "Pin with a grease groove and cross hole" {
   hole cross on=plane.XZ at=(0 mm, pin_len / 2) d=6 mm depth=pin_d / 2 + 2 mm
 
   chamfer ends edges=[edge(pin.cap_end & pin.side(pin_sk.c)#2), edge(pin.cap_start & pin.side(pin_sk.c)#1)] d=2 mm
+
+  connector pin_axis origin=pin.side(pin_sk.c) z=pin.side(pin_sk.c) origin_at=middle
+  connector grease from=axial
+  connector cross_in from=cross
+  connector end_a origin=pin.cap_start z=pin.cap_start
+  connector end_b origin=pin.cap_end z=pin.cap_end
+  publish bearing_surface = pin.side(pin_sk.c)
 }

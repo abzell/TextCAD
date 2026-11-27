@@ -1,0 +1,173 @@
+{
+  "note": "A connector and a published face that refer to a suppressed feature are suppressed with it in that configuration (information I6014 for each), while the others stay. Without the configuration the part has all three.",
+  "volume_mm3": 46429.203673205106,
+  "area_mm2": 9271.238898038471,
+  "center_of_mass_mm": [
+    29.49251886662184,
+    19.999999999999996,
+    10.000000000000002
+  ],
+  "bbox_min_mm": [
+    0,
+    0,
+    0
+  ],
+  "bbox_max_mm": [
+    60,
+    40,
+    20
+  ],
+  "topology": {
+    "solids": 1
+  },
+  "connectors": {
+    "seat": {
+      "origin_mm": [
+        45.0,
+        20.0,
+        20.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "top": {
+      "origin_mm": [
+        29.492518866621847,
+        20.0,
+        20.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "origin": {
+      "origin_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    }
+  },
+  "absent": [],
+  "baseline": [
+    "area_mm2",
+    "center_of_mass_mm"
+  ],
+  "published": {
+    "bore": [
+      {
+        "type": "cylinder",
+        "axis": [
+          0.0,
+          0.0,
+          1
+        ],
+        "axis_point_mm": [
+          45,
+          20,
+          0.0
+        ],
+        "radius_mm": 5,
+        "span_mm": [
+          0.0,
+          20
+        ]
+      }
+    ]
+  },
+  "configs": {
+    "plain": {
+      "connectors": {
+        "top": {
+          "origin_mm": [
+            30.0,
+            20.0,
+            20.0
+          ],
+          "x": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "y": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "z": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        "origin": {
+          "origin_mm": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "x": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "y": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "z": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        }
+      },
+      "published": {},
+      "info": [
+        "I6014",
+        "I6014"
+      ]
+    }
+  }
+}
