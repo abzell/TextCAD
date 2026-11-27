@@ -26,7 +26,7 @@ here first, recorded as ADRs in [`../docs/adr/`](../docs/adr/), and covered by c
 | [bundle.md](bundle.md) | Bundle layout, archive, source hash | normative |
 | [io.md](io.md) | STEP import | normative |
 | [diagnostics.md](diagnostics.md) | Validity and standard diagnostic codes | normative |
-| [assembly.md](assembly.md) | Assemblies, mates, BOM | draft (Phase 2) |
+| [assembly.md](assembly.md) | Assemblies, mates, BOM | draft (Phase 2); files, instances, references and placement normative |
 
 Examples live in [`examples/`](examples/); they are valid and in canonical form.
 

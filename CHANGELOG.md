@@ -6,7 +6,7 @@ Changes to the TextCAD format, its specification and its conformance corpus. For
 ## [Unreleased]
 
 ### Added
-- Draft rules for assembly files (#29): resolving `part()`/`assembly()` paths (relative to the file,
+- Rules for assembly files (#29): resolving `part()`/`assembly()` paths (relative to the file,
   inside the bundle, or `lib:`), instances (`config=`, override blocks, name scope), reference paths
   into rigid and flexible sub-assemblies, and placement (`rotate=` in order about the fixed axes, then
   `at=`; nested placements composed); `ground` takes no arguments; `E6006`; canonical argument order
@@ -42,6 +42,11 @@ Changes to the TextCAD format, its specification and its conformance corpus. For
   (`I6014`); connectors may not refer to other connectors (`E5002`; share a frame through a `csys`).
 
 ### Changed
+- Assembly files are normative (#29): `spec/assembly.md` § Files and bundles (without the version lock
+  and libraries), § Assembly file for `meta`, `param`, `instance`, `ground`, `config` and `tag`,
+  § Instances, § References and § Placement before solving. `assembly_decl`, `instance_decl` and
+  `ground_decl` are in `grammar.ebnf`; `E6001`, `E6002`, `E6004`, `E6006` and `E6012` are in
+  `spec/diagnostics.md`. The other assembly statements stay drafts.
 - Connectors and published geometry are normative: their rules moved from `spec/assembly.md` (draft)
   to `spec/features.md` § Connectors and § Published geometry, unchanged. `connector_decl` and
   `publish_decl` are in `grammar.ebnf`; `E6011` and `I6014` are in `spec/diagnostics.md`; the

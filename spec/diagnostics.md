@@ -34,7 +34,7 @@ Every diagnostic has:
 | E3xxx | Naming and references |
 | E4xxx | Sketches and constraints |
 | E5xxx | Features and geometry |
-| E6xxx | Assemblies (draft, spec/assembly.md), and connectors (E6011, I6014, normative) |
+| E6xxx | Assemblies and connectors (spec/assembly.md: the codes listed here are normative, the others draft) |
 
 ## Codes
 
@@ -100,7 +100,12 @@ Every diagnostic has:
 | E5004 | the kernel failed to build the feature |
 | E5005 | profile problem (open chain, self-intersection, empty sketch) |
 | E5006 | the first solid feature must add material, or the feature needs an existing body |
-| E6011 | connector axes are parallel or degenerate (x parallel to z, or a zero direction) |
+| E6001 | reference to an unknown instance, connector, published entity or datum (with nearest names) |
+| E6002 | referenced file not found, outside the bundle, or not a part / assembly as the call says |
+| E6004 | reference cycle between files (the message lists the cycle) |
+| E6006 | `config=` names a configuration the referenced file does not declare |
+| E6011 | connector axes are parallel or degenerate (x parallel to z, or a zero direction), or a zero rotation axis |
+| E6012 | an assembly has no grounded instance |
 | I6014 | a connector or published entity is suppressed with the feature it refers to (information) |
 
 ## Recovery (recommended)

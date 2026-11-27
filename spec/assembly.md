@@ -2,7 +2,11 @@
 
 Status: **draft** (Phase 2 of the format). Source requirements: 13 (Phase 2). Decisions: ADR 0015.
 Sections become *normative* one by one as they are reviewed and covered by conformance cases; changes
-to this text are recorded in ADRs. The roadmap is in [`../docs/roadmap.md`](../docs/roadmap.md).
+to this text are recorded in ADRs. **Normative so far:** § Files and bundles (except § Version lock and
+`[libraries]`), § Assembly file with § Statements (the rows `meta`, `param`, `instance`, `ground`,
+`config` and `tag`), § Instances, § References and § Placement before solving (format 0.2, #29), and
+the part side (§ `meta`, § `connector`, § `publish`, normative in spec/features.md). Every other
+section is a draft. The roadmap is in [`../docs/roadmap.md`](../docs/roadmap.md).
 
 An assembly places instances of parts and other assemblies relative to each other and records the design
 intent behind the placement: which frames meet, what may still move, which values drive the pose. Like
@@ -31,6 +35,9 @@ a part, it is a recipe: the resolved transforms are derived from it and are not 
    part may reference a skeleton; nothing may reference the assembly that contains it (`E6004`).
 
 ## Files and bundles
+
+Status: **normative** (format 0.2), except § Version lock and the `[libraries]` table, which are drafts
+(#30, #46): until they are normative a tool may reject `lib:` paths with `E6002`.
 
 ```
 excavator_boom/
@@ -140,6 +147,11 @@ Makes faces or an edge chain visible to assemblies for mates that cannot be writ
 kernel-independent parameters.
 
 ## Assembly file
+
+Status: **normative** (format 0.2) for the statements `meta`, `param`, `instance`, `ground`, `config`
+(parameter overrides and `suppress`, as in parts) and `tag`. The other statements, the `instance`
+arguments `rev=`, `flexible` and `bom=`, `@hint(...)`, `skeleton(...)` and configuration overrides of
+instances are drafts; a tool that does not support one yet reports `E0001`.
 
 ```
 tcad 0.2
@@ -522,20 +534,16 @@ solved transforms, the BOM or the checks; tools use them to show the assembly.
 
 ## Grammar (draft, to be merged into grammar.ebnf when implemented)
 
-`meta`, `connector` and `publish` are already in [grammar.ebnf](grammar.ebnf).
+`meta`, `connector` and `publish` are already in [grammar.ebnf](grammar.ebnf), and so are `assembly_decl`
+with `instance`, `ground`, `param`, `tag`, `config` and `meta` (normative). The rules below add the
+draft statements.
 
 ```
-top_item        = part_decl | assembly_decl | reserved_stmt ;
-assembly_decl   = "assembly" , IDENT , [ STRING ] , "{" , { asm_item } , "}" ;
-asm_item        = meta_decl | param_decl | instance_decl | ground_decl | mate_decl | pattern_decl
-                | mirror_inst_decl | config_decl | bom_decl | check_decl | fastener_decl
-                | route_decl | weld_decl | explode_decl | sketch_decl | feature_stmt | tag_decl
-                | reserved_stmt ;
-meta_decl       = "meta" , { named_arg } ;
-instance_decl   = "instance" , IDENT , "=" , source_call , { arg } , [ suppress_clause ] ,
-                  [ "{" , { IDENT , "=" , ( expr | STRING ) , [ ";" ] } , "}" ] , [ hint ] ;
-source_call     = ( "part" | "assembly" | "skeleton" ) , "(" , STRING , ")" ;
-ground_decl     = "ground" , IDENT ;
+asm_item        = (* the normative ones, plus *) mate_decl | pattern_decl | mirror_inst_decl
+                | bom_decl | check_decl | fastener_decl | route_decl | weld_decl | explode_decl
+                | sketch_decl | feature_stmt ;
+instance_decl   = (* as in grammar.ebnf, plus *) [ hint ] ;
+source_call     = (* as in grammar.ebnf, plus *) "skeleton" , "(" , STRING , ")" ;
 mate_decl       = "mate" , IDENT , IDENT , "(" , reference , { "," , reference } , ")" ,
                   [ "=" , expr ] , { arg } , [ suppress_clause ] ;
 pattern_decl    = "pattern" , IDENT , { arg } , [ suppress_clause ] ;
