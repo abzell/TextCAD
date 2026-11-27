@@ -143,7 +143,7 @@ emit(
 )
 
 
-# --- interfaces: connectors and published faces (spec/assembly.md, draft) -------------------------
+# --- interfaces: connectors and published faces (spec/features.md) -------------------------
 import json  # noqa: E402
 import subprocess  # noqa: E402
 

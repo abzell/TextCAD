@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Corpus cases for connectors (spec/assembly.md § `connector`, draft; issue #28).
+"""Corpus cases for connectors (spec/features.md § Connectors and § Published geometry; issue #28).
 
 Writes `con_*` cases: three parts with geometry whose expected connector frames are computed here in
 closed form and checked against frames that each case's independent build123d model derives from its

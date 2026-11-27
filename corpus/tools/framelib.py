@@ -1,5 +1,5 @@
 """Shared helpers for connector and published-geometry cases: closed-form frames (the rules of
-spec/assembly.md), and the code that each reference.py uses to derive frames and entities from its
+spec/features.md), and the code that each reference.py uses to derive frames and entities from its
 own build123d geometry."""
 import math
 import sys
@@ -10,7 +10,7 @@ ORIGIN_TOL = 1e-5  # mm, tier T2 (spec/kernel.md)
 AXIS_TOL = 1e-9
 
 
-# --- closed-form frame helpers (the rules of spec/assembly.md § `connector`) -------------------------
+# --- closed-form frame helpers (the rules of spec/features.md § Connectors) -------------------------
 
 def unit(v):
     n = math.sqrt(sum(c * c for c in v))

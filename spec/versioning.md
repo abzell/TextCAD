@@ -53,8 +53,8 @@ keywords are **gated by the header**:
 | Keyword | Context | Introduced | Chapter | Status |
 | --- | --- | --- | --- | --- |
 | `meta` | part | 0.2 | [features.md](features.md) § Part metadata | normative; also `meta.<key> = ...` in configurations |
-| `connector` | part | 0.2 | [assembly.md](assembly.md) § `connector` | draft |
-| `publish` | part | 0.2 | [assembly.md](assembly.md) § `publish` | draft |
+| `connector` | part | 0.2 | [features.md](features.md) § Connectors | normative |
+| `publish` | part | 0.2 | [features.md](features.md) § Published geometry | normative |
 | `uses` | part | 0.2 | [assembly.md](assembly.md) § Skeleton | draft |
 
 A change to the format that adds a part-level keyword adds a row to this table. Keywords that only

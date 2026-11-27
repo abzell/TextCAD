@@ -61,7 +61,7 @@ Formatting is idempotent: `format(format(x)) == format(x)` for every input that 
 | sweep | path, guide, op |
 | loft | sections, guides, op |
 | hole | on, at, from, type, d, thread, cbore_d, cbore_depth, csk_d, csk_angle, depth, end, flip |
-| connector | from, csys, origin, z, x, origin_at, rotate, offset, flip (draft, spec/assembly.md) |
+| connector | from, csys, origin, z, x, origin_at, rotate, offset, flip |
 | fillet | edges, r |
 | chamfer | edges, d, d2, angle |
 | shell | faces, thickness, outward |

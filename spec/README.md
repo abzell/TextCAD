@@ -20,13 +20,13 @@ here first, recorded as ADRs in [`../docs/adr/`](../docs/adr/), and covered by c
 | [expressions.md](expressions.md) | Expressions and scopes | normative |
 | [parameters.md](parameters.md) | Parameters and configurations | normative |
 | [sketch.md](sketch.md) | Sketches and constraints | normative |
-| [features.md](features.md) | Features and part metadata | normative |
+| [features.md](features.md) | Features, part metadata, connectors, published geometry | normative |
 | [naming.md](naming.md) | Persistent naming | normative |
 | [kernel.md](kernel.md) | Geometric semantics, conformance tiers | normative |
 | [bundle.md](bundle.md) | Bundle layout, archive, source hash | normative |
 | [io.md](io.md) | STEP import | normative |
 | [diagnostics.md](diagnostics.md) | Validity and standard diagnostic codes | normative |
-| [assembly.md](assembly.md) | Assemblies, connectors, mates, BOM | draft (Phase 2) |
+| [assembly.md](assembly.md) | Assemblies, mates, BOM | draft (Phase 2) |
 
 Examples live in [`examples/`](examples/); they are valid and in canonical form.
 

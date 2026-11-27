@@ -28,6 +28,8 @@ part_decl       = "part" , IDENT , [ STRING ] , "{" , { part_item } , "}" ;
 part_item       = tolerance_decl
                 | material_decl
                 | meta_decl                                     (* format 0.2 *)
+                | connector_decl                                (* format 0.2 *)
+                | publish_decl                                  (* format 0.2 *)
                 | param_decl
                 | import_decl
                 | sketch_decl
@@ -40,6 +42,8 @@ part_item       = tolerance_decl
 tolerance_decl  = "tolerance" , quantity ;                      (* default 1e-6 mm *)
 material_decl   = "material" , STRING , { named_arg } ;         (* density=7.85 g/cm^3 *)
 meta_decl       = "meta" , { named_arg } ;                      (* number="HC-1" kind=made ... *)
+connector_decl  = "connector" , IDENT , { arg } , [ suppress_clause ] ;
+publish_decl    = "publish" , IDENT , "=" , reference , { "," , reference } ;
 
 param_decl      = "param" , IDENT , "=" , ( expr | STRING ) ,
                   [ "range" , "(" , expr , "," , expr , ")" ] ,

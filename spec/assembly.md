@@ -67,7 +67,8 @@ format = "0.1"
 
 ## Part side: metadata, connectors and published geometry
 
-These statements are added to **parts** (spec/features.md links here).
+These statements are added to **parts**. They are normative in [features.md](features.md); the
+summaries below show how assemblies use them.
 
 ### `meta`
 
@@ -92,106 +93,34 @@ appear once (`E2303`). Configurations may override `meta` keys: `config heavy { 
 
 ### `connector`
 
-A connector is a named right-handed frame (origin, x, y, z) owned by the part. It is evaluated after the
-last feature, from references resolved by persistent naming (spec/naming.md), and stored in the
-manifest per configuration.
+**Normative in [features.md](features.md) § Connectors**; summary:
 
 ```
 connector pin_axis from=pin_bore                 # hole: origin at the entry, z out of the material
 connector mount    origin=base.cap_start z=base.cap_start x=+X
-connector rod_end  origin=(0 mm, 0 mm, rod_len) z=+Z
-connector bore     origin=barrel.side(s.c1) z=barrel.side(s.c1) origin_at=start
 connector seat     csys=seat_csys rotate=90 deg offset=(0 mm, 0 mm, 2 mm)
 ```
 
-| Argument | Accepts | Meaning |
-| --- | --- | --- |
-| `from=` | a `hole` feature, or a pattern or mirror of one (also nested) | one connector per hole position: origin at the centre of the hole's entry (top of a counterbore or countersink; for a hole on a datum plane, the point on the plane), z **opposite to the drilling direction** (out of the material for a hole on a face without `flip`; for a hole on a datum plane, the plane's normal, reversed by `flip`), x by the rule below. A hole with one position gives the connector `<name>` itself; several positions give `<name>.p1`, `<name>.p2`, ... (and no bare `<name>`). A pattern gives `<name>.i<k>` for every instance that is not skipped, numbered as the pattern numbers them; a mirror gives `<name>.m1` (its `of=`, the original) and `<name>.m2` (the mirrored copy). Nested repetitions give one suffix per level, outermost first, then the position: `<name>.m2.i3.p1`, as semantic IDs do (spec/naming.md). A mirrored copy's connector is built like any hole's from the mirrored position and drilling direction, so it stays right-handed. |
-| `csys=` | a `csys` | copies its frame |
-| `origin=` | `(x, y, z)`, a `point`, a circular edge (its centre), a planar face (its centroid), a cylindrical, conical, spherical or toroidal face (a point on its axis or its centre; see `origin_at`), a sketch point | the origin |
-| `z=` | a direction (`+Z`, `(0, 1, 1)`), an `axis`, a planar face (its outward normal), a face of revolution or circular edge (its axis) | the z axis |
-| `x=` | a direction or an `axis` | the x axis, projected into the plane normal to z |
-| `origin_at=` | `start`, `middle`, `end` | for a face of revolution: where along the axis (default `start`, the face's lowest point along z) |
-| `rotate=` | angle | turns x and y about z after everything else |
-| `offset=` | `(x, y, z)` | moves the origin in the connector's own frame |
-| flag `flip` | | turns the frame 180 deg about its x axis (z and y reverse) |
-
-Rules, so that no frame depends on the kernel:
-
-- An axis taken from a face of revolution or circular edge has no inherent sign. It is oriented so that
-  its first component that is not zero (x, then y, then z, with tolerance 1e-9) is positive; use `flip`
-  or give `z=` as a direction to choose the other sense. A direction given explicitly (`z=(0, 0, -1)`)
-  keeps its sign; directions need not be unit length.
-- `origin_at` is measured along that oriented axis: `start` is the face's lowest point along it.
-- A face of revolution that later features split into pieces (`pin_bore.wall#1`, `#2`) may be given
-  without an ordinal in `origin=` and `z=`: it then means all of its pieces, which must share one axis
-  (within the modeling tolerance; otherwise `E3002` as for any ambiguous reference), and `origin_at`
-  is measured over all of them. With an ordinal it means that piece alone.
-- Without `x=`, x is `world Z cross z` normalized, or world X when z is parallel to world Z (the hole
-  frame rule). `x=` is projected into the plane normal to z and normalized; y is `z cross x`.
-- The frame is built in this order: the base frame (from `from=`, `csys=`, or `origin=`/`z=`/`x=`);
-  then `flip` (180 deg about x: y and z reverse, the origin stays); then `rotate` (about the current z,
-  by the right-hand rule: positive turns x towards y); then `offset`, measured along the resulting axes.
-- `origin=` and `z=` are required unless `from=` or `csys=` is given; `from=` and `csys=` exclude
-  `origin=`, `z=` and `x=` and each other. A missing or contradictory argument is `E5001`; a `from=`
-  that is not a hole or a pattern of one is `E5002`; x parallel to z, or a zero direction, is `E6011`.
-- Connector names share the part's name scope with parameters, sketches, features, datums and tags
-  (`E2101` for a clash).
-- A connector refers to geometry, datums, points and holes, never to another connector or to a
-  published name (`E5002`). To share a frame, declare a `csys` and use it in both connectors.
-
-**Suppression.** A connector or `publish` whose references name a feature that is suppressed in the
-configuration being built (by the configuration's `suppress` list or by the feature's `suppress if`,
-directly or through a tag) is suppressed with it. It is left out of that configuration's interface and
-reported with the information `I6014`, not an error; an assembly that uses it in that configuration
-follows the rules for suppressed references (`I6202`). A connector can also be suppressed on its own
-(`suppress if`).
-
-The conformance cases `corpus/con_*` cover these rules.
+A connector is a named right-handed frame owned by the part, evaluated after the last feature. It is
+taken from a hole (one per position), a `csys`, or an origin and axes; the sign of an axis taken from
+a face of revolution follows a fixed rule, so no frame depends on the kernel. A connector that refers
+to a suppressed feature is suppressed with it (`I6014`).
 
 Every part has the implicit connector `origin` (the part frame) and its datums are visible to
 assemblies under their own names (`plate.plane.XY`, `plate.mid_plane`, `plate.pin_axis_a`).
 
 ### `publish`
 
+**Normative in [features.md](features.md) § Published geometry**; summary:
+
 ```
 publish cam_lobe  = cam.side(lobe.s1)
-publish roller    = roller_body.side(r.c1)
 publish slot_path = edge(slot.side(g.top) & base.cap_end)
 ```
 
-Makes a face, a set of faces or an edge chain of the part visible to assemblies, for mates that cannot
-be written with frames (`tangent`, `cam`, `path`) and for named interference checks. Like connectors,
-published entities are evaluated after the last feature, and their names share the part's name scope
-(`E2101`).
-
-- The references are faces or edges, not both (`E3005` for a mix). A face that later features split
-  into pieces, given without an ordinal, means all its pieces, as for connectors.
-- Edges must form one connected chain, each edge sharing an end point with the next in the order
-  written (`E5002` otherwise).
-- The entities are listed in the order of the references and, within one reference, in the order of
-  their ordinals (`#1`, `#2`, spec/naming.md).
-
-Each entity is described in the part frame by its type and, where it has them, analytic parameters
-that do not depend on the kernel:
-
-| Type | Parameters |
-| --- | --- |
-| `plane` | `normal` (outward unit normal), `point_mm` (the face's centroid), `area_mm2` |
-| `cylinder` | `axis` (oriented by the sign rule of connectors), `axis_point_mm` (the point of the axis nearest the part origin), `radius_mm`, `span_mm` (`[start, end]` of the face along the axis, measured from `axis_point_mm`) |
-| `cone` | `axis` (sign rule), `apex_mm`, `half_angle_deg`, `span_mm` (along the axis, from the apex) |
-| `sphere` | `centre_mm`, `radius_mm` |
-| `torus` | `centre_mm`, `axis` (sign rule), `major_radius_mm`, `minor_radius_mm` |
-| `bspline` (any other surface) | `area_mm2` |
-| `line` | `ends_mm` (the two end points) |
-| `circle` (also an arc) | `centre_mm`, `axis` (sign rule), `radius_mm`, and `ends_mm` for an arc |
-| `ellipse`, `bspline` (curves) | `length_mm` |
-
-A face of revolution is described by its geometry, not by how it was made: a sphere made by revolving
-an arc is a `sphere`. Tools may store more (a tessellation and a sampled polyline at the modeling
-tolerance times 100 for free-form entities); conformance checks only the parameters above, at tier T2
-for lengths and points and to 1e-9 for unit vectors. The conformance cases `corpus/pub_*` cover these
-rules.
+Makes faces or an edge chain visible to assemblies for mates that cannot be written with frames
+(`tangent`, `cam`, `path`) and for named interference checks. Each entity is described by its type and
+kernel-independent parameters.
 
 ## Assembly file
 
@@ -521,10 +450,10 @@ solved transforms, the BOM or the checks; tools use them to show the assembly.
 | W6003 / E6003 | referenced file differs from `bundle.lock` (error under `--locked`) |
 | E6004 | reference cycle (an assembly or skeleton that refers back to itself) |
 | E6005 | the referenced part's `meta revision` does not match `rev=` |
-| E6011 | connector axes are parallel or degenerate |
+| E6011 | connector axes are parallel or degenerate (normative, spec/diagnostics.md) |
 | E6012 | no grounded instance |
 | E6013 | opposite-hand part lacks connectors of the seed |
-| I6014 | a connector or published entity is suppressed with the feature it refers to |
+| I6014 | a connector or published entity is suppressed with the feature it refers to (normative) |
 | E6101 | mate arguments have the wrong primitive kinds |
 | E6102 | mates conflict (names a minimal conflicting set) |
 | W6103 | redundant mate |
@@ -540,6 +469,8 @@ solved transforms, the BOM or the checks; tools use them to show the assembly.
 | W6601 | instance without material (zero mass) |
 
 ## Grammar (draft, to be merged into grammar.ebnf when implemented)
+
+`meta`, `connector` and `publish` are already in [grammar.ebnf](grammar.ebnf).
 
 ```
 top_item        = part_decl | assembly_decl | reserved_stmt ;
@@ -566,9 +497,7 @@ explode_decl    = "explode" , IDENT , "{" , { "step" , { arg } , [ ";" ] } , "}"
 config_item     = (* as in parts, plus *) reference , "." , "config" , "=" , IDENT ;
 
 (* additions to parts *)
-part_item       = (* ... *) | meta_decl | connector_decl | publish_decl | uses_decl ;
-connector_decl  = "connector" , IDENT , { arg } , [ suppress_clause ] ;
-publish_decl    = "publish" , IDENT , "=" , reference , { "," , reference } ;
+part_item       = (* ... *) | uses_decl ;
 uses_decl       = "uses" , IDENT , "=" , "skeleton" , "(" , STRING , ")" ;
 ```
 
