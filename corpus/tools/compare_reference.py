@@ -3,7 +3,8 @@
 
 For every corpus/<name>/reference.py: run it, and compare the printed properties with
 expected.json at determinism tier T2 (requirements 8.2): volume and area to 1e-6 relative,
-center of mass and bounding box to 1e-5 mm (10 x the default modeling tolerance of 1e-6 mm).
+center of mass and bounding box to 1e-5 mm (10 x the default modeling tolerance of 1e-6 mm);
+connector frames: origins to 1e-5 mm, axis components to 1e-9.
 
 Usage: python3 corpus/tools/compare_reference.py [corpus_dir]
 Needs `pip install build123d`. Run in CI only; build123d is never part of the product.
@@ -15,6 +16,7 @@ import sys
 
 REL = 1e-6
 ABS = 1e-5
+AXIS = 1e-9
 
 
 def close_rel(a, b):
@@ -51,6 +53,19 @@ def main():
                 if not close_abs(a, b):
                     problems.append(f"{key}: build123d {got[key]} vs expected {exp[key]}")
                     break
+        # connector frames: origins at T2 (1e-5 mm), axes to 1e-9; the implicit `origin` is not modelled
+        for key, f in exp.get("connectors", {}).items():
+            if key == "origin":
+                continue
+            g = got.get("connectors", {}).get(key)
+            if g is None:
+                problems.append(f"connector {key}: no frame in the build123d model")
+                continue
+            if not all(close_abs(a, b) for a, b in zip(g["origin_mm"], f["origin_mm"])):
+                problems.append(f"connector {key} origin: build123d {g['origin_mm']} vs expected {f['origin_mm']}")
+            for axis in "xyz":
+                if not all(abs(a - b) <= AXIS for a, b in zip(g[axis], f[axis])):
+                    problems.append(f"connector {key}.{axis}: build123d {g[axis]} vs expected {f[axis]}")
         if exp.get("topology") and got["topology"]["solids"] != exp["topology"]["solids"]:
             problems.append(f"solids: build123d {got['topology']['solids']} vs {exp['topology']['solids']}")
         checked += 1

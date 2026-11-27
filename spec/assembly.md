@@ -106,7 +106,7 @@ connector seat     csys=seat_csys rotate=90 deg offset=(0 mm, 0 mm, 2 mm)
 
 | Argument | Accepts | Meaning |
 | --- | --- | --- |
-| `from=` | a `hole` feature (or a pattern of one) | one connector per hole position: origin at the centre of the hole's entry (top of a counterbore or countersink), z **out of** the material (opposite to the drilling direction), x as in the hole frame (spec/features.md). Several positions give `<name>.p1`, `<name>.p2`, ...; a pattern of the hole gives `<name>.i<k>` (and `.i<k>.p<j>`). |
+| `from=` | a `hole` feature (or a pattern of one) | one connector per hole position: origin at the centre of the hole's entry (top of a counterbore or countersink), z **out of** the material (opposite to the drilling direction), x by the rule below. A hole with one position gives the connector `<name>` itself; several positions give `<name>.p1`, `<name>.p2`, ... (and no bare `<name>`); a pattern of the hole gives `<name>.i<k>` for every instance that is not skipped, numbered as the pattern numbers them (and `.i<k>.p<j>`). |
 | `csys=` | a `csys` | copies its frame |
 | `origin=` | `(x, y, z)`, a `point`, a circular edge (its centre), a planar face (its centroid), a cylindrical, conical, spherical or toroidal face (a point on its axis or its centre; see `origin_at`), a sketch point | the origin |
 | `z=` | a direction (`+Z`, `(0, 1, 1)`), an `axis`, a planar face (its outward normal), a face of revolution or circular edge (its axis) | the z axis |
@@ -120,11 +120,21 @@ Rules, so that no frame depends on the kernel:
 
 - An axis taken from a face of revolution or circular edge has no inherent sign. It is oriented so that
   its first component that is not zero (x, then y, then z, with tolerance 1e-9) is positive; use `flip`
-  or give `z=` as a direction to choose the other sense.
+  or give `z=` as a direction to choose the other sense. A direction given explicitly (`z=(0, 0, -1)`)
+  keeps its sign; directions need not be unit length.
+- `origin_at` is measured along that oriented axis: `start` is the face's lowest point along it.
 - Without `x=`, x is `world Z cross z` normalized, or world X when z is parallel to world Z (the hole
-  frame rule).
-- `origin=` and `z=` are required unless `from=` or `csys=` is given. A missing or contradictory
-  argument is `E5001`; x parallel to z is `E6011`.
+  frame rule). `x=` is projected into the plane normal to z and normalized; y is `z cross x`.
+- The frame is built in this order: the base frame (from `from=`, `csys=`, or `origin=`/`z=`/`x=`);
+  then `flip` (180 deg about x: y and z reverse, the origin stays); then `rotate` (about the current z,
+  by the right-hand rule: positive turns x towards y); then `offset`, measured along the resulting axes.
+- `origin=` and `z=` are required unless `from=` or `csys=` is given; `from=` and `csys=` exclude
+  `origin=`, `z=` and `x=` and each other. A missing or contradictory argument is `E5001`; a `from=`
+  that is not a hole or a pattern of one is `E5002`; x parallel to z, or a zero direction, is `E6011`.
+- Connector names share the part's name scope with parameters, sketches, features, datums and tags
+  (`E2101` for a clash).
+
+The conformance cases `corpus/con_*` cover these rules.
 
 Every part has the implicit connector `origin` (the part frame) and its datums are visible to
 assemblies under their own names (`plate.plane.XY`, `plate.mid_plane`, `plate.pin_axis_a`).

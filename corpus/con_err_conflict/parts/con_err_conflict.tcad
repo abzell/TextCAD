@@ -1,0 +1,10 @@
+tcad 0.2
+
+part con_err_conflict "Connector with csys and origin" {
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=40 mm h=30 mm
+  }
+  extrude base from s.r distance=20 mm
+  csys k origin=(0 mm, 0 mm, 0 mm) x=(1, 0, 0) y=(0, 1, 0)
+  connector a csys=k origin=(0 mm, 0 mm, 0 mm) z=+Z
+}

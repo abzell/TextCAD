@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E5001"
+  ],
+  "fails": true,
+  "note": "origin= needs z= unless from= or csys= gives the whole frame."
+}

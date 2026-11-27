@@ -1,0 +1,16 @@
+tcad 0.2
+
+part con_explicit "Block with connectors from explicit arguments" {
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=40 mm h=30 mm
+  }
+  extrude base from s.r distance=20 mm
+  csys seat_csys origin=(10 mm, 5 mm, 20 mm) x=(1, 0, 0) y=(0, 1, 0)
+
+  connector top origin=base.cap_end z=base.cap_end
+  connector front origin=base.side(s.r.bottom) z=base.side(s.r.bottom)
+  connector corner origin=(40 mm, 30 mm, 0 mm) z=(0, 0, -1) x=(1, 1, 0)
+  connector tilt origin=(0 mm, 0 mm, 0 mm) z=(0, 1, 1) x=+X
+  connector seat csys=seat_csys rotate=90 deg offset=(0 mm, 0 mm, 2 mm)
+  connector probe origin=(0 mm, 0 mm, 20 mm) z=+Z rotate=90 deg offset=(5 mm, 0 mm, 0 mm) flip
+}

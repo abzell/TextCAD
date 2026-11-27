@@ -1,0 +1,9 @@
+tcad 0.1
+
+part con_err_version "Connector under a format 0.1 header" {
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=40 mm h=30 mm
+  }
+  extrude base from s.r distance=20 mm
+  connector a origin=(0 mm, 0 mm, 0 mm) z=+Z
+}

@@ -1,0 +1,5 @@
+format = "0.1"
+name = "con_hole_frames"
+entry = "parts/con_hole_frames.tcad"
+units = "mm"
+license = "Apache-2.0"

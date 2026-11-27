@@ -1,0 +1,21 @@
+tcad 0.2
+
+part con_hole_frames "Plate with connectors on holes" {
+  param t = 10 mm range(6 mm, 14 mm)
+
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=60 mm h=40 mm
+  }
+  extrude plate from s.r distance=t
+  hole pins on=plate.cap_end at=[(10 mm, 10 mm), (50 mm, 10 mm)] d=6 mm end=through_all
+  hole cb on=plate.cap_end at=(45 mm, 30 mm) d=6 mm cbore_d=11 mm cbore_depth=3 mm end=through_all
+  hole bolt on=plate.cap_end at=(10 mm, 30 mm) d=4 mm end=through_all
+  linear_pattern bolts of=bolt dir=+X count=3 spacing=8 mm skip=[2]
+  hole port on=plate.side(s.r.bottom) at=(20 mm, t / 2) d=5 mm end=through_all
+
+  connector pin from=pins
+  connector pin_under from=pins flip
+  connector seat from=cb
+  connector bolt_seat from=bolts
+  connector port_face from=port
+}
