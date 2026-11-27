@@ -106,7 +106,7 @@ connector seat     csys=seat_csys rotate=90 deg offset=(0 mm, 0 mm, 2 mm)
 
 | Argument | Accepts | Meaning |
 | --- | --- | --- |
-| `from=` | a `hole` feature (or a pattern of one) | one connector per hole position: origin at the centre of the hole's entry (top of a counterbore or countersink), z **out of** the material (opposite to the drilling direction), x by the rule below. A hole with one position gives the connector `<name>` itself; several positions give `<name>.p1`, `<name>.p2`, ... (and no bare `<name>`); a pattern of the hole gives `<name>.i<k>` for every instance that is not skipped, numbered as the pattern numbers them (and `.i<k>.p<j>`). |
+| `from=` | a `hole` feature, or a pattern or mirror of one (also nested) | one connector per hole position: origin at the centre of the hole's entry (top of a counterbore or countersink; for a hole on a datum plane, the point on the plane), z **opposite to the drilling direction** (out of the material for a hole on a face without `flip`; for a hole on a datum plane, the plane's normal, reversed by `flip`), x by the rule below. A hole with one position gives the connector `<name>` itself; several positions give `<name>.p1`, `<name>.p2`, ... (and no bare `<name>`). A pattern gives `<name>.i<k>` for every instance that is not skipped, numbered as the pattern numbers them; a mirror gives `<name>.m1` (its `of=`, the original) and `<name>.m2` (the mirrored copy). Nested repetitions give one suffix per level, outermost first, then the position: `<name>.m2.i3.p1`, as semantic IDs do (spec/naming.md). A mirrored copy's connector is built like any hole's from the mirrored position and drilling direction, so it stays right-handed. |
 | `csys=` | a `csys` | copies its frame |
 | `origin=` | `(x, y, z)`, a `point`, a circular edge (its centre), a planar face (its centroid), a cylindrical, conical, spherical or toroidal face (a point on its axis or its centre; see `origin_at`), a sketch point | the origin |
 | `z=` | a direction (`+Z`, `(0, 1, 1)`), an `axis`, a planar face (its outward normal), a face of revolution or circular edge (its axis) | the z axis |
@@ -123,6 +123,10 @@ Rules, so that no frame depends on the kernel:
   or give `z=` as a direction to choose the other sense. A direction given explicitly (`z=(0, 0, -1)`)
   keeps its sign; directions need not be unit length.
 - `origin_at` is measured along that oriented axis: `start` is the face's lowest point along it.
+- A face of revolution that later features split into pieces (`pin_bore.wall#1`, `#2`) may be given
+  without an ordinal in `origin=` and `z=`: it then means all of its pieces, which must share one axis
+  (within the modeling tolerance; otherwise `E3002` as for any ambiguous reference), and `origin_at`
+  is measured over all of them. With an ordinal it means that piece alone.
 - Without `x=`, x is `world Z cross z` normalized, or world X when z is parallel to world Z (the hole
   frame rule). `x=` is projected into the plane normal to z and normalized; y is `z cross x`.
 - The frame is built in this order: the base frame (from `from=`, `csys=`, or `origin=`/`z=`/`x=`);

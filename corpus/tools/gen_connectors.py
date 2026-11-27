@@ -165,6 +165,27 @@ def cylinder_axis(shape, radius, near, at="start"):
     t = {"start": min(ts), "end": max(ts), "middle": (min(ts) + max(ts)) / 2}[at]
     return [p[i] + t * z[i] for i in range(3)], z
 
+
+def cylinder_axis_all(shape, radius, axis_point, axis_dir, at="start"):
+    """Like cylinder_axis, over every cylindrical face of this radius on the given axis (the pieces of a
+    split face)."""
+    z = _orient(_unit(axis_dir))
+    ts = []
+    for f in shape.faces():
+        if f.geom_type != GeomType.CYLINDER:
+            continue
+        cyl = BRepAdaptor_Surface(f.wrapped).Cylinder()
+        if abs(cyl.Radius() - radius) > 1e-9:
+            continue
+        ax = cyl.Axis()
+        q = [ax.Location().X() - axis_point[0], ax.Location().Y() - axis_point[1], ax.Location().Z() - axis_point[2]]
+        d = [ax.Direction().X(), ax.Direction().Y(), ax.Direction().Z()]
+        if abs(abs(_dot(d, z)) - 1) > 1e-9 or _dot(_cross(q, z), _cross(q, z)) > 1e-12:
+            continue
+        ts += [_dot([v.X - axis_point[0], v.Y - axis_point[1], v.Z - axis_point[2]], z) for v in f.vertices()]
+    t = {"start": min(ts), "end": max(ts), "middle": (min(ts) + max(ts)) / 2}[at]
+    return [axis_point[i] + t * z[i] for i in range(3)], z
+
 '''
 
 
@@ -396,7 +417,109 @@ emit_connectors(
     revolution, [],
 )
 
-# 4. invalid connectors: each part must fail with exactly the one code -----------------------------
+# 4. a split face of revolution, mirrored holes, holes on a datum plane --------------------------------
+
+split = {
+    "pin_mid": frame([30, 20, 25], [0, 1, 0]),
+    "pin_start": frame([30, 0, 25], [0, 1, 0]),
+    "pin_piece_end": frame([30, 12, 25], [0, 1, 0]),
+    "pin_entry": frame([30, 0, 25], [0, -1, 0]),
+    "origin": IDENTITY,
+}
+emit_connectors(
+    "con_split_axis", "Fork with a pin bore split by the slot",
+    "  sketch s on plane.XY {\n    rect r corner=(0 mm, 0 mm) w=60 mm h=40 mm\n  }\n"
+    "  extrude base from s.r distance=40 mm\n"
+    "  sketch u on base.cap_end {\n    rect r corner=(0 mm, 12 mm) w=60 mm h=16 mm\n  }\n"
+    "  extrude slot from u.r distance=-30 mm op=subtract\n"
+    "  hole pin on=base.side(s.r.bottom) at=(30 mm, 25 mm) d=8 mm end=through_all\n\n"
+    "  connector pin_mid origin=pin.wall z=pin.wall origin_at=middle\n"
+    "  connector pin_start origin=pin.wall z=pin.wall\n"
+    "  connector pin_piece_end origin=pin.wall#1 z=pin.wall#1 origin_at=end\n"
+    "  connector pin_entry from=pin\n",
+    "The slot splits the pin bore's wall into two pieces on one axis. Without an ordinal the connector "
+    "takes both, so origin_at=middle is the middle of the fork gap (y = 20); with #1 it takes the first "
+    "piece only (y = 0 to 12).",
+    60 * 40 * 40 - 60 * 16 * 30 - PI * 16 * 24, [0, 0, 0], [60, 40, 40],
+    "shape = Box(60, 40, 40, align=(Align.MIN, Align.MIN, Align.MIN))\n"
+    "shape = shape - Pos(30, 20, 25) * Box(60, 16, 30)\n"
+    "shape = shape - Pos(30, 20, 25) * Rot(90, 0, 0) * Cylinder(4, 40)\n",
+    "connectors['pin_mid'] = _frame(*cylinder_axis_all(shape, 4, [30, 0, 25], [0, 1, 0], 'middle'))\n"
+    "connectors['pin_start'] = _frame(*cylinder_axis_all(shape, 4, [30, 0, 25], [0, 1, 0], 'start'))\n"
+    "connectors['pin_piece_end'] = _frame(*cylinder_axis(shape, 4, (30, 6, 25), 'end'))\n"
+    "_o, _front = face_frame(planar_face(shape, [0, -1, 0], (30, 0, 20)))\n"
+    "connectors['pin_entry'] = _frame(circle_centre(shape, 4, (30, 0, 25)), _front)\n",
+    split, ["pin_mid.p1"],
+)
+
+mirrored = {
+    "v4.m1.m1": frame([20, 10, 20], [0, 0, 1]),
+    "v4.m1.m2": frame([-20, 10, 20], [0, 0, 1]),
+    "v4.m2.m1": frame([20, -10, 20], [0, 0, 1]),
+    "v4.m2.m2": frame([-20, -10, 20], [0, 0, 1]),
+    "side.m1": frame([30, 0, 10], [1, 0, 0]),
+    "side.m2": frame([-30, 0, 10], [-1, 0, 0]),
+    "origin": IDENTITY,
+}
+emit_connectors(
+    "con_mirror_holes", "Plate with mirrored holes",
+    "  sketch s on plane.XY {\n    rect r corner=(-30 mm, -20 mm) w=60 mm h=40 mm\n  }\n"
+    "  extrude plate from s.r distance=20 mm\n"
+    "  hole v on=plate.cap_end at=(20 mm, 10 mm) d=6 mm end=through_all\n"
+    "  mirror vx of=v plane=plane.YZ\n"
+    "  mirror vxy of=vx plane=plane.XZ\n"
+    "  hole sp on=plate.side(s.r.right) at=(0 mm, 10 mm) d=5 mm depth=8 mm\n"
+    "  mirror sm of=sp plane=plane.YZ\n\n"
+    "  connector v4 from=vxy\n"
+    "  connector side from=sm\n",
+    "A mirror gives .m1 (the original) and .m2 (the copy); a mirror of a mirror nests them, outermost "
+    "first. The mirrored side hole's connector points out of the opposite face (z = -X) and stays "
+    "right-handed (x by the default rule, not mirrored).",
+    60 * 40 * 20 - 4 * PI * 9 * 20 - 2 * PI * 6.25 * 8, [-30, -20, 0], [30, 20, 20],
+    "shape = Box(60, 40, 20, align=(Align.CENTER, Align.CENTER, Align.MIN))\n"
+    "for x in (20, -20):\n"
+    "    for y in (10, -10):\n"
+    "        shape = shape - Pos(x, y, 10) * Cylinder(3, 20)\n"
+    "shape = shape - Pos(26, 0, 10) * Rot(0, 90, 0) * Cylinder(2.5, 8)\n"
+    "shape = shape - Pos(-26, 0, 10) * Rot(0, 90, 0) * Cylinder(2.5, 8)\n",
+    "_o, _top = face_frame(planar_face(shape, [0, 0, 1], (0, 0, 20)))\n"
+    "for key, x, y in (('v4.m1.m1', 20, 10), ('v4.m1.m2', -20, 10), ('v4.m2.m1', 20, -10), ('v4.m2.m2', -20, -10)):\n"
+    "    connectors[key] = _frame(circle_centre(shape, 3, (x, y, 20)), _top)\n"
+    "_o, _r = face_frame(planar_face(shape, [1, 0, 0], (30, 0, 10)))\n"
+    "connectors['side.m1'] = _frame(circle_centre(shape, 2.5, (30, 0, 10)), _r)\n"
+    "_o, _l = face_frame(planar_face(shape, [-1, 0, 0], (-30, 0, 10)))\n"
+    "connectors['side.m2'] = _frame(circle_centre(shape, 2.5, (-30, 0, 10)), _l)\n",
+    mirrored, ["v4", "v4.m1", "v4.m2", "side"],
+)
+
+datum = {
+    "c_entry": frame([10, 0, 10], [0, -1, 0]),
+    "cf_entry": frame([30, 0, 20], [0, 1, 0]),
+    "origin": IDENTITY,
+}
+emit_connectors(
+    "con_datum_hole", "Block with holes drilled from a datum plane",
+    "  sketch s on plane.XY {\n    rect r corner=(0 mm, -20 mm) w=40 mm h=40 mm\n  }\n"
+    "  extrude block from s.r distance=30 mm\n"
+    "  hole c on=plane.XZ at=(10 mm, 10 mm) d=6 mm depth=25 mm\n"
+    "  hole cf on=plane.XZ at=(30 mm, 20 mm) d=6 mm depth=25 mm flip\n\n"
+    "  connector c_entry from=c\n"
+    "  connector cf_entry from=cf\n",
+    "Holes that start on plane.XZ inside the block and break out through a side. The connector sits on "
+    "the plane with z opposite to the drilling direction: the plane's normal (-Y) for c, reversed (+Y) "
+    "for the flipped cf.",
+    40 * 40 * 30 - 2 * PI * 9 * 20, [0, -20, 0], [40, 20, 30],
+    "shape = Box(40, 40, 30, align=(Align.MIN, Align.CENTER, Align.MIN))\n"
+    "shape = shape - Pos(10, 12.5, 10) * Rot(90, 0, 0) * Cylinder(3, 25)\n"
+    "shape = shape - Pos(30, -12.5, 20) * Rot(90, 0, 0) * Cylinder(3, 25)\n",
+    "_p, _ax = cylinder_axis(shape, 3, (10, 10, 10), 'start')\n"
+    "connectors['c_entry'] = _frame(_p, [-c for c in _ax])\n"
+    "_p, _ax = cylinder_axis(shape, 3, (30, -10, 20), 'end')\n"
+    "connectors['cf_entry'] = _frame(_p, _ax)\n",
+    datum, [],
+)
+
+# 5. invalid connectors: each part must fail with exactly the one code -----------------------------
 
 BASE = "  sketch s on plane.XY {\n    rect r corner=(0 mm, 0 mm) w=40 mm h=30 mm\n  }\n  extrude base from s.r distance=20 mm\n"
 emit_invalid("con_err_missing_z", "Connector without z",

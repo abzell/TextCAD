@@ -6,8 +6,9 @@ Changes to the TextCAD format, its specification and its conformance corpus. For
 ## [Unreleased]
 
 ### Added
-- Conformance cases for connectors (draft, #28): `con_hole_frames`, `con_explicit` and `con_revolution`
-  with expected frames cross-checked against build123d, and eight invalid parts (`con_err_*`).
+- Conformance cases for connectors (draft, #28): `con_hole_frames`, `con_explicit`, `con_revolution`,
+  `con_split_axis`, `con_mirror_holes` and `con_datum_hole` with expected frames cross-checked against
+  build123d, and eight invalid parts (`con_err_*`).
   `compare_reference.py` also compares connector frames.
 
 ### Clarified (draft)
@@ -15,6 +16,9 @@ Changes to the TextCAD format, its specification and its conformance corpus. For
   instances; the order flip → rotate → offset and the sense of `rotate`; `origin_at` along the oriented
   axis; explicit directions keep their sign; diagnostics for wrong `from=`, zero directions and name
   clashes. Canonical argument order for `connector`.
+- Connectors on a face of revolution split into pieces take all pieces (one axis) unless an ordinal
+  picks one; `from=` accepts mirrors of holes (`.m1` original, `.m2` copy, nested outermost first);
+  a hole on a datum plane gives a connector on the plane with z opposite to the drilling direction.
 
 ### Changed
 - The repository holds the format only. The specification no longer describes a particular program:

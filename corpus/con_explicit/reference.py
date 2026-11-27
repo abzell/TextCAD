@@ -102,6 +102,27 @@ def cylinder_axis(shape, radius, near, at="start"):
     t = {"start": min(ts), "end": max(ts), "middle": (min(ts) + max(ts)) / 2}[at]
     return [p[i] + t * z[i] for i in range(3)], z
 
+
+def cylinder_axis_all(shape, radius, axis_point, axis_dir, at="start"):
+    """Like cylinder_axis, over every cylindrical face of this radius on the given axis (the pieces of a
+    split face)."""
+    z = _orient(_unit(axis_dir))
+    ts = []
+    for f in shape.faces():
+        if f.geom_type != GeomType.CYLINDER:
+            continue
+        cyl = BRepAdaptor_Surface(f.wrapped).Cylinder()
+        if abs(cyl.Radius() - radius) > 1e-9:
+            continue
+        ax = cyl.Axis()
+        q = [ax.Location().X() - axis_point[0], ax.Location().Y() - axis_point[1], ax.Location().Z() - axis_point[2]]
+        d = [ax.Direction().X(), ax.Direction().Y(), ax.Direction().Z()]
+        if abs(abs(_dot(d, z)) - 1) > 1e-9 or _dot(_cross(q, z), _cross(q, z)) > 1e-12:
+            continue
+        ts += [_dot([v.X - axis_point[0], v.Y - axis_point[1], v.Z - axis_point[2]], z) for v in f.vertices()]
+    t = {"start": min(ts), "end": max(ts), "middle": (min(ts) + max(ts)) / 2}[at]
+    return [axis_point[i] + t * z[i] for i in range(3)], z
+
 shape = Box(40, 30, 20, align=(Align.MIN, Align.MIN, Align.MIN))
 
 from OCP.BRepGProp import BRepGProp

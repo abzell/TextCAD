@@ -1,0 +1,13 @@
+tcad 0.2
+
+part con_datum_hole "Block with holes drilled from a datum plane" {
+  sketch s on plane.XY {
+    rect r corner=(0 mm, -20 mm) w=40 mm h=40 mm
+  }
+  extrude block from s.r distance=30 mm
+  hole c on=plane.XZ at=(10 mm, 10 mm) d=6 mm depth=25 mm
+  hole cf on=plane.XZ at=(30 mm, 20 mm) d=6 mm depth=25 mm flip
+
+  connector c_entry from=c
+  connector cf_entry from=cf
+}

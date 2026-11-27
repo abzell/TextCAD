@@ -1,0 +1,16 @@
+tcad 0.2
+
+part con_mirror_holes "Plate with mirrored holes" {
+  sketch s on plane.XY {
+    rect r corner=(-30 mm, -20 mm) w=60 mm h=40 mm
+  }
+  extrude plate from s.r distance=20 mm
+  hole v on=plate.cap_end at=(20 mm, 10 mm) d=6 mm end=through_all
+  mirror vx of=v plane=plane.YZ
+  mirror vxy of=vx plane=plane.XZ
+  hole sp on=plate.side(s.r.right) at=(0 mm, 10 mm) d=5 mm depth=8 mm
+  mirror sm of=sp plane=plane.YZ
+
+  connector v4 from=vxy
+  connector side from=sm
+}

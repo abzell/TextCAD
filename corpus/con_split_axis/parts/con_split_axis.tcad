@@ -1,0 +1,18 @@
+tcad 0.2
+
+part con_split_axis "Fork with a pin bore split by the slot" {
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=60 mm h=40 mm
+  }
+  extrude base from s.r distance=40 mm
+  sketch u on base.cap_end {
+    rect r corner=(0 mm, 12 mm) w=60 mm h=16 mm
+  }
+  extrude slot from u.r distance=-30 mm op=subtract
+  hole pin on=base.side(s.r.bottom) at=(30 mm, 25 mm) d=8 mm end=through_all
+
+  connector pin_mid origin=pin.wall z=pin.wall origin_at=middle
+  connector pin_start origin=pin.wall z=pin.wall
+  connector pin_piece_end origin=pin.wall#1 z=pin.wall#1 origin_at=end
+  connector pin_entry from=pin
+}
