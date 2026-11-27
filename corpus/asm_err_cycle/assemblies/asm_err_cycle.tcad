@@ -1,0 +1,7 @@
+tcad 0.2
+
+assembly asm_err_cycle "Invalid" {
+  instance a = part("../parts/box.tcad")
+  instance b = assembly("other.tcad")
+  ground a
+}

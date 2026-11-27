@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E0001"
+  ],
+  "fails": true,
+  "note": "Assemblies need format 0.2; under a 0.1 header `assembly` is a reserved word."
+}

@@ -1,0 +1,6 @@
+tcad 0.1
+
+assembly asm_err_version "Invalid" {
+  instance a = part("../parts/box.tcad")
+  ground a
+}

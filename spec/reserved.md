@@ -14,7 +14,10 @@ sheet_metal flange bend flat_pattern weldment direct_edit`
 - The list is extended only by a minor version bump; removing a word needs a major version
   (see [versioning.md](versioning.md)).
 - A word leaves this list when the statement it starts is implemented, in a minor version; files with
-  an older header keep reading it under the rules of their version.
+  an older header keep reading it under the rules of their version. In format 0.2, `assembly`,
+  `instance`, `mate`, `skeleton` and `bom` leave the list (spec/assembly.md): they become
+  keywords, still never declared names (`E1104`); `assembly` and `instance` are normative, the others
+  drafts. Under a `tcad 0.1` header they stay reserved.
 - Keywords added in later minor versions that are not reserved words (`meta`, `connector`, ...)
   are gated by the header instead: see [versioning.md](versioning.md) § Keywords added in a minor
   version.

@@ -1,0 +1,15 @@
+tcad 0.2
+
+part block "Post block" {
+  param h = 40 mm range(20 mm, 80 mm)
+
+  sketch s on plane.XY {
+    rect r corner=(-10 mm, -10 mm) w=20 mm h=20 mm
+  }
+  extrude body from s.r distance=h
+
+  connector top origin=body.cap_end z=body.cap_end
+  connector side origin=body.side(s.r.right) z=body.side(s.r.right)
+
+  config tall { h = 60 mm }
+}

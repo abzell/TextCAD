@@ -6,6 +6,12 @@ Changes to the TextCAD format, its specification and its conformance corpus. For
 ## [Unreleased]
 
 ### Added
+- Rules for assembly files (#29): resolving `part()`/`assembly()` paths (relative to the file,
+  inside the bundle, or `lib:`), instances (`config=`, override blocks, name scope), reference paths
+  into rigid and flexible sub-assemblies, and placement (`rotate=` in order about the fixed axes, then
+  `at=`; nested placements composed); `ground` takes no arguments; `E6006`; canonical argument order
+  for `instance`. Conformance cases `asm_placement` (cross-checked against build123d) and 15 invalid
+  `asm_err_*` bundles (`tools/gen_assemblies.py`).
 - Conformance cases for connectors (#28): `con_hole_frames`, `con_explicit`, `con_revolution`,
   `con_split_axis`, `con_mirror_holes` and `con_datum_hole` with expected frames cross-checked against
   build123d, and eight invalid parts (`con_err_*`).
@@ -20,6 +26,9 @@ Changes to the TextCAD format, its specification and its conformance corpus. For
   whose frames are listed for every swept parameter set (#28).
 
 ### Clarified
+- `spec/features.md` § Published geometry: a tool may store a tessellation or sampled polyline of
+  free-form entities at a resolution of its choosing (the fixed "modeling tolerance times 100" is
+  removed); the accuracy that mates need is defined with the mates (#37).
 - `spec/assembly.md` § `connector`: naming of single- and multi-position holes and skipped pattern
   instances; the order flip → rotate → offset and the sense of `rotate`; `origin_at` along the oriented
   axis; explicit directions keep their sign; diagnostics for wrong `from=`, zero directions and name
@@ -33,6 +42,11 @@ Changes to the TextCAD format, its specification and its conformance corpus. For
   (`I6014`); connectors may not refer to other connectors (`E5002`; share a frame through a `csys`).
 
 ### Changed
+- Assembly files are normative (#29): `spec/assembly.md` § Files and bundles (without the version lock
+  and libraries), § Assembly file for `meta`, `param`, `instance`, `ground`, `config` and `tag`,
+  § Instances, § References and § Placement before solving. `assembly_decl`, `instance_decl` and
+  `ground_decl` are in `grammar.ebnf`; `E6001`, `E6002`, `E6004`, `E6006` and `E6012` are in
+  `spec/diagnostics.md`. The other assembly statements stay drafts.
 - Connectors and published geometry are normative: their rules moved from `spec/assembly.md` (draft)
   to `spec/features.md` § Connectors and § Published geometry, unchanged. `connector_decl` and
   `publish_decl` are in `grammar.ebnf`; `E6011` and `I6014` are in `spec/diagnostics.md`; the

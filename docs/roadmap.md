@@ -7,7 +7,7 @@ GitHub issues in this repository, one epic per phase. Items that need the mainta
 | Phase | Scope | Status | Epic |
 | --- | --- | --- | --- |
 | 1 — Parts | Parameters, sketches, features, naming, metadata, STEP import | specified; open items below | #4, #68 |
-| 2 — Assemblies and BOM | `spec/assembly.md` | draft; connectors and `publish` normative (#28) | #5 |
+| 2 — Assemblies and BOM | `spec/assembly.md` | draft; connectors and `publish` (#28), assembly files and placement (#29) normative | #5 |
 | 3 — PMI, GD&T, MBD | `spec/pmi.md` (to be written) | planned | #6 |
 | 4 — 2D drawings | `spec/drawing.md` (to be written) | planned | #69 |
 | 5 — Surfacing, sheet metal, weldments | new chapters | planned | #7 |

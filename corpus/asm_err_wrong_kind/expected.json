@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E6002"
+  ],
+  "fails": true,
+  "note": "`assembly(...)` names a part file."
+}

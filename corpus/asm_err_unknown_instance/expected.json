@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E6001"
+  ],
+  "fails": true,
+  "note": "`ground` names an instance that does not exist."
+}

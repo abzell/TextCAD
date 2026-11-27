@@ -1,0 +1,6 @@
+tcad 0.2
+
+assembly asm_err_outside "Invalid" {
+  instance a = part("../../prim_box/parts/prim_box.tcad")
+  ground a
+}

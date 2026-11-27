@@ -1,0 +1,7 @@
+tcad 0.2
+
+assembly asm_err_unknown_ref "Invalid" {
+  instance a = part("../parts/box.tcad")
+  ground a
+  tag t = a.nosuch
+}

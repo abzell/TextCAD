@@ -1,0 +1,6 @@
+tcad 0.2
+
+assembly asm_err_override_type "Invalid" {
+  instance a = assembly("sub.tcad") { w = 5 deg }
+  ground a
+}

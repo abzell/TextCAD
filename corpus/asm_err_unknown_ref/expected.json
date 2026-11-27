@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E6001"
+  ],
+  "fails": true,
+  "note": "A path names a connector the part does not have; the message gives the nearest names."
+}

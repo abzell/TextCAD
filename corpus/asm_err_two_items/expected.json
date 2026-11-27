@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E2701"
+  ],
+  "fails": true,
+  "note": "A file holds one part or one assembly, not both."
+}

@@ -1,0 +1,10 @@
+tcad 0.2
+
+assembly post "Post with a pin" {
+  param h = 40 mm range(20 mm, 80 mm)
+
+  instance block = part("../parts/block.tcad") { h = h }
+  instance pin = part("../parts/pin.tcad") at=(0 mm, 0 mm, h)
+
+  ground block
+}

@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E6002"
+  ],
+  "fails": true,
+  "note": "The path leaves the bundle (the file exists, in another corpus case); only `lib:` libraries reach outside."
+}

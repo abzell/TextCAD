@@ -1,0 +1,6 @@
+tcad 0.2
+
+assembly asm_err_zero_axis "Invalid" {
+  instance a = part("../parts/box.tcad") rotate=[((0, 0, 0), 30 deg)]
+  ground a
+}

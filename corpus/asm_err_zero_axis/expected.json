@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E6011"
+  ],
+  "fails": true,
+  "note": "A rotation about a zero vector."
+}

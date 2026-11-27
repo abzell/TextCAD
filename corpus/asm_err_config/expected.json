@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E6006"
+  ],
+  "fails": true,
+  "note": "`config=` names a configuration the part does not declare (it has `big`)."
+}

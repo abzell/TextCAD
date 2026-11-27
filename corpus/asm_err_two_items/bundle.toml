@@ -1,0 +1,5 @@
+format = "0.1"
+name = "asm_err_two_items"
+entry = "assemblies/asm_err_two_items.tcad"
+units = "mm"
+license = "Apache-2.0"

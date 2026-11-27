@@ -18,7 +18,7 @@ file            = header , { top_item } ;
 header          = "tcad" , VERSION , NEWLINE ;                  (* VERSION = INT "." INT, e.g. 0.2 *)
 (* The header's version selects the keyword set: keywords added in a later minor version are
    ordinary identifiers in older files (spec/versioning.md). *)
-top_item        = part_decl | reserved_stmt ;
+top_item        = part_decl | assembly_decl | reserved_stmt ;       (* assembly_decl: format 0.2 *)
 
 
 (* ---------- part ---------- *)
@@ -57,6 +57,18 @@ config_decl     = "config" , [ "default" ] , IDENT , "{" , { config_item , [ ";"
 config_item     = IDENT , "=" , ( expr | STRING )               (* parameter override *)
                 | "meta" , "." , IDENT , "=" , ( expr | STRING ) (* metadata override, format 0.2 *)
                 | "suppress" , reference , { "," , reference } ;
+
+
+(* ---------- assembly (format 0.2, spec/assembly.md) ---------- *)
+
+assembly_decl   = "assembly" , IDENT , [ STRING ] , "{" , { asm_item } , "}" ;
+asm_item        = meta_decl | param_decl | instance_decl | ground_decl | tag_decl | config_decl
+                | reserved_stmt ;                               (* other statements: draft *)
+instance_decl   = "instance" , IDENT , "=" , source_call , { arg } , [ suppress_clause ] ,
+                  [ override_block ] ;
+source_call     = ( "part" | "assembly" ) , "(" , STRING , ")" ;  (* a path, spec/assembly.md *)
+override_block  = "{" , { IDENT , "=" , expr , ( ";" | NEWLINE ) } , "}" ;
+ground_decl     = "ground" , IDENT ;
 
 
 (* ---------- reference geometry and features ---------- *)

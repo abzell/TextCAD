@@ -1,0 +1,5 @@
+format = "0.1"
+name = "asm_err_zero_axis"
+entry = "assemblies/asm_err_zero_axis.tcad"
+units = "mm"
+license = "Apache-2.0"

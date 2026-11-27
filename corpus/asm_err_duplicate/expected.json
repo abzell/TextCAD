@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E2101"
+  ],
+  "fails": true,
+  "note": "Two instances with the same name."
+}
