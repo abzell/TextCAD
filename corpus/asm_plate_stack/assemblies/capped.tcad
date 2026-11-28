@@ -1,0 +1,10 @@
+tcad 0.2
+
+assembly capped "Slab with a knob" {
+  instance plate = part("../parts/slab.tcad")
+  instance knob = part("../parts/knob.tcad") at=(3 mm, -2 mm, 14 mm) rotate=[(+X, 10 deg)]
+
+  ground plate
+
+  mate knob_seat fastened(knob.origin, plate.top)
+}

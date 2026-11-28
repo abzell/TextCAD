@@ -1,0 +1,35 @@
+{
+  "codes": [],
+  "info": [
+    "I6202"
+  ],
+  "fails": false,
+  "dof": 0,
+  "instances": {
+    "base": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    }
+  },
+  "note": "The instance is suppressed, so its mate is suppressed with it (I6202) and only the base remains."
+}

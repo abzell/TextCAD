@@ -1,0 +1,5 @@
+format = "0.1"
+name = "asm_plate_stack"
+entry = "assemblies/asm_plate_stack.tcad"
+units = "mm"
+license = "Apache-2.0"

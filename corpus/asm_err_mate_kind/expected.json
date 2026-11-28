@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E5001"
+  ],
+  "fails": true,
+  "note": "An unknown mate kind; the message gives the nearest names."
+}

@@ -1,0 +1,11 @@
+tcad 0.2
+
+assembly asm_mate_redundant "A redundant mate" {
+  instance base = part("../parts/slab.tcad")
+  instance a = part("../parts/slab.tcad") at=(0 mm, 0 mm, 10 mm)
+
+  ground base
+
+  mate seat fastened(a.origin, base.top)
+  mate again concentric(a.origin, base.origin)
+}

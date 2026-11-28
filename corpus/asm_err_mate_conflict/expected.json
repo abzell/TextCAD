@@ -1,0 +1,15 @@
+{
+  "codes": [
+    "E6102"
+  ],
+  "fails": true,
+  "note": "Two distances between the same planes that cannot both hold: the minimal conflicting set is d1 and d2 (d2 the primary location); `seat` and the other block's mate are innocent.",
+  "conflict": [
+    "d1",
+    "d2"
+  ],
+  "not_named": [
+    "seat",
+    "other_on"
+  ]
+}

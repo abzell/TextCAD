@@ -1,0 +1,15 @@
+tcad 0.2
+
+assembly asm_err_mate_conflict "Invalid" {
+  instance base = part("../parts/slab.tcad")
+  instance a = part("../parts/slab.tcad") at=(0 mm, 0 mm, 10 mm)
+
+  instance other = part("../parts/slab.tcad") at=(80 mm, 0 mm, 0 mm)
+
+  ground base
+
+  mate seat coincident(a.bottom, base.top)
+  mate d1 distance(a.east, base.east) = 4 mm aligned
+  mate other_on coincident(other.bottom, base.top)
+  mate d2 distance(a.east, base.east) = 9 mm aligned
+}

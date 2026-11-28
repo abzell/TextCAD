@@ -1,0 +1,5 @@
+format = "0.1"
+name = "asm_pin_clevis"
+entry = "assemblies/asm_pin_clevis.tcad"
+units = "mm"
+license = "Apache-2.0"

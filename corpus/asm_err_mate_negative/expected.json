@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E5001"
+  ],
+  "fails": true,
+  "note": "A negative distance between two points."
+}

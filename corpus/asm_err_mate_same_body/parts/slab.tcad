@@ -1,0 +1,13 @@
+tcad 0.2
+
+part slab "Slab, 40 x 30 x 10" {
+  sketch s on plane.XY {
+    rect r corner=(-20 mm, -15 mm) w=40 mm h=30 mm
+  }
+  extrude body from s.r distance=10 mm
+
+  connector top origin=body.cap_end z=body.cap_end
+  connector bottom origin=body.cap_start z=body.cap_start
+  connector east origin=body.side(s.r.right) z=body.side(s.r.right)
+  connector north origin=body.side(s.r.top) z=body.side(s.r.top)
+}

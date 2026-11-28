@@ -1,0 +1,58 @@
+{
+  "codes": [
+    "W6103"
+  ],
+  "fails": false,
+  "dof": 0,
+  "instances": {
+    "base": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "a": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        0.0,
+        0.0,
+        10.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    }
+  },
+  "note": "`again` removes nothing that `seat` has not removed and is consistent with it (the block is fastened on the base's top, on the base's axis): W6103, and the assembly solves."
+}

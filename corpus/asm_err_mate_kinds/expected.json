@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E6101"
+  ],
+  "fails": true,
+  "note": "`concentric` on two planes: the message lists the primitives each argument offers."
+}

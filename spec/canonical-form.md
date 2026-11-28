@@ -63,6 +63,7 @@ Formatting is idempotent: `format(format(x)) == format(x)` for every input that 
 | hole | on, at, from, type, d, thread, cbore_d, cbore_depth, csk_d, csk_angle, depth, end, flip |
 | connector | from, csys, origin, z, x, origin_at, rotate, offset, flip |
 | instance | config, rev, at, rotate, bom, then the flag `flexible`; then the override block |
+| mate | the value (`= ...`), then about, rotate, offset, then the flags `aligned`, `opposed` (draft, #33) |
 | fillet | edges, r |
 | chamfer | edges, d, d2, angle |
 | shell | faces, thickness, outward |

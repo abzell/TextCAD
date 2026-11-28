@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E5001"
+  ],
+  "fails": true,
+  "note": "`angle` without `about=`."
+}

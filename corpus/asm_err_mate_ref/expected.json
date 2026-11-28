@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E6001"
+  ],
+  "fails": true,
+  "note": "A mate argument names a connector the part does not have (did you mean `bottom`)."
+}

@@ -1,0 +1,10 @@
+tcad 0.2
+
+assembly asm_err_mate_flag "Invalid" {
+  instance base = part("../parts/slab.tcad")
+  instance a = part("../parts/slab.tcad") at=(0 mm, 0 mm, 10 mm)
+
+  ground base
+
+  mate m perpendicular(a.east, base.east) opposed
+}

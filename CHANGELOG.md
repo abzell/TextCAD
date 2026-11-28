@@ -6,6 +6,14 @@ Changes to the TextCAD format, its specification and its conformance corpus. For
 ## [Unreleased]
 
 ### Added
+- Draft rules for the classic mates and solving (#33): `spec/assembly.md` § Classic mates gives, for
+  `fastened`, `coincident`, `concentric`, `parallel`, `perpendicular`, `distance` and `angle`, the
+  default primitive, every allowed pair with its equation and the degrees of freedom it removes, the
+  orientation flags and their defaults, the signs (`distance` along `b`'s normal, `angle` right-handed
+  about the required `about=`, `fastened` `rotate=`/`offset=` in `b`'s frame) and the argument errors
+  (`E5001`, `E2202`, `E6101`). § Solving: rigid bodies (a rigid sub-assembly solved first), tolerances,
+  the nearest solution, degrees of freedom split into translations and rotations, `I6201`, `W6103`,
+  `E6102`, `E6301`, `I6202`. 18 conformance cases from `tools/gen_mates.py`.
 - Rules for `bundle.lock` (#30): which files it lists (everything reachable from the entry),
   their hashes (the source hash of `.tcad` files, a plain SHA-256 of other files), its exact bytes,
   `W6003`/`E6003` and strict mode, `rev=` against the configured `meta revision` (`E6005`), and notes

@@ -6,7 +6,7 @@ to this text are recorded in ADRs. **Normative so far:** § Files and bundles (e
 § Version lock (#30), § Assembly file with § Statements (the rows `meta`, `param`, `instance`, `ground`,
 `config` and `tag`), § Instances, § References and § Placement before solving (format 0.2, #29), and
 the part side (§ `meta`, § `connector`, § `publish`, normative in spec/features.md). Every other
-section is a draft. The roadmap is in [`../docs/roadmap.md`](../docs/roadmap.md).
+section is a draft; § Classic mates and § Solving are the next to be reviewed (#33). The roadmap is in [`../docs/roadmap.md`](../docs/roadmap.md).
 
 An assembly places instances of parts and other assemblies relative to each other and records the design
 intent behind the placement: which frames meet, what may still move, which values drive the pose. Like
@@ -292,8 +292,8 @@ sub-assembly's frame) to the frame of the assembly that contains it:
 `at=` and `rotate=` are **starting values** (soft), like coordinates in a sketch: an instance with no
 mate stays exactly there; a mated instance starts there. A grounded instance stays exactly there
 (hard). `@hint(x, y, z, qw, qx, qy, qz)` (millimetres and a unit quaternion) is a solved pose written
-by a tool and is used as the start when `at=` is absent. Until mates are specified (#33) every
-instance is placed exactly by its `at=` and `rotate=`.
+by a tool and is used as the start when `at=` is absent. A mated instance ends where the mates put it
+(§ Solving).
 
 ## Mates
 
@@ -335,22 +335,105 @@ reported in the manifest.
 A mate whose primitives have the wrong kind is `E6101` (for example `concentric` on two planes); the
 message lists the primitives each argument offers.
 
+### Classic mates
+
+Status: **draft** (#33). This section makes the rows `fastened` ... `angle` of the table above precise;
+where the two differ, this section holds. The other kinds stay drafts (a tool that does not support one
+yet reports `E0001`).
+
+```
+mate pin_seat fastened(pin.pin_axis, clevis.pin) rotate=90 deg
+mate eye_on   concentric(eye.bearing, pin.pin_axis)
+mate eye_mid  coincident(eye.bearing.xy, pin.pin_axis.xy) aligned
+mate eye_tilt angle(eye.rod, clevis.rod) = 150 deg about=clevis.pin
+mate gap      distance(top.bottom, base.top) = 2 mm
+```
+
+**Primitives.** An argument is a connector frame of an instance or one of its derived primitives
+(§ References): a *point* (`.origin`), a *line* (`.x`, `.y`, `.z`: a point and a unit direction) or a
+*plane* (`.xy`, `.yz`, `.xz`: a point and a unit normal). A bare frame stands for the kind's default
+primitive below. Published entities and datums are not arguments of these kinds (`E6101`; `tangent`
+and `cam` take published faces, #37; a datum is mated through a connector on it). The *direction* of a
+line is its direction, of a plane its normal. In the equations, `a` and `b` are the two arguments in
+the order written, `p` a primitive's point, `d` its direction, and `F` a frame (origin `o`, axes
+`x`, `y`, `z`), all in the assembly frame.
+
+| Kind | Default | Pairs and equations | Removes | Orientation |
+| --- | --- | --- | --- | --- |
+| `fastened(a, b)` | (frames only) | frame/frame: `F_a = F_b · Trans(offset) · Rz(rotate)`: `a`'s origin is at `offset` in `b`'s frame, `a`'s axes are `b`'s turned by `rotate` about `b.z` | 6 | none |
+| `coincident(a, b)` | `.xy` | point/point `p_a = p_b`; point/line, line/point: the point lies on the line; point/plane, plane/point: on the plane; line/line: collinear; line/plane, plane/line: the line lies in the plane; plane/plane: the same plane | 3, 2, 1, 4, 2, 3 | line/line `aligned` (default) or `opposed`; plane/plane `opposed` (default: faces touching) or `aligned`; the others none |
+| `concentric(a, b)` | `.z` | line/line: collinear | 4 | `aligned` (default) or `opposed` |
+| `parallel(a, b)` | `.z` | line/line, plane/plane: `d_a = ±d_b`; line/plane, plane/line: the line's direction is perpendicular to the normal | 2, 2, 1 | line/line and plane/plane: `aligned` (default, `+`) or `opposed` (`−`); line/plane none |
+| `perpendicular(a, b)` | `.z` | line/line, plane/plane: `d_a · d_b = 0`; line/plane, plane/line: the line's direction is parallel to the normal (either sign) | 1, 1, 2 | none |
+| `distance(a, b) = s` | `.xy` | point/point `\|p_a − p_b\| = s`; point/line, line/point: the point's distance from the line is `s`; point/plane, plane/point: the point's signed distance from the plane, positive on the side its normal points to, is `s`; plane/plane: the planes are parallel and `(p_a − p_b) · d_b = s` | 1, 1, 1, 3 | plane/plane `opposed` (default) or `aligned`, as for `coincident`; the others none |
+| `angle(a, b) = t` | `.z` | line/line, plane/plane, with `about=<line>` (a frame: its `.z`): `t` is the angle from `b`'s direction to `a`'s, both projected onto the plane normal to `about`, right-handed about `about`'s direction | 1 | none (the sign of `t` chooses) |
+
+- **Order.** For the mixed pairs either order is accepted. `distance` and the orientation flags are
+  measured on `b` where the table says so; swapping the arguments of a `distance` between planes
+  changes the sign of `s` only if the planes are aligned.
+- **Signs.** `fastened`: `offset=(x, y, z)` (lengths) is in `b`'s frame and `rotate=<angle>` turns
+  right-handed about `b.z`; both default to zero. `distance` between planes: with the default
+  `opposed`, two plates stacked with a gap of 2 mm (`a` the upper plate's bottom face, normal down; `b`
+  the lower plate's top face, normal up) are `= 2 mm`; `= -2 mm` puts `a` 2 mm *into* `b`. `angle`:
+  looking against `about`'s direction (it points at the viewer), a positive `t` turns `b`'s direction
+  counterclockwise onto `a`'s. `t` and `t + 360 deg` are the same mate.
+- **Values.** `distance` and `angle` take `= <value>` (a length, an angle; an expression in the
+  assembly's parameters); it is required for them and not allowed on the other kinds (`E5001`). A value
+  of the wrong dimension is `E2202`. `distance` between two points or between a point and a line needs
+  `s >= 0` (`E5001`).
+- **Arguments.** `aligned` and `opposed` are flags, allowed only where the table lists an orientation
+  choice, and not both (`E5001`). `about=` is required for `angle` and must be a line (a frame: its
+  `.z`; anything else is `E6101`). `rotate=` and `offset=` belong to `fastened`. `drive=`, `min=` and
+  `max=` belong to joints (#34). Any other argument, or one on the wrong kind, is `E5001`; an unknown
+  kind is `E5001` with the nearest kind names.
+- **Bodies.** A mate whose two arguments lie on the same rigid body (§ Solving) is `E5001`. A mate on
+  a suppressed instance is suppressed with it (`I6202` lists such mates); `suppress if <expr>` on a
+  mate suppresses it alone.
+- **Names.** Mate names share the assembly's name scope (`E2101`) and may not be keywords (`E1104`).
+- **Wrong kinds.** A pair the table does not list for the kind is `E6101`; the message names, for
+  each argument, the primitive it resolved to and the primitives its frame offers.
+
 ### Solving
 
-Each non-grounded instance (or rigid sub-assembly) is a rigid body with six degrees of freedom, and
-each mate is a set of equations on the world positions of its primitives. A solver must find the
-solution nearest to the starting pose (`at=`, `rotate=`, `@hint`) in the sense of a minimum-norm change
-from it, respecting the explicit orientation flags, and must report:
-- **Over-constrained**: a set of mates with no solution is `E6102` naming a minimal conflicting set
-  (with related locations), as `E4101` does for sketches; a mate that removes no further DOF is
-  `W6103`.
-- **Under-constrained** is allowed: `I6201` reports the remaining DOF per instance and names them
-  (`rod: 1 rotation about barrel.bore_axis`). Tools may offer a strict mode that treats it as an
-  error for release builds.
-- **No solution near the start** is `E6301` and names the mates with the largest residual.
-- Joint limits are inequality constraints; a `drive` outside `min`/`max` is `E6302`.
-- Tolerances: positions within the assembly's modeling tolerance (default 1e-6 mm), angles within
-  1e-9 rad.
+What a solution is (how a solver finds it is up to the implementation; Status: **draft**, #33):
+
+1. **Bodies.** Every top-level instance is a rigid body. A rigid sub-assembly is one body: it is solved
+   on its own first, in its own frame, and then moves as a whole (§ Sub-assemblies); a reference into
+   it is a fixed frame of that body. A grounded instance is fixed where it is placed. An instance that
+   no mate refers to stays exactly where `at=` and `rotate=` place it.
+2. **Equations.** Each mate is a set of scalar equations on the poses of its two bodies (above). The
+   assembly is solved when every equation holds within 1e-6 mm for positions and 1e-9 rad for
+   directions and angles. Mates that share bodies, other than grounded ones, form a **cluster**;
+   clusters are independent of each other.
+3. **Nearest solution.** Of all solutions, the solver returns the one nearest to the starting pose
+   (`at=` and `rotate=`, or `@hint` when `at=` is absent): the least change of each body, measured by
+   how far its frame origin moves and how far it turns. How a tool weighs turning against moving is its
+   choice; the conformance cases are built so that one solution moves *and* turns each body the least,
+   so that every such weighting agrees. The orientation flags choose between mirror solutions; the
+   start chooses only within them.
+4. **Agreement.** Different solvers must agree within the T2 tolerances (spec/kernel.md): instance
+   origins to 1e-5 mm and axis components to 1e-9.
+
+#### Degrees of freedom and diagnostics
+
+After solving, the null space of the mate equations' Jacobian (with respect to the six pose
+variables of every body that is not grounded) gives the motions that remain; its dimension is the
+assembly's degrees of freedom. An instance's degrees of freedom are the rank of the null space
+projected onto its six variables (the motions it can still make, the other bodies moving along as they
+must); its *rotations* are the rank of the projection onto its three angular variables, and its
+*translations* the rest. So a pin in a bore (`concentric`) has 2: 1 translation, 1 rotation.
+
+| Code | Severity | Meaning |
+| --- | --- | --- |
+| `I6201` | info | The assembly is under-constrained: the total degrees of freedom and, for every instance that a mate refers to and that has some left, its number, split into translations and rotations (`pin: 2 (1 translation, 1 rotation)`). A tool should name an axis when a remaining rotation or translation is along a primitive of a mate (`about clevis.pin.z`). This is normal and not a failure; a tool may offer a strict mode that makes it an error for release builds. |
+| `W6103` | warning | A mate removes no degree of freedom that the mates before it (in source order) have not already removed, and is consistent with them. |
+| `E6102` | error | Mates that cannot all be satisfied. The report is a *minimal* set: removing any one of the named mates makes the rest satisfiable. The last of them in source order is the primary location, the others are related locations. |
+| `E6301` | error | The solver found no solution near the start, but no conflicting set; the message names the mates with the largest remaining residuals. Also for an `angle` whose directions are parallel to `about` at the solution, where the angle is undefined. |
+| `I6202` | info | Mates suppressed with a suppressed instance. |
+| `E6302` | error | A driving value is outside the joint's limits (#34). |
+
+Configurations are solved separately, as sketches are; a problem that exists in the default
+configuration is reported once.
 
 ## Sub-assemblies
 

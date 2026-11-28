@@ -1,0 +1,22 @@
+tcad 0.2
+
+assembly asm_plate_stack "Three slabs and a capped slab, stacked" {
+  param gap = 4 mm
+
+  instance base = part("../parts/slab.tcad")
+  instance mid = part("../parts/slab.tcad") at=(3 mm, -4 mm, 12 mm) rotate=[(+Z, 5 deg)]
+  instance top = part("../parts/slab.tcad") at=(-2 mm, 1 mm, 23 mm) rotate=[(+Z, 25 deg), (+X, 3 deg)]
+  instance cap = assembly("capped.tcad") at=(0 mm, 0 mm, 35 mm) rotate=[(+Z, -80 deg)]
+
+  ground base
+
+  mate mid_on coincident(mid.bottom, base.top)
+  mate mid_east distance(mid.east, base.east) = gap aligned
+  mate mid_north distance(mid.north.origin, base.north) = -5 mm
+  mate top_on coincident(top.bottom, mid.top)
+  mate top_axis concentric(top.origin, mid.origin)
+  mate top_turn angle(top.east, mid.east) = 30 deg about=mid.top
+  mate cap_on coincident(cap.plate.bottom, top.top)
+  mate cap_axis concentric(cap.knob.origin, top.origin)
+  mate cap_turn angle(cap.plate.north, top.north) = -90 deg about=top.top
+}

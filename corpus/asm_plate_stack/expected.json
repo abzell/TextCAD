@@ -1,0 +1,152 @@
+{
+  "note": "Slabs stacked by coincident faces, a signed distance between aligned planes (from a parameter), a signed point-to-plane distance, a concentric axis and angles about a face normal; on top, a rigid sub-assembly whose own fastened mate is solved first (its knob starts off its seat), mated through nested references. Fully constrained.",
+  "codes": [],
+  "fails": false,
+  "dof": 0,
+  "instances": {
+    "base": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "mid": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        4.0,
+        -5.0,
+        10.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "top": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        4.0,
+        -5.0,
+        20.0
+      ],
+      "x": [
+        0.866025403784439,
+        0.5,
+        0.0
+      ],
+      "y": [
+        -0.5,
+        0.866025403784439,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "cap": {
+      "file": "assemblies/capped.tcad",
+      "config": null,
+      "origin_mm": [
+        4.0,
+        -5.0,
+        30.0
+      ],
+      "x": [
+        0.5,
+        -0.866025403784439,
+        0.0
+      ],
+      "y": [
+        0.866025403784439,
+        0.5,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "cap.plate": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        4.0,
+        -5.0,
+        30.0
+      ],
+      "x": [
+        0.5,
+        -0.866025403784439,
+        0.0
+      ],
+      "y": [
+        0.866025403784439,
+        0.5,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "cap.knob": {
+      "file": "parts/knob.tcad",
+      "config": null,
+      "origin_mm": [
+        4.0,
+        -5.0,
+        40.0
+      ],
+      "x": [
+        0.5,
+        -0.866025403784439,
+        0.0
+      ],
+      "y": [
+        0.866025403784439,
+        0.5,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    }
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "note": "The rod clevis, a grease pin and a rod eye from the hydraulic parts (with overrides that make them fit). The pin is fastened in the clevis's bore, turned 90 deg; the eye turns on the pin (concentric, its mid-plane on the pin's) and is set by an angle about the bore axis, from a parameter. Fully constrained: the start poses do not matter.",
+  "codes": [],
+  "fails": false,
+  "dof": 0,
+  "instances": {
+    "clevis": {
+      "file": "parts/rod_clevis.tcad",
+      "config": null,
+      "origin_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "pin": {
+      "file": "parts/grease_pin.tcad",
+      "config": null,
+      "origin_mm": [
+        50.0,
+        -50.0,
+        0.0
+      ],
+      "x": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "y": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "eye": {
+      "file": "parts/rod_eye.tcad",
+      "config": null,
+      "origin_mm": [
+        50.0,
+        0.0,
+        0.0
+      ],
+      "x": [
+        0.866025403784438,
+        0.0,
+        0.5
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        -0.5,
+        0.0,
+        0.866025403784438
+      ]
+    }
+  }
+}

@@ -1,0 +1,58 @@
+tcad 0.2
+
+assembly asm_mate_pairs "Every pair of every classic mate" {
+  instance base = part("../parts/slab.tcad")
+  instance fast = part("../parts/slab.tcad") at=(60 mm, 0 mm, 0 mm) rotate=[(+Z, 12 deg)]
+  instance pt_pt = part("../parts/slab.tcad") at=(0 mm, 70 mm, 40 mm) rotate=[(+X, 20 deg)]
+  instance pt_line = part("../parts/slab.tcad") at=(90 mm, 8 mm, -6 mm) rotate=[(+Y, 15 deg)]
+  instance line_pt = part("../parts/slab.tcad") at=(70 mm, -3 mm, 9 mm) rotate=[(+Z, 40 deg)]
+  instance pt_plane = part("../parts/slab.tcad") at=(-60 mm, 20 mm, 35 mm) rotate=[((1, 1, 0), 30 deg)]
+  instance line_line = part("../parts/slab.tcad") at=(100 mm, 6 mm, 12 mm) rotate=[(+Y, 75 deg)]
+  instance line_line_op = part("../parts/slab.tcad") at=(5 mm, 80 mm, 2 mm) rotate=[(+X, 100 deg)]
+  instance line_plane = part("../parts/slab.tcad") at=(-40 mm, -50 mm, 30 mm) rotate=[(+Y, -25 deg)]
+  instance plane_plane = part("../parts/slab.tcad") at=(30 mm, -60 mm, 25 mm) rotate=[(+X, 170 deg)]
+  instance plane_plane_al = part("../parts/slab.tcad") at=(-30 mm, -60 mm, 25 mm) rotate=[(+X, 15 deg)]
+  instance conc = part("../parts/slab.tcad") at=(-8 mm, 60 mm, 15 mm) rotate=[(+Z, -70 deg), (+X, -80 deg)]
+  instance par_line = part("../parts/slab.tcad") at=(0 mm, -90 mm, 0 mm) rotate=[(+Z, 20 deg)]
+  instance par_plane = part("../parts/slab.tcad") at=(50 mm, -90 mm, 0 mm) rotate=[(+Y, 160 deg)]
+  instance par_mixed = part("../parts/slab.tcad") at=(-50 mm, -90 mm, 0 mm) rotate=[(+X, 70 deg)]
+  instance perp_line = part("../parts/slab.tcad") at=(0 mm, 120 mm, 0 mm) rotate=[(+X, 60 deg)]
+  instance perp_plane = part("../parts/slab.tcad") at=(50 mm, 120 mm, 0 mm) rotate=[(+Y, 30 deg)]
+  instance perp_mixed = part("../parts/slab.tcad") at=(-50 mm, 120 mm, 0 mm) rotate=[(+Y, -110 deg)]
+  instance dist_pt = part("../parts/slab.tcad") at=(10 mm, -20 mm, 40 mm) rotate=[(+Z, 10 deg)]
+  instance dist_line = part("../parts/slab.tcad") at=(80 mm, 30 mm, 45 mm) rotate=[(+Z, -10 deg)]
+  instance dist_plane = part("../parts/slab.tcad") at=(-90 mm, 0 mm, 30 mm) rotate=[(+X, 5 deg)]
+  instance dist_plane_pt = part("../parts/slab.tcad") at=(-90 mm, 40 mm, -10 mm) rotate=[(+X, -5 deg)]
+  instance dist_planes = part("../parts/slab.tcad") at=(-120 mm, 0 mm, 30 mm) rotate=[(+Y, 172 deg)]
+  instance dist_planes_al = part("../parts/slab.tcad") at=(-120 mm, 60 mm, 30 mm) rotate=[(+Y, 6 deg)]
+  instance ang_line = part("../parts/slab.tcad") at=(120 mm, -60 mm, 0 mm) rotate=[(+Z, 75 deg)]
+  instance ang_plane = part("../parts/slab.tcad") at=(120 mm, 60 mm, 0 mm) rotate=[(+Z, -10 deg)]
+
+  ground base
+
+  mate fast_m fastened(fast.origin, base.top) rotate=30 deg offset=(5 mm, 0 mm, 2 mm)
+  mate pt_pt_m coincident(pt_pt.origin.origin, base.top.origin)
+  mate pt_line_m coincident(pt_line.origin.origin, base.east.z)
+  mate line_pt_m coincident(base.east.z, line_pt.origin.origin)
+  mate pt_plane_m coincident(pt_plane.origin.origin, base.top.xy)
+  mate line_line_m coincident(line_line.origin.z, base.east.z)
+  mate line_line_op_m coincident(line_line_op.origin.z, base.north.z) opposed
+  mate line_plane_m coincident(line_plane.origin.x, base.top.xy)
+  mate plane_plane_m coincident(plane_plane.origin, base.top)
+  mate plane_plane_al_m coincident(plane_plane_al.origin, base.top) aligned
+  mate conc_m concentric(conc.origin, base.north)
+  mate par_line_m parallel(par_line.origin.x, base.east)
+  mate par_plane_m parallel(par_plane.origin.xy, base.top.xy) opposed
+  mate par_mixed_m parallel(par_mixed.origin.z, base.top.xy)
+  mate perp_line_m perpendicular(perp_line.origin, base.top)
+  mate perp_plane_m perpendicular(perp_plane.origin.xy, base.east.xy)
+  mate perp_mixed_m perpendicular(perp_mixed.origin.z, base.east.xy)
+  mate dist_pt_m distance(dist_pt.origin.origin, base.top.origin) = 25 mm
+  mate dist_line_m distance(dist_line.origin.origin, base.east.z) = 12 mm
+  mate dist_plane_m distance(dist_plane.origin.origin, base.top.xy) = 8 mm
+  mate dist_plane_pt_m distance(base.top.xy, dist_plane_pt.origin.origin) = -8 mm
+  mate dist_planes_m distance(dist_planes.origin, base.top) = 5 mm
+  mate dist_planes_al_m distance(dist_planes_al.origin, base.top) = -3 mm aligned
+  mate ang_line_m angle(ang_line.origin.x, base.east) = 30 deg about=base.top
+  mate ang_plane_m angle(ang_plane.origin.xz, base.north.xy) = -45 deg about=base.top
+}

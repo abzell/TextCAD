@@ -1,0 +1,12 @@
+tcad 0.2
+
+assembly asm_mate_suppressed "A mate on a suppressed instance" {
+  param with_a = false
+
+  instance base = part("../parts/slab.tcad")
+  instance a = part("../parts/slab.tcad") at=(0 mm, 0 mm, 10 mm) suppress if not with_a
+
+  ground base
+
+  mate seat coincident(a.bottom, base.top)
+}

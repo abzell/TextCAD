@@ -1,0 +1,733 @@
+{
+  "note": "One block per pair of primitives of every classic mate kind (and both orders of the mixed pairs, and the orientation flags), each mated to the grounded base by that mate alone. Each block's primitive passes through its frame origin, so the nearest solution is exact: the origin moves to the nearest point the mate allows and the block turns by the least rotation it allows. I6201 lists every block but the fastened one.",
+  "codes": [],
+  "info": [
+    "I6201"
+  ],
+  "fails": false,
+  "dof": 95,
+  "free": {
+    "pt_pt": {
+      "translations": 0,
+      "rotations": 3
+    },
+    "pt_line": {
+      "translations": 1,
+      "rotations": 3
+    },
+    "line_pt": {
+      "translations": 1,
+      "rotations": 3
+    },
+    "pt_plane": {
+      "translations": 2,
+      "rotations": 3
+    },
+    "line_line": {
+      "translations": 1,
+      "rotations": 1
+    },
+    "line_line_op": {
+      "translations": 1,
+      "rotations": 1
+    },
+    "line_plane": {
+      "translations": 2,
+      "rotations": 2
+    },
+    "plane_plane": {
+      "translations": 2,
+      "rotations": 1
+    },
+    "plane_plane_al": {
+      "translations": 2,
+      "rotations": 1
+    },
+    "conc": {
+      "translations": 1,
+      "rotations": 1
+    },
+    "par_line": {
+      "translations": 3,
+      "rotations": 1
+    },
+    "par_plane": {
+      "translations": 3,
+      "rotations": 1
+    },
+    "par_mixed": {
+      "translations": 3,
+      "rotations": 2
+    },
+    "perp_line": {
+      "translations": 3,
+      "rotations": 2
+    },
+    "perp_plane": {
+      "translations": 3,
+      "rotations": 2
+    },
+    "perp_mixed": {
+      "translations": 3,
+      "rotations": 1
+    },
+    "dist_pt": {
+      "translations": 2,
+      "rotations": 3
+    },
+    "dist_line": {
+      "translations": 2,
+      "rotations": 3
+    },
+    "dist_plane": {
+      "translations": 2,
+      "rotations": 3
+    },
+    "dist_plane_pt": {
+      "translations": 2,
+      "rotations": 3
+    },
+    "dist_planes": {
+      "translations": 2,
+      "rotations": 1
+    },
+    "dist_planes_al": {
+      "translations": 2,
+      "rotations": 1
+    },
+    "ang_line": {
+      "translations": 3,
+      "rotations": 2
+    },
+    "ang_plane": {
+      "translations": 3,
+      "rotations": 2
+    }
+  },
+  "instances": {
+    "base": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "fast": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        5.0,
+        0.0,
+        12.0
+      ],
+      "x": [
+        0.866025403784439,
+        0.5,
+        0.0
+      ],
+      "y": [
+        -0.5,
+        0.866025403784439,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "pt_pt": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        0.0,
+        0.0,
+        10.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        0.939692620785908,
+        0.342020143325669
+      ],
+      "z": [
+        0.0,
+        -0.342020143325669,
+        0.939692620785908
+      ]
+    },
+    "pt_line": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        90.0,
+        0.0,
+        5.0
+      ],
+      "x": [
+        0.965925826289068,
+        0.0,
+        -0.258819045102521
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.258819045102521,
+        0.0,
+        0.965925826289068
+      ]
+    },
+    "line_pt": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        70.0,
+        0.0,
+        5.0
+      ],
+      "x": [
+        0.766044443118978,
+        0.642787609686539,
+        0.0
+      ],
+      "y": [
+        -0.642787609686539,
+        0.766044443118978,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "pt_plane": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        -60.0,
+        20.0,
+        10.0
+      ],
+      "x": [
+        0.933012701892219,
+        0.066987298107781,
+        -0.353553390593274
+      ],
+      "y": [
+        0.066987298107781,
+        0.933012701892219,
+        0.353553390593274
+      ],
+      "z": [
+        0.353553390593274,
+        -0.353553390593274,
+        0.866025403784439
+      ]
+    },
+    "line_line": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        100.0,
+        0.0,
+        5.0
+      ],
+      "x": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        1.0,
+        0.0,
+        0.0
+      ]
+    },
+    "line_line_op": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        0.0,
+        80.0,
+        5.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "z": [
+        0.0,
+        -1.0,
+        0.0
+      ]
+    },
+    "line_plane": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        -40.0,
+        -50.0,
+        10.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "plane_plane": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        30.0,
+        -60.0,
+        10.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        -1.0
+      ]
+    },
+    "plane_plane_al": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        -30.0,
+        -60.0,
+        10.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "conc": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        0.0,
+        60.0,
+        5.0
+      ],
+      "x": [
+        0.342020143325669,
+        0.0,
+        0.939692620785908
+      ],
+      "y": [
+        0.939692620785908,
+        0.0,
+        -0.342020143325669
+      ],
+      "z": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "par_line": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        0.0,
+        -90.0,
+        0.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "par_plane": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        50.0,
+        -90.0,
+        0.0
+      ],
+      "x": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        -1.0
+      ]
+    },
+    "par_mixed": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        -50.0,
+        -90.0,
+        0.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "z": [
+        0.0,
+        -1.0,
+        0.0
+      ]
+    },
+    "perp_line": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        0.0,
+        120.0,
+        0.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "z": [
+        0.0,
+        -1.0,
+        0.0
+      ]
+    },
+    "perp_plane": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        50.0,
+        120.0,
+        0.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "perp_mixed": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        -50.0,
+        120.0,
+        0.0
+      ],
+      "x": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        -1.0,
+        0.0,
+        0.0
+      ]
+    },
+    "dist_pt": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        6.681531047810609,
+        -13.363062095621219,
+        30.04459314343183
+      ],
+      "x": [
+        0.984807753012208,
+        0.17364817766693,
+        0.0
+      ],
+      "y": [
+        -0.17364817766693,
+        0.984807753012208,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "dist_line": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        80.0,
+        7.2,
+        14.6
+      ],
+      "x": [
+        0.984807753012208,
+        -0.17364817766693,
+        0.0
+      ],
+      "y": [
+        0.17364817766693,
+        0.984807753012208,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "dist_plane": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        -90.0,
+        0.0,
+        18.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        0.996194698091746,
+        0.087155742747658
+      ],
+      "z": [
+        0.0,
+        -0.087155742747658,
+        0.996194698091746
+      ]
+    },
+    "dist_plane_pt": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        -90.0,
+        40.0,
+        2.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        0.996194698091746,
+        -0.087155742747658
+      ],
+      "z": [
+        0.0,
+        0.087155742747658,
+        0.996194698091746
+      ]
+    },
+    "dist_planes": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        -120.0,
+        0.0,
+        15.0
+      ],
+      "x": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        -1.0
+      ]
+    },
+    "dist_planes_al": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        -120.0,
+        60.0,
+        7.0
+      ],
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "ang_line": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        120.0,
+        -60.0,
+        0.0
+      ],
+      "x": [
+        0.866025403784439,
+        0.5,
+        0.0
+      ],
+      "y": [
+        -0.5,
+        0.866025403784439,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "ang_plane": {
+      "file": "parts/slab.tcad",
+      "config": null,
+      "origin_mm": [
+        120.0,
+        60.0,
+        0.0
+      ],
+      "x": [
+        0.707106781186548,
+        -0.707106781186547,
+        0.0
+      ],
+      "y": [
+        0.707106781186547,
+        0.707106781186548,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    }
+  }
+}

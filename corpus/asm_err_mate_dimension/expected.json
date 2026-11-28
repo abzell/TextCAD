@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E2202"
+  ],
+  "fails": true,
+  "note": "A distance given as an angle."
+}

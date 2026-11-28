@@ -1,0 +1,19 @@
+tcad 0.2
+
+assembly asm_pin_clevis "Rod clevis, pin and rod eye" {
+  param tilt = 150 deg
+
+  instance clevis = part("../parts/rod_clevis.tcad") { pin_dia = 32 mm }
+  instance pin = part("../parts/grease_pin.tcad") at=(45 mm, 5 mm, 3 mm) rotate=[(+X, -80 deg)] {
+    pin_d = 32 mm
+    pin_len = 100 mm
+  }
+  instance eye = part("../parts/rod_eye.tcad") at=(60 mm, 2 mm, -20 mm) rotate=[(+Y, -20 deg)]
+
+  ground clevis
+
+  mate pin_seat fastened(pin.pin_axis, clevis.pin) rotate=90 deg
+  mate eye_on concentric(eye.bearing, pin.pin_axis)
+  mate eye_mid coincident(eye.bearing.xy, pin.pin_axis.xy) aligned
+  mate eye_tilt angle(eye.rod, clevis.rod) = tilt about=clevis.pin
+}
