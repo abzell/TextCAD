@@ -10,10 +10,12 @@ same parts with its own `rotate` and `Pos`.
 
 Usage: B123_PYTHON=/path/to/python-with-build123d python3 corpus/tools/gen_assemblies.py
 """
+import hashlib
 import json
 import math
 import os
 import shutil
+import struct
 import subprocess
 import sys
 
@@ -405,6 +407,7 @@ def main():
         code,
     )
     invalid()
+    locks()
 
 
 # --- 2. invalid assemblies: each must fail with exactly the listed codes ---------------------------
@@ -491,6 +494,98 @@ def invalid():
                   f"assemblies/{name}.tcad": BOX.rstrip("\n") + "\n\n" + asm(name, body)[len("tcad 0.2\n\n"):]},
            f"assemblies/{name}.tcad",
            {"codes": ["E2701"], "fails": True, "note": "A file holds one part or one assembly, not both."})
+
+
+# --- 3. bundle.lock and rev= (spec/assembly.md § Version lock; issue #30) ----------------------------
+
+
+def source_hash(text, config="", imports=()):
+    """spec/bundle.md § Source hash, written out byte for byte."""
+    h = hashlib.sha256()
+
+    def piece(label, data):
+        label = label.encode()
+        h.update(struct.pack("<Q", len(label)) + label + struct.pack("<Q", len(data)) + data)
+
+    piece("tcad-source-v1", b"")
+    piece("text", text.encode())
+    piece("config", config.encode())
+    for path, data in imports:
+        piece(f"import:{path}", data)
+    return "sha256:" + h.hexdigest()
+
+
+def lock_text(files):
+    """The exact bytes of bundle.lock for {path: text} (spec/assembly.md § Version lock)."""
+    lines = ['format = "0.1"', "", "[files]"]
+    for key in sorted(files, key=lambda k: k.encode()):
+        lines.append(f'"{key}" = "{source_hash(files[key])}"')
+    return "\n".join(lines) + "\n"
+
+
+ROD = """tcad 0.2
+
+part rod "Rod" {
+  meta revision="A"
+
+  param l = 50 mm range(20 mm, 100 mm)
+
+  sketch s on plane.XY {
+    circle c center=(0 mm, 0 mm) r=5 mm
+  }
+  extrude body from s.c distance=l
+
+  connector tip origin=body.cap_end z=body.cap_end
+
+  config default standard { }
+  config long { l = 80 mm; meta.revision = "B" }
+}
+"""
+
+UNUSED = BOX.replace("part box", "part spare")
+
+
+def lock_assembly(name, rev_b='"B"'):
+    return asm(name, f"""  instance a = part("../parts/rod.tcad") rev="A"
+  instance b = part("../parts/rod.tcad") config=long rev={rev_b} at=(20 mm, 0 mm, 0 mm)
+
+  ground a
+""").replace('"Invalid"', '"Two rods pinned by revision"')
+
+
+def locks():
+    note_ok = ("A lock that matches every reachable file (the assembly and the rod; the unused part is not "
+               "listed) and two rev= pins, one under a configuration that overrides meta.revision. A tool "
+               "that writes the lock must produce exactly this bundle.lock.")
+    cases = [
+        # name, lock from (files as locked), files on disk, codes, strict codes, note
+        ("asm_lock", True, {}, [], [], note_ok),
+        ("asm_lock_modified", True, {"parts/rod.tcad": ROD.replace("r=5 mm", "r=6 mm")},
+         ["W6003"], ["E6003"], "The rod changed after the lock was written: a warning, an error in strict mode."),
+        ("asm_lock_unlisted", "drop", {}, ["W6003"], ["E6003"],
+         "The lock does not list the rod, which the assembly reaches."),
+        ("asm_lock_missing", False, {}, [], ["E6003"],
+         "No bundle.lock: nothing is checked, except in strict mode, where a missing lock is an error."),
+    ]
+    for name, lock, changes, codes, strict, note in cases:
+        entry = f"assemblies/{name}.tcad"
+        locked = {entry: lock_assembly(name), "parts/rod.tcad": ROD}
+        files = dict(locked)
+        files["parts/spare.tcad"] = UNUSED
+        files.update(changes)
+        if lock is True:
+            files["bundle.lock"] = lock_text(locked)
+        elif lock == "drop":
+            files["bundle.lock"] = lock_text({entry: locked[entry]})
+        expected = {"codes": codes, "strict_codes": strict, "fails": False, "note": note}
+        if name == "asm_lock":
+            expected["lock_written"] = True
+        bundle(name, files, entry, expected)
+    name = "asm_err_rev"
+    bundle(name, {"parts/rod.tcad": ROD, f"assemblies/{name}.tcad": lock_assembly(name, rev_b='"A"')},
+           f"assemblies/{name}.tcad",
+           {"codes": ["E6005"], "fails": True,
+            "note": "rev=\"A\" on an instance built in the configuration `long`, whose meta.revision is B."})
 
 
 if __name__ == "__main__":

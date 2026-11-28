@@ -81,10 +81,21 @@ The expected placements are computed in closed form and cross-checked against bu
 the same parts with its own rotations and translations. The `asm_err_*` cases are invalid bundles
 that must fail with exactly the listed code (`codes`, `fails`).
 
+The `asm_lock*` cases cover `bundle.lock` and `rev=` (spec/assembly.md § Version lock, draft; issue
+#30). They build (`fails` is false) and list:
+
+| Key | Meaning |
+| --- | --- |
+| `codes` | The diagnostics (other than information) of a normal build, such as `W6003`. |
+| `strict_codes` | The diagnostics in strict mode, where lock findings and a missing lock are `E6003`. |
+| `lock_written` | `true` if a tool that writes a lock for the bundle must produce exactly its `bundle.lock`, byte for byte. |
+
+The generator computes every hash itself from spec/bundle.md § Source hash.
+
 `python3 corpus/tools/compare_reference.py corpus` cross-checks every `expected.json` against its
 build123d model at T2 (needs `pip install build123d`).
 
-## The 89 cases
+## The 94 cases
 
 | Group | Parts |
 | --- | --- |
@@ -96,6 +107,7 @@ build123d model at T2 (needs `pip install build123d`).
 | Published geometry (10) | `pub_surfaces` (plane, cylinder, cone, a set of faces), `pub_edges` (line, chain, circle), `pub_split`, `pub_sphere`, `pub_torus`; `pub_err_*`: E3005, E3001, E5002, E2101, E0103 |
 | Hydraulic (6) | `hyd_rod_clevis`, `hyd_rod_eye`, `hyd_end_cap`, `hyd_tie_rod_head`, `hyd_manifold_4port`, `hyd_grease_pin`; expected values from the independent build123d model (`baseline` lists every value taken from it); each has connectors (and most a published face) for the Phase 2 assemblies, the clevis also for its `heavy` configuration |
 | Assemblies (16) | `asm_placement` (parts and a rigid sub-assembly used twice, with an override, a configuration, rotations about fixed and skew axes, nested paths); `asm_err_*`: E6001 (unknown connector; unknown instance), E6002 (missing file; outside the bundle; `assembly()` on a part), E6004 (cycle), E6012, E5001 (`ground` with `at=`), E2401, E2402, E6006, E2101, E6011, E0001 (format 0.1), E2701 |
+| Version lock (5, draft) | `asm_lock` (a matching lock, the exact bytes a tool must write; `rev=` pins, one under a configuration that overrides `meta.revision`), `asm_lock_modified`, `asm_lock_unlisted` (W6003, E6003 in strict mode), `asm_lock_missing` (E6003 in strict mode only), `asm_err_rev` (E6005) |
 
 Surface area, center of mass and volume in `expected.json` are integrated to a relative precision of
 1e-12.

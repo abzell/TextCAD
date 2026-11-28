@@ -1,0 +1,7 @@
+{
+  "codes": [],
+  "strict_codes": [],
+  "fails": false,
+  "note": "A lock that matches every reachable file (the assembly and the rod; the unused part is not listed) and two rev= pins, one under a configuration that overrides meta.revision. A tool that writes the lock must produce exactly this bundle.lock.",
+  "lock_written": true
+}

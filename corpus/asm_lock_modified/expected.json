@@ -1,0 +1,10 @@
+{
+  "codes": [
+    "W6003"
+  ],
+  "strict_codes": [
+    "E6003"
+  ],
+  "fails": false,
+  "note": "The rod changed after the lock was written: a warning, an error in strict mode."
+}

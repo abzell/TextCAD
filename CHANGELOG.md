@@ -6,6 +6,11 @@ Changes to the TextCAD format, its specification and its conformance corpus. For
 ## [Unreleased]
 
 ### Added
+- Draft rules for `bundle.lock` (#30): which files it lists (everything reachable from the entry),
+  their hashes (the source hash of `.tcad` files, a plain SHA-256 of other files), its exact bytes,
+  `W6003`/`E6003` and strict mode, `rev=` against the configured `meta revision` (`E6005`), and notes
+  on storage (no particular version control assumed) and locking after a release. `spec/bundle.md`
+  defines the source hash byte for byte. Conformance cases `asm_lock*` and `asm_err_rev`.
 - Rules for assembly files (#29): resolving `part()`/`assembly()` paths (relative to the file,
   inside the bundle, or `lib:`), instances (`config=`, override blocks, name scope), reference paths
   into rigid and flexible sub-assemblies, and placement (`rotate=` in order about the fixed axes, then

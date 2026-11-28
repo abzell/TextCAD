@@ -1,0 +1,5 @@
+format = "0.1"
+
+[files]
+"assemblies/asm_lock.tcad" = "sha256:4fcd6c9caab5321f108a50b682afa04250966d8df4ff1702c9db1ec6777d804a"
+"parts/rod.tcad" = "sha256:380aa111d4a867718cd2660f8e2727300dd734eca8f37c643c2877e2c417be87"

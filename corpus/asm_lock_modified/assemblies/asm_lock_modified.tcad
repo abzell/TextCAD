@@ -1,0 +1,8 @@
+tcad 0.2
+
+assembly asm_lock_modified "Two rods pinned by revision" {
+  instance a = part("../parts/rod.tcad") rev="A"
+  instance b = part("../parts/rod.tcad") config=long rev="B" at=(20 mm, 0 mm, 0 mm)
+
+  ground a
+}

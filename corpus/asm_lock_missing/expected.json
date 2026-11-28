@@ -1,0 +1,8 @@
+{
+  "codes": [],
+  "strict_codes": [
+    "E6003"
+  ],
+  "fails": false,
+  "note": "No bundle.lock: nothing is checked, except in strict mode, where a missing lock is an error."
+}

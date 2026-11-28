@@ -74,20 +74,54 @@ and an assembly whose referenced file has errors does not build.
 ### Version lock
 
 The requirement "reference part files by path and version hash" is met by **`bundle.lock`**, not by
-hashes in the source text, so that editing a part does not rewrite every assembly that uses it:
+hashes in the source text, so that editing a part does not rewrite every assembly that uses it. The
+lock records which exact files were last verified together; tools write it on request (for example
+after a review or a release) and check it on every build.
 
 ```toml
 format = "0.1"
+
 [files]
-"parts/rod.tcad"       = "sha256:2f1c..."   # source hash (spec/bundle.md) of the canonical text
-"lib:iso4762.tcad"     = "sha256:9ab0..."
+"assemblies/boom.tcad" = "sha256:9ab0..."
+"imports/seal.step" = "sha256:41c7..."
+"parts/rod.tcad" = "sha256:2f1c..."
 ```
 
-- Tools write it on request. A checker reports `W6003` for every referenced file whose current source
-  hash differs from the lock (or that the lock does not list), and `E6003` in a strict mode meant for
-  release builds.
-- An instance may also pin a revision from the part's `meta` (`rev="B"`); a different revision in the
-  file is `E6005`.
+**Content.** `bundle.lock` lies next to `bundle.toml`. It lists every file reachable from the bundle's
+entry: the entry itself, every file named by `part(...)`, `assembly(...)` or `skeleton(...)`,
+recursively, and every file named by `import` in any of them. Files of the bundle that nothing reaches
+are not listed. Each key is the file's path relative to the bundle root with `/` separators (a library
+file: `lib:<name>/<path>`); each value is
+
+- for a `.tcad` file: its source hash (spec/bundle.md) with no configuration and no imports. It
+  covers the canonical text, so reformatting a file (spacing, line breaks, argument order) does not
+  change it; comments are part of the canonical text, so editing one does;
+- for any other file (an imported STEP file): `sha256:` and the SHA-256 of its bytes.
+
+**Bytes.** UTF-8, LF line ends: the line `format = "0.1"`, an empty line, the line `[files]`, then one
+line `"<key>" = "<value>"` per file, sorted by key in byte order, and a final line break. Equal content
+gives equal bytes, so locks written by different tools can be compared directly.
+
+**Checking.** Without `bundle.lock` nothing is checked. With it, a tool reports `W6003` for every
+reachable file whose current hash differs from the lock or that the lock does not list (the message
+names the file); entries for files that are no longer reachable are ignored. In a **strict mode** meant
+for release builds, the same findings are `E6003`, and so is a missing or unreadable lock. How a tool
+offers strict mode (a command-line option, a release step of a document management system) is the
+tool's choice.
+
+**Revisions.** An instance may pin a revision: `rev="B"` requires the referenced part's `meta revision`,
+under the configuration the instance builds (spec/features.md § Part metadata), to be exactly `"B"`;
+anything else, including a part without a revision, is `E6005`.
+
+Notes:
+
+- The lock assumes no particular version control. It is an ordinary file of the bundle; Git, a PDM
+  system or plain directories store and version it like the `.tcad` files. Rebuilding an older state is
+  the job of that storage (an older commit, a PDM "as stored" retrieval); the lock tells whether the
+  files at hand are the ones that were verified together.
+- Write the lock after any step that changes the files. A document management system that writes the
+  `meta revision` of a part when it releases it changes that file, and so its hash: lock after the
+  release, not before, or every freshly released part reports `W6003`.
 
 ## Part side: metadata, connectors and published geometry
 
@@ -510,7 +544,7 @@ solved transforms, the BOM or the checks; tools use them to show the assembly.
 | --- | --- |
 | E6001 | reference to an unknown instance, connector, published entity or datum (with nearest names) |
 | E6002 | referenced file not found, or not a part / assembly as the call says |
-| W6003 / E6003 | referenced file differs from `bundle.lock` (error under `--locked`) |
+| W6003 / E6003 | a reachable file differs from `bundle.lock` or is not listed in it (`E6003` in strict mode, also for a missing lock) |
 | E6004 | reference cycle (an assembly or skeleton that refers back to itself) |
 | E6005 | the referenced part's `meta revision` does not match `rev=` |
 | E6006 | `config=` names a configuration the referenced file does not declare |

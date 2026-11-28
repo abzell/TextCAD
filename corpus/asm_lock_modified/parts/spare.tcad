@@ -1,0 +1,9 @@
+tcad 0.2
+
+part spare "Box" {
+  sketch s on plane.XY {
+    rect r corner=(0 mm, 0 mm) w=10 mm h=10 mm
+  }
+  extrude body from s.r distance=10 mm
+  config default big { }
+}

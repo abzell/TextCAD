@@ -1,0 +1,17 @@
+tcad 0.2
+
+part rod "Rod" {
+  meta revision="A"
+
+  param l = 50 mm range(20 mm, 100 mm)
+
+  sketch s on plane.XY {
+    circle c center=(0 mm, 0 mm) r=6 mm
+  }
+  extrude body from s.c distance=l
+
+  connector tip origin=body.cap_end z=body.cap_end
+
+  config default standard { }
+  config long { l = 80 mm; meta.revision = "B" }
+}
