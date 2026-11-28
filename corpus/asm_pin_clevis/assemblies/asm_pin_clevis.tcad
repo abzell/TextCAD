@@ -3,12 +3,14 @@ tcad 0.2
 assembly asm_pin_clevis "Rod clevis, pin and rod eye" {
   param tilt = 150 deg
 
-  instance clevis = part("../parts/rod_clevis.tcad") { pin_dia = 32 mm }
+  instance clevis = part("../parts/rod_clevis.tcad") { pin_dia = 30 mm }
   instance pin = part("../parts/grease_pin.tcad") at=(45 mm, 5 mm, 3 mm) rotate=[(+X, -80 deg)] {
-    pin_d = 32 mm
+    pin_d = 30 mm
     pin_len = 100 mm
   }
-  instance eye = part("../parts/rod_eye.tcad") at=(60 mm, 2 mm, -20 mm) rotate=[(+Y, -20 deg)]
+  instance eye = part("../parts/rod_eye.tcad") at=(60 mm, 2 mm, -20 mm) rotate=[(+Y, -20 deg)] {
+    bore = 30 mm
+  }
 
   ground clevis
 
