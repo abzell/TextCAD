@@ -2,8 +2,8 @@
 
 Status: **draft** (Phase 2 of the format). Source requirements: 13 (Phase 2). Decisions: ADR 0015.
 Sections become *normative* one by one as they are reviewed and covered by conformance cases; changes
-to this text are recorded in ADRs. **Normative so far:** § Files and bundles (except § Version lock and
-`[libraries]`), § Assembly file with § Statements (the rows `meta`, `param`, `instance`, `ground`,
+to this text are recorded in ADRs. **Normative so far:** § Files and bundles (except `[libraries]`) with
+§ Version lock (#30), § Assembly file with § Statements (the rows `meta`, `param`, `instance`, `ground`,
 `config` and `tag`), § Instances, § References and § Placement before solving (format 0.2, #29), and
 the part side (§ `meta`, § `connector`, § `publish`, normative in spec/features.md). Every other
 section is a draft. The roadmap is in [`../docs/roadmap.md`](../docs/roadmap.md).
@@ -36,8 +36,8 @@ a part, it is a recipe: the resolved transforms are derived from it and are not 
 
 ## Files and bundles
 
-Status: **normative** (format 0.2), except § Version lock and the `[libraries]` table, which are drafts
-(#30, #46): until they are normative a tool may reject `lib:` paths with `E6002`.
+Status: **normative** (format 0.2), including § Version lock, except the `[libraries]` table, which is
+a draft (#46): until it is normative a tool may reject `lib:` paths with `E6002`.
 
 ```
 excavator_boom/
@@ -544,9 +544,9 @@ solved transforms, the BOM or the checks; tools use them to show the assembly.
 | --- | --- |
 | E6001 | reference to an unknown instance, connector, published entity or datum (with nearest names) |
 | E6002 | referenced file not found, or not a part / assembly as the call says |
-| W6003 / E6003 | a reachable file differs from `bundle.lock` or is not listed in it (`E6003` in strict mode, also for a missing lock) |
+| W6003 / E6003 | a reachable file differs from `bundle.lock` or is not listed in it (`E6003` in strict mode, also for a missing lock) (normative) |
 | E6004 | reference cycle (an assembly or skeleton that refers back to itself) |
-| E6005 | the referenced part's `meta revision` does not match `rev=` |
+| E6005 | the referenced part's `meta revision` does not match `rev=` (normative) |
 | E6006 | `config=` names a configuration the referenced file does not declare |
 | E6011 | connector axes are parallel or degenerate (normative, spec/diagnostics.md) |
 | E6012 | no grounded instance |

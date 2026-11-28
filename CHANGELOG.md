@@ -6,7 +6,7 @@ Changes to the TextCAD format, its specification and its conformance corpus. For
 ## [Unreleased]
 
 ### Added
-- Draft rules for `bundle.lock` (#30): which files it lists (everything reachable from the entry),
+- Rules for `bundle.lock` (#30): which files it lists (everything reachable from the entry),
   their hashes (the source hash of `.tcad` files, a plain SHA-256 of other files), its exact bytes,
   `W6003`/`E6003` and strict mode, `rev=` against the configured `meta revision` (`E6005`), and notes
   on storage (no particular version control assumed) and locking after a release. `spec/bundle.md`
@@ -47,6 +47,8 @@ Changes to the TextCAD format, its specification and its conformance corpus. For
   (`I6014`); connectors may not refer to other connectors (`E5002`; share a frame through a `csys`).
 
 ### Changed
+- The version lock is normative (#30): `spec/assembly.md` § Version lock, with `W6003`, `E6003` and
+  `E6005` in `spec/diagnostics.md`. Only the `[libraries]` table of § Files and bundles stays a draft.
 - Assembly files are normative (#29): `spec/assembly.md` § Files and bundles (without the version lock
   and libraries), § Assembly file for `meta`, `param`, `instance`, `ground`, `config` and `tag`,
   § Instances, § References and § Placement before solving. `assembly_decl`, `instance_decl` and
