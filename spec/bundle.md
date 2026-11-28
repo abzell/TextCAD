@@ -38,6 +38,19 @@ so changes in formatting or comments that do not change the canonical form do no
 resolved configuration name, and the bytes of each imported file. It is used by `bundle.lock`
 (spec/assembly.md) and by tools that cache derived results.
 
+Exactly: each piece is a label and a byte string, fed to SHA-256 as the label's length in bytes (an
+unsigned 64-bit little-endian integer), the label's UTF-8 bytes, the byte string's length (the same
+encoding) and the byte string. The pieces, in order:
+
+| Label | Bytes |
+| --- | --- |
+| `tcad-source-v1` | none (length 0) |
+| `text` | the canonical text of the file, UTF-8 |
+| `config` | the resolved configuration's name, UTF-8; empty for the base part |
+| `import:<path>` | the bytes of each imported file, in the order of the `import` statements (`<path>` as written) |
+
+The hash is written as `sha256:` and 64 lowercase hexadecimal digits.
+
 ## Derived data
 
 Tools may keep derived data (regenerated geometry, meshes, reports) next to the sources, for example in

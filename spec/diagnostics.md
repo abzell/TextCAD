@@ -102,7 +102,10 @@ Every diagnostic has:
 | E5006 | the first solid feature must add material, or the feature needs an existing body |
 | E6001 | reference to an unknown instance, connector, published entity or datum (with nearest names) |
 | E6002 | referenced file not found, outside the bundle, or not a part / assembly as the call says |
+| W6003 | a file reachable from the entry differs from `bundle.lock` or is not listed in it (the message names the file) |
+| E6003 | the same as `W6003` in strict mode, and a missing or unreadable `bundle.lock` in strict mode |
 | E6004 | reference cycle between files (the message lists the cycle) |
+| E6005 | an instance's `rev=` differs from the referenced part's `meta revision` under the configuration it builds |
 | E6006 | `config=` names a configuration the referenced file does not declare |
 | E6011 | connector axes are parallel or degenerate (x parallel to z, or a zero direction), or a zero rotation axis |
 | E6012 | an assembly has no grounded instance |

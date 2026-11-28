@@ -1,0 +1,10 @@
+{
+  "codes": [
+    "W6003"
+  ],
+  "strict_codes": [
+    "E6003"
+  ],
+  "fails": false,
+  "note": "The lock does not list the rod, which the assembly reaches."
+}

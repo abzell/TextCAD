@@ -1,0 +1,7 @@
+{
+  "codes": [
+    "E6005"
+  ],
+  "fails": true,
+  "note": "rev=\"A\" on an instance built in the configuration `long`, whose meta.revision is B."
+}

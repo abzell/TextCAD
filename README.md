@@ -31,7 +31,7 @@ by following it.
 | --- | --- |
 | [`spec/`](spec/README.md) | The normative specification: grammar, statements, units, naming, geometric semantics, diagnostics |
 | [`spec/examples/`](spec/examples/) | Example parts |
-| [`corpus/`](corpus/README.md) | The conformance corpus: 89 cases with expected results and independent build123d reference models |
+| [`corpus/`](corpus/README.md) | The conformance corpus: 94 cases with expected results and independent build123d reference models |
 | [`docs/TextCAD-Requirements.md`](docs/TextCAD-Requirements.md) | What the format must achieve |
 | [`docs/roadmap.md`](docs/roadmap.md) | Phases and open work |
 | [`docs/adr/`](docs/adr/) | Decisions about the format |
